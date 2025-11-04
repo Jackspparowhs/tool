@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#f7fbff" />
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
-  /* PirateRuler tokens (kept consistent with your tools site) */
+  /* PR design tokens */
   :root{
     --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
     --accent-start:#6b7dff; --accent-end:#0bb3ff;
@@ -15,42 +15,64 @@
     --radius:14px;
     --shadow-lg: 0 18px 50px rgba(3,12,30,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
     --shadow-sm: 0 8px 24px rgba(3,12,30,0.08);
+    --content-max:1280px;
   }
-  html.dark { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --glass: rgba(255,255,255,0.02); --accent-start:#5ab3ff; --accent-end:#6b7dff; --shadow-lg: 0 18px 50px rgba(0,0,0,0.6); --shadow-sm:0 8px 24px rgba(0,0,0,0.45); }
+
+  /* themes */
+  html.theme-light { --bg:#f3f7fb; --card:#fff; --muted:#6b7480; --text:#0b2130; --accent-start:#6b7dff; --accent-end:#0bb3ff; --glass: rgba(11,17,28,0.04); --shadow-lg: 0 18px 50px rgba(3,12,30,0.18); --shadow-sm: 0 8px 24px rgba(3,12,30,0.08); }
+  html.theme-dark  { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --accent-start:#5ab3ff; --accent-end:#6b7dff; --glass: rgba(255,255,255,0.02); --shadow-lg: 0 18px 50px rgba(0,0,0,0.6); --shadow-sm: 0 8px 24px rgba(0,0,0,0.45); }
+  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; --glass: rgba(6,50,66,0.03); --shadow-lg: 0 18px 50px rgba(3,12,30,0.08); --shadow-sm: 0 8px 24px rgba(3,12,30,0.06); }
+  html.theme-sunset{ --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; --glass: rgba(42,16,32,0.03); --shadow-lg: 0 18px 50px rgba(50,10,20,0.06); --shadow-sm: 0 8px 24px rgba(50,10,20,0.04); }
+
   *{box-sizing:border-box}
-  body{background:linear-gradient(180deg,var(--bg), #e9f6ff); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:var(--text); margin:0; -webkit-font-smoothing:antialiased;}
+  body{
+    margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    background: linear-gradient(180deg,var(--bg), #e9f6ff);
+    color:var(--text); -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:1280px;margin:18px auto;padding:18px}
+  .wrap{max-width:var(--content-max);margin:14px auto;padding:16px}
 
   /* header */
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));box-shadow:var(--shadow-sm)}
+  header.header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px; border-radius:12px;
+    background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));
+    box-shadow:var(--shadow-sm);
+  }
   .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px}
-  .title{font-weight:900;font-size:18px}
+  .logo{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px;flex-shrink:0}
+  .title-strong{font-weight:900;font-size:18px}
   .by{font-size:12px;color:var(--muted)}
 
-  /* main layout (tightened to avoid large empty spaces on laptop) */
-  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px}
-  @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
-
-  /* left card with canvas */
-  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
-  .uploader{display:flex;gap:12px;align-items:center}
-  .drop{flex:1;min-height:240px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
-  .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
-  .btn{padding:9px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
-  .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff}
+  /* theme selector */
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:800;background:transparent}
   .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
+  .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff}
 
+  /* layout - tightened for laptop so no huge whitespace */
+  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 320px)}
+  @media(max-width:980px){ main{grid-template-columns:1fr; } }
+
+  /* left card */
+  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .drop{flex:1;min-height:260px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
+  input[type=file]{display:none}
   canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
 
-  /* right panel */
-  aside.right{position:sticky;top:18px;align-self:start}
+  /* right panel (sidebar) — behaves like tools */
+  aside.right{align-self:start}
   .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
   .panel h3{margin:0 0 8px 0;font-weight:900}
-  .muted{color:var(--muted)}
+  .muted{color:var(--muted);font-size:13px}
 
-  /* palette grid: match tools look */
+  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .settings .small{font-size:13px;color:var(--muted)}
+
+  /* palette */
   .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
   @media(min-width:480px){ .palette{grid-template-columns:repeat(2,1fr)} }
   @media(min-width:720px){ .palette{grid-template-columns:repeat(2,1fr)} }
@@ -61,73 +83,106 @@
   }
   .swatch:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(3,12,30,0.12) }
   .sw-left{display:flex;flex-direction:column;gap:6px;z-index:2}
-  .sw-hex{font-weight:900;color:var(--text);font-size:14px;text-shadow:0 1px 0 rgba(255,255,255,0.25)}
+  .sw-hex{font-weight:900;color:inherit;font-size:14px;text-shadow:0 1px 0 rgba(255,255,255,0.2)}
   .sw-pct{font-weight:800;color:var(--muted);font-size:13px}
-  .sw-copy{align-self:flex-end;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.85);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer}
+  .sw-copy{align-self:flex-end;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:2}
   .sw-copy:active{transform:translateY(1px)}
 
-  /* overlay tiny icon */
-  .pr-badge{position:fixed;left:18px;bottom:18px;width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999}
+  /* subtle overlay to mimic Tools cards */
+  .swatch::after{
+    content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+    mix-blend-mode: overlay;
+  }
+
+  /* small PR badge (mobile) + PR square in sidebar (desktop) */
+  .pr-badge{
+    position:fixed;left:18px;bottom:18px;width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999;
+  }
   @media(min-width:980px){ .pr-badge{display:none} }
+  .pr-sidebar{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);
+  }
 
-  /* settings row */
-  .settings{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
-  .range{display:flex;align-items:center;gap:8px}
-  .small{font-size:13px;color:var(--muted)}
+  /* footer */
+  footer{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));text-align:center;box-shadow:var(--shadow-lg)}
+  footer .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
 
-  footer{margin-top:18px;text-align:center;color:var(--muted)}
+  /* compact on dark */
+  html.theme-dark footer{background:linear-gradient(180deg, rgba(10,14,20,0.6), rgba(6,10,14,0.6));}
+
+  /* small helpers */
+  .row{display:flex;gap:8px;align-items:center}
+  .flex-fill{flex:1}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <header class="header" role="banner">
       <div class="brand">
-        <div class="logo" aria-hidden="true">PR</div>
-        <div>
-          <div class="title">Color Finder</div>
-          <div class="by">by PirateRuler.com</div>
-        </div>
+        <a href="/" aria-label="Home" style="display:flex;align-items:center;gap:12px">
+          <div class="logo" aria-hidden="true">PR</div>
+          <div>
+            <div class="title-strong">Color Finder</div>
+            <div class="by">by PirateRuler.com</div>
+          </div>
+        </a>
       </div>
-      <div>
-        <button id="themeBtn" class="btn ghost">Toggle Theme</button>
+
+      <div class="controls" role="navigation" aria-label="Header controls">
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="themeSelect" class="btn ghost" title="Theme selector" aria-label="Theme">
+            <option value="theme-light">Light</option>
+            <option value="theme-dark">Dark</option>
+            <option value="theme-ocean" selected>Ocean</option>
+            <option value="theme-sunset">Sunset</option>
+          </select>
+          <button id="openSidebarBtn" class="btn ghost" title="Open sidebar">☰</button>
+        </div>
       </div>
     </header>
 
     <main>
-      <!-- LEFT: image / canvas -->
-      <section class="card">
+      <!-- LEFT: image + canvas -->
+      <section class="card" aria-labelledby="mainTitle">
         <div id="dropZone" class="drop" title="Click or drop an image">
           <div>
-            <div style="font-weight:900">Drop an image here or click to choose</div>
-            <div class="muted small" style="margin-top:6px">PNG / JPG / WEBP — everything is processed in your browser.</div>
+            <div style="font-weight:900" id="mainTitle">Drop an image here or click to choose</div>
+            <div class="muted" style="margin-top:8px">PNG / JPG / WEBP — everything stays in your browser.</div>
           </div>
         </div>
 
-        <input id="fileInput" type="file" accept="image/*" style="display:none" />
+        <input id="fileInput" type="file" accept="image/*" />
 
         <div id="canvasWrap" style="margin-top:14px;display:none">
-          <canvas id="imageCanvas"></canvas>
-          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
-            <div class="small muted">Click the image to pick a pixel — results show in the palette.</div>
-            <div style="display:flex;gap:8px">
+          <canvas id="imageCanvas" aria-label="Loaded image"></canvas>
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:10px">
+            <div class="muted small">Click the image to pick a pixel — it will appear at the top of the palette.</div>
+            <div class="row">
               <button id="zoomIn" class="btn ghost">Zoom +</button>
               <button id="zoomOut" class="btn ghost">Zoom -</button>
-              <button id="clear" class="btn">Clear</button>
+              <button id="clear" class="btn ghost">Clear</button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- RIGHT: palette + controls -->
-      <aside class="right">
-        <div class="panel">
-          <h3>Palette</h3>
-          <div class="small muted">Extracted colors (click Copy to copy HEX)</div>
+      <!-- RIGHT: sidebar panel (behaves like Tools site) -->
+      <aside class="right" id="rightPanel">
+        <div class="panel" role="complementary" aria-label="Palette panel">
+          <div style="display:flex;gap:12px;align-items:center">
+            <h3 style="margin:0">Palette</h3>
+            <div class="flex-fill"></div>
+            <div class="pr-sidebar" title="PirateRuler">PR</div>
+          </div>
 
-          <div style="margin-top:12px" class="settings">
-            <div class="range"><label class="small muted">Colors</label><input id="kRange" type="range" min="2" max="12" value="6" style="width:120px" /></div>
-            <div class="small muted"> <span id="kValue">6</span> </div>
-            <div style="flex:1"></div>
+          <div class="muted" style="margin-top:8px">Extracted colors — click Copy to copy HEX.</div>
+
+          <div class="settings">
+            <div class="small muted">Colors</div>
+            <input id="kRange" type="range" min="2" max="12" value="6" />
+            <div class="small muted"><strong id="kValue">6</strong></div>
+            <div class="flex-fill"></div>
           </div>
 
           <div class="palette" id="palette" aria-live="polite"></div>
@@ -136,26 +191,44 @@
             <button id="extractBtn" class="btn primary">Extract Palette</button>
             <button id="exportJSON" class="btn ghost">Export JSON</button>
             <button id="downloadPng" class="btn ghost">Download Pal PNG</button>
+            <button id="copyAll" class="btn ghost" title="Copy all hex">Copy All</button>
           </div>
 
-          <div style="margin-top:12px" class="small muted">Tip: on desktop the right panel is sticky. Use fewer colors for simpler palettes.</div>
+          <div class="muted" style="margin-top:12px;font-size:13px">Tip: use fewer colors for simpler palettes. Sampling is optimized for speed.</div>
         </div>
       </aside>
     </main>
 
+    <!-- mobile PR badge -->
     <div class="pr-badge" title="PirateRuler">PR</div>
 
     <footer>
-      <small>© <span id="year"></span> PirateRuler — private & fast</small>
+      <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
+      <div style="height:12px"></div>
+      <small class="muted">© <span id="year"></span> PirateRuler — private & fast — Backup & resources: pirateruler.com</small>
     </footer>
   </div>
 
 <script>
-/* ---------- utilities & state ---------- */
+/* ---------- year and theme ---------- */
 document.getElementById('year').textContent = new Date().getFullYear();
 const root = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-themeBtn.addEventListener('click', ()=> root.classList.toggle('dark'));
+const themeSelect = document.getElementById('themeSelect');
+
+// load saved theme (or keep ocean default)
+const saved = localStorage.getItem('pr-theme') || 'theme-ocean';
+themeSelect.value = saved;
+applyTheme(saved);
+
+themeSelect.addEventListener('change', (e)=> {
+  applyTheme(e.target.value);
+  localStorage.setItem('pr-theme', e.target.value);
+});
+
+function applyTheme(cls){
+  ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c));
+  root.classList.add(cls);
+}
 
 /* ---------- elements ---------- */
 const drop = document.getElementById('dropZone');
@@ -172,13 +245,14 @@ const downloadPng = document.getElementById('downloadPng');
 const clearBtn = document.getElementById('clear');
 const zoomIn = document.getElementById('zoomIn');
 const zoomOut = document.getElementById('zoomOut');
+const copyAll = document.getElementById('copyAll');
 
 let img = new Image();
 let imgLoaded = false;
 let scale = 1;
 let lastPalette = [];
 
-/* ---------- drag & file handling ---------- */
+/* ---------- drag & choose ---------- */
 drop.addEventListener('click', ()=> fileIn.click());
 drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
 drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
@@ -192,7 +266,7 @@ function handleFile(file){
   loadImage(url);
 }
 
-/* ---------- image load & draw ---------- */
+/* ---------- load + draw ---------- */
 function loadImage(src){
   img = new Image();
   img.crossOrigin = "anonymous";
@@ -209,14 +283,14 @@ function loadImage(src){
     ctx.drawImage(img, 0, 0, w, h);
     canvasWrap.style.display = 'block';
     imgLoaded = true;
-    // auto extract default palette
-    setTimeout(()=> extractPalette(), 150);
+    // auto extract a default palette
+    setTimeout(()=> extractPalette(), 120);
   };
   img.onerror = ()=> alert('Could not load image.');
   img.src = src;
 }
 
-/* ---------- zoom controls ---------- */
+/* ---------- zoom ---------- */
 zoomIn.addEventListener('click', ()=> {
   if(!imgLoaded) return;
   scale = Math.min(2.5, scale + 0.25);
@@ -228,24 +302,23 @@ zoomOut.addEventListener('click', ()=> {
   resizeCanvas();
 });
 function resizeCanvas(){
-  const w = Math.round(img.naturalWidth * (Math.min(1, (window.innerWidth - 420)/img.naturalWidth)) * scale);
-  const h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+  const maxW = Math.min(1200, window.innerWidth - 420);
+  const w = Math.round(Math.min(img.naturalWidth, maxW) * scale);
+  const h = Math.round(w * (img.naturalHeight / img.naturalWidth));
   canvas.width = w; canvas.height = h;
   ctx.clearRect(0,0,w,h);
   ctx.drawImage(img, 0, 0, w, h);
 }
 
-/* ---------- palette extraction (k-means) ---------- */
+/* ---------- k-means palette extraction ---------- */
 kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
 extractBtn.addEventListener('click', extractPalette);
 
 function extractPalette(){
   if(!imgLoaded) return alert('Load an image first.');
-  // sampling
   const w = canvas.width, h = canvas.height;
   const data = ctx.getImageData(0,0,w,h).data;
   const pixels = [];
-  // adaptive sampling to keep arrays small on large images
   const targetSamples = 40000;
   const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
   for(let y=0;y<h;y+=step){
@@ -269,14 +342,13 @@ function extractPalette(){
   renderPalette();
 }
 
-/* ---------- render palette matching Tools visual style ---------- */
+/* ---------- render swatches (Tools-like) ---------- */
 function renderPalette(){
   paletteEl.innerHTML = '';
   lastPalette.forEach(p => {
     const sw = document.createElement('div');
     sw.className = 'swatch';
     sw.style.background = p.hex;
-    // ensure text contrast depending on brightness (light text on dark bg)
     const textColor = getContrastColor(p.hex);
     sw.style.color = textColor;
     sw.innerHTML = `
@@ -288,31 +360,23 @@ function renderPalette(){
         <button class="sw-copy" data-hex="${p.hex}">Copy</button>
       </div>
     `;
-    // subtle overlay gradient to mimic cards on your tools site
-    const overlay = document.createElement('div');
-    overlay.style.position = 'absolute';
-    overlay.style.inset = 0;
-    overlay.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02))';
-    overlay.style.borderRadius = '12px';
-    overlay.style.pointerEvents = 'none';
-    sw.appendChild(overlay);
-
+    // subtle overlay gradient is done via CSS ::after
     paletteEl.appendChild(sw);
   });
 
-  // hook copy buttons
   paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const hex = e.currentTarget.dataset.hex;
       navigator.clipboard.writeText(hex).then(()=> {
+        const prev = e.currentTarget.textContent;
         e.currentTarget.textContent = 'Copied';
-        setTimeout(()=> e.currentTarget.textContent = 'Copy', 900);
+        setTimeout(()=> e.currentTarget.textContent = prev, 900);
       });
     });
   });
 }
 
-/* ---------- copy/export ---------- */
+/* ---------- export / download ---------- */
 exportJSON.addEventListener('click', ()=>{
   if(!lastPalette.length) return alert('No palette to export.');
   const data = {palette: lastPalette, createdAt: new Date().toISOString()};
@@ -320,6 +384,7 @@ exportJSON.addEventListener('click', ()=>{
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
+
 downloadPng.addEventListener('click', ()=> {
   if(!lastPalette.length) return alert('No palette to download.');
   const sw = Math.max(80, Math.floor(900 / lastPalette.length));
@@ -328,14 +393,24 @@ downloadPng.addEventListener('click', ()=> {
   const g = c.getContext('2d');
   lastPalette.forEach((p,i)=>{
     g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
-    g.fillStyle = getContrastColor(p.hex); g.font = 'bold 14px Inter, Arial'; g.textAlign = 'center';
+    g.fillStyle = getContrastColor(p.hex); g.font = '700 14px Inter, Arial'; g.textAlign = 'center';
     g.fillText(p.hex, i*sw + sw/2, h - 18);
   });
   const url = c.toDataURL('image/png');
   const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
 });
 
-/* ---------- canvas click to sample 1 pixel ---------- */
+/* copy all hexes */
+copyAll.addEventListener('click', ()=> {
+  if(!lastPalette.length) return;
+  const all = lastPalette.map(p=>p.hex).join(', ');
+  navigator.clipboard.writeText(all).then(()=> {
+    copyAll.textContent = 'Copied';
+    setTimeout(()=> copyAll.textContent = 'Copy All', 1200);
+  });
+});
+
+/* ---------- single-pixel sample on click ---------- */
 canvas.addEventListener('click', (e)=>{
   if(!imgLoaded) return;
   const rect = canvas.getBoundingClientRect();
@@ -343,9 +418,7 @@ canvas.addEventListener('click', (e)=>{
   const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
   const px = ctx.getImageData(x, y, 1, 1).data;
   const hex = rgbToHex(px[0], px[1], px[2]);
-  // add to top of palette as first item (copy-style)
   lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
-  // keep unique by hex and limit
   const uniq = [];
   for(const it of lastPalette){
     if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
@@ -360,12 +433,10 @@ clearBtn.addEventListener('click', ()=> {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   canvas.width = canvas.height = 0;
   canvasWrap.style.display = 'none';
-  imgLoaded = false;
-  lastPalette = [];
-  paletteEl.innerHTML = '';
+  imgLoaded = false; lastPalette = []; paletteEl.innerHTML = '';
 });
 
-/* ---------- helper: contrast color ---------- */
+/* ---------- helpers ---------- */
 function getContrastColor(hex){
   const c = hex.replace('#','');
   const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
@@ -373,7 +444,7 @@ function getContrastColor(hex){
   return (yiq >= 150) ? '#111' : '#fff';
 }
 
-/* ---------- k-means (small & fast) ---------- */
+/* small fast k-means (client-side) */
 function kmeans(samples, k, opts={}){
   const maxIter = opts.maxIter || 20;
   const centroids = [];
@@ -423,6 +494,29 @@ function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*d
 function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
 function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
+/* ---------- handle resize so canvas fits nicely ---------- */
+window.addEventListener('resize', ()=> {
+  if(!imgLoaded) return;
+  resizeCanvas();
+});
+
+/* ---------- keyboard: open/close sidebar on mobile ---------- */
+const openSidebarBtn = document.getElementById('openSidebarBtn');
+openSidebarBtn.addEventListener('click', ()=> {
+  const right = document.getElementById('rightPanel');
+  if(window.innerWidth < 980){
+    // on small screens, toggle panel visibility
+    right.style.display = right.style.display === 'none' ? 'block' : 'none';
+    if(right.style.display === 'block') right.scrollIntoView({behavior:'smooth'});
+  } else {
+    // focus panel on desktop
+    right.querySelector('.panel').focus();
+  }
+});
+
+/* ---------- tiny UX: click drop zone hint ---------- */
+drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
+drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
 </script>
 </body>
 </html>
