@@ -3,341 +3,426 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Image Color Finder — PirateRuler</title>
+<title>Color Finder — PirateRuler</title>
+<meta name="theme-color" content="#f7fbff" />
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
+  /* PirateRuler tokens (kept consistent with your tools site) */
   :root{
-    --bg:#f3f7fb; --card:#fff; --text:#07212a; --muted:#66727b;
-    --accent:#6b7dff; --radius:14px;
+    --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
+    --accent-start:#6b7dff; --accent-end:#0bb3ff;
+    --glass: rgba(11,17,28,0.04);
+    --radius:14px;
+    --shadow-lg: 0 18px 50px rgba(3,12,30,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+    --shadow-sm: 0 8px 24px rgba(3,12,30,0.08);
   }
-  html.dark { --bg:#071225; --card:#061028; --text:#e9f1ff; --muted:#98a7bf; --accent:#5ab3ff; }
-  body{background:linear-gradient(180deg,var(--bg),#e9f6ff);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--text);margin:0;padding:20px;}
-  .wrap{max-width:1100px;margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-  .logo{display:flex;gap:12px;align-items:center}
-  .logo .mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#0bb3ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:800}
-  .title{font-weight:800;font-size:18px}
-  .controls{display:flex;gap:10px;align-items:center}
-  button{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-  .btn-primary{background:linear-gradient(90deg,var(--accent),#0bb3ff);color:white}
-  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 8px 24px rgba(3,12,30,0.06);border:1px solid rgba(0,0,0,0.04)}
+  html.dark { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --glass: rgba(255,255,255,0.02); --accent-start:#5ab3ff; --accent-end:#6b7dff; --shadow-lg: 0 18px 50px rgba(0,0,0,0.6); --shadow-sm:0 8px 24px rgba(0,0,0,0.45); }
+  *{box-sizing:border-box}
+  body{background:linear-gradient(180deg,var(--bg), #e9f6ff); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:var(--text); margin:0; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1280px;margin:18px auto;padding:18px}
+
+  /* header */
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));box-shadow:var(--shadow-sm)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px}
+  .title{font-weight:900;font-size:18px}
+  .by{font-size:12px;color:var(--muted)}
+
+  /* main layout (tightened to avoid large empty spaces on laptop) */
+  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px}
+  @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
+
+  /* left card with canvas */
+  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
   .uploader{display:flex;gap:12px;align-items:center}
-  .drop{flex:1;min-height:180px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--muted)}
-  .row{display:flex;gap:16px;margin-top:12px;align-items:flex-start}
-  canvas{max-width:100%;border-radius:12px;display:block}
-  .palette{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-  .sw{width:72px;height:72px;border-radius:8px;display:flex;align-items:flex-end;justify-content:center;padding:6px;color:white;font-weight:800;box-shadow:0 6px 16px rgba(3,12,30,0.12)}
-  .color-info{font-size:12px;background:rgba(0,0,0,0.18);padding:6px;border-radius:6px}
+  .drop{flex:1;min-height:240px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .btn{padding:9px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:800}
+  .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff}
+  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
+
+  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
+
+  /* right panel */
+  aside.right{position:sticky;top:18px;align-self:start}
+  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .panel h3{margin:0 0 8px 0;font-weight:900}
   .muted{color:var(--muted)}
-  .picker{margin-top:8px;display:flex;gap:8px;align-items:center}
-  .small{font-size:13px}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  input[type="range"]{width:160px}
-  @media(max-width:900px){ .row{flex-direction:column} .sw{width:56px;height:56px} }
+
+  /* palette grid: match tools look */
+  .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
+  @media(min-width:480px){ .palette{grid-template-columns:repeat(2,1fr)} }
+  @media(min-width:720px){ .palette{grid-template-columns:repeat(2,1fr)} }
+
+  .swatch{
+    height:84px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:12px;color:var(--text);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.04);
+    transition:transform .14s ease, box-shadow .14s ease;
+  }
+  .swatch:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(3,12,30,0.12) }
+  .sw-left{display:flex;flex-direction:column;gap:6px;z-index:2}
+  .sw-hex{font-weight:900;color:var(--text);font-size:14px;text-shadow:0 1px 0 rgba(255,255,255,0.25)}
+  .sw-pct{font-weight:800;color:var(--muted);font-size:13px}
+  .sw-copy{align-self:flex-end;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.85);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer}
+  .sw-copy:active{transform:translateY(1px)}
+
+  /* overlay tiny icon */
+  .pr-badge{position:fixed;left:18px;bottom:18px;width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999}
+  @media(min-width:980px){ .pr-badge{display:none} }
+
+  /* settings row */
+  .settings{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .range{display:flex;align-items:center;gap:8px}
+  .small{font-size:13px;color:var(--muted)}
+
+  footer{margin-top:18px;text-align:center;color:var(--muted)}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">
-        <div class="mark" aria-hidden="true">PR</div>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">PR</div>
         <div>
-          <div class="title">Image Color Finder</div>
-          <div class="muted small">Extract colors from images — client-side only</div>
+          <div class="title">Color Finder</div>
+          <div class="by">by PirateRuler.com</div>
         </div>
       </div>
-      <div class="controls">
-        <button id="themeBtn" class="btn-primary">Toggle Theme</button>
+      <div>
+        <button id="themeBtn" class="btn ghost">Toggle Theme</button>
       </div>
     </header>
 
-    <div class="card uploader" aria-live="polite">
-      <div id="dropZone" class="drop">
-        <div>
-          <div style="font-weight:800">Drop an image here or click to choose</div>
-          <div class="muted small">PNG, JPG, WEBP. Everything runs in your browser.</div>
-          <div style="margin-top:8px" class="muted small">Click the image to pick a pixel color.</div>
+    <main>
+      <!-- LEFT: image / canvas -->
+      <section class="card">
+        <div id="dropZone" class="drop" title="Click or drop an image">
+          <div>
+            <div style="font-weight:900">Drop an image here or click to choose</div>
+            <div class="muted small" style="margin-top:6px">PNG / JPG / WEBP — everything is processed in your browser.</div>
+          </div>
         </div>
-      </div>
-      <input id="fileInput" type="file" accept="image/*" style="display:none" />
-    </div>
 
-    <div class="row">
-      <div style="flex:1">
-        <div class="card" id="imageCard">
-          <canvas id="imageCanvas" style="display:block"></canvas>
-          <div class="picker muted small">Click on image to sample color</div>
-          <div id="pixelInfo" class="picker" aria-hidden="true"></div>
+        <input id="fileInput" type="file" accept="image/*" style="display:none" />
+
+        <div id="canvasWrap" style="margin-top:14px;display:none">
+          <canvas id="imageCanvas"></canvas>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
+            <div class="small muted">Click the image to pick a pixel — results show in the palette.</div>
+            <div style="display:flex;gap:8px">
+              <button id="zoomIn" class="btn ghost">Zoom +</button>
+              <button id="zoomOut" class="btn ghost">Zoom -</button>
+              <button id="clear" class="btn">Clear</button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <aside style="width:360px;max-width:40%">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="font-weight:900">Palette</div>
-            <div class="muted small">Colors extracted from image</div>
+      <!-- RIGHT: palette + controls -->
+      <aside class="right">
+        <div class="panel">
+          <h3>Palette</h3>
+          <div class="small muted">Extracted colors (click Copy to copy HEX)</div>
+
+          <div style="margin-top:12px" class="settings">
+            <div class="range"><label class="small muted">Colors</label><input id="kRange" type="range" min="2" max="12" value="6" style="width:120px" /></div>
+            <div class="small muted"> <span id="kValue">6</span> </div>
+            <div style="flex:1"></div>
           </div>
 
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-            <label class="small">Colors:</label>
-            <input id="kRange" type="range" min="2" max="12" value="6" />
-            <div id="kValue" class="muted small">6</div>
+          <div class="palette" id="palette" aria-live="polite"></div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button id="extractBtn" class="btn primary">Extract Palette</button>
+            <button id="exportJSON" class="btn ghost">Export JSON</button>
+            <button id="downloadPng" class="btn ghost">Download Pal PNG</button>
           </div>
 
-          <div class="palette" id="palette"></div>
-
-          <div class="actions">
-            <button class="btn-primary" id="extractBtn">Extract Palette</button>
-            <button id="exportJSON" class="btn">Export JSON</button>
-            <button id="downloadPng" class="btn">Download Pal PNG</button>
-            <button id="clearBtn" class="btn">Clear</button>
-          </div>
-
-          <div style="margin-top:12px" class="muted small">Tip: reduce k for fewer colors. Sampling is optimized for speed.</div>
+          <div style="margin-top:12px" class="small muted">Tip: on desktop the right panel is sticky. Use fewer colors for simpler palettes.</div>
         </div>
       </aside>
-    </div>
+    </main>
+
+    <div class="pr-badge" title="PirateRuler">PR</div>
+
+    <footer>
+      <small>© <span id="year"></span> PirateRuler — private & fast</small>
+    </footer>
   </div>
 
 <script>
-(function(){
-  const drop = document.getElementById('dropZone');
-  const fileIn = document.getElementById('fileInput');
-  const canvas = document.getElementById('imageCanvas');
-  const ctx = canvas.getContext('2d', {willReadFrequently:true});
-  const paletteEl = document.getElementById('palette');
-  const extractBtn = document.getElementById('extractBtn');
-  const pixelInfo = document.getElementById('pixelInfo');
-  const kRange = document.getElementById('kRange');
-  const kValue = document.getElementById('kValue');
-  const exportJSON = document.getElementById('exportJSON');
-  const downloadPng = document.getElementById('downloadPng');
-  const clearBtn = document.getElementById('clearBtn');
-  const themeBtn = document.getElementById('themeBtn');
+/* ---------- utilities & state ---------- */
+document.getElementById('year').textContent = new Date().getFullYear();
+const root = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.addEventListener('click', ()=> root.classList.toggle('dark'));
 
-  let img = new Image();
-  let imgLoaded = false;
-  let currentPalette = [];
-  let lastImageData = null;
+/* ---------- elements ---------- */
+const drop = document.getElementById('dropZone');
+const fileIn = document.getElementById('fileInput');
+const canvas = document.getElementById('imageCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently:true });
+const canvasWrap = document.getElementById('canvasWrap');
+const kRange = document.getElementById('kRange');
+const kValue = document.getElementById('kValue');
+const paletteEl = document.getElementById('palette');
+const extractBtn = document.getElementById('extractBtn');
+const exportJSON = document.getElementById('exportJSON');
+const downloadPng = document.getElementById('downloadPng');
+const clearBtn = document.getElementById('clear');
+const zoomIn = document.getElementById('zoomIn');
+const zoomOut = document.getElementById('zoomOut');
 
-  // theme
-  function toggleTheme(){ document.documentElement.classList.toggle('dark'); }
-  themeBtn.addEventListener('click', toggleTheme);
+let img = new Image();
+let imgLoaded = false;
+let scale = 1;
+let lastPalette = [];
 
-  // drag/drop
-  drop.addEventListener('click', ()=> fileIn.click());
-  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.10)'; });
-  drop.addEventListener('dragleave', e=>{ e.preventDefault(); drop.style.borderColor=''; });
-  drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.borderColor=''; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
-  fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+/* ---------- drag & file handling ---------- */
+drop.addEventListener('click', ()=> fileIn.click());
+drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
+drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
+drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
 
-  function handleFile(file){
-    if(!file.type.startsWith('image/')) return alert('Please pick an image file.');
-    const url = URL.createObjectURL(file);
-    loadImage(url);
+fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file){
+  if(!file.type.startsWith('image/')) return alert('Choose an image file.');
+  const url = URL.createObjectURL(file);
+  loadImage(url);
+}
+
+/* ---------- image load & draw ---------- */
+function loadImage(src){
+  img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = ()=> {
+    // fit canvas to available area but keep resolution comfortable
+    const maxW = Math.min(1200, window.innerWidth - 420);
+    const maxH = 700;
+    let w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = Math.min(1, maxW/w, maxH/h);
+    w = Math.round(w * ratio); h = Math.round(h * ratio);
+    scale = 1;
+    canvas.width = w; canvas.height = h;
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(img, 0, 0, w, h);
+    canvasWrap.style.display = 'block';
+    imgLoaded = true;
+    // auto extract default palette
+    setTimeout(()=> extractPalette(), 150);
+  };
+  img.onerror = ()=> alert('Could not load image.');
+  img.src = src;
+}
+
+/* ---------- zoom controls ---------- */
+zoomIn.addEventListener('click', ()=> {
+  if(!imgLoaded) return;
+  scale = Math.min(2.5, scale + 0.25);
+  resizeCanvas();
+});
+zoomOut.addEventListener('click', ()=> {
+  if(!imgLoaded) return;
+  scale = Math.max(0.5, scale - 0.25);
+  resizeCanvas();
+});
+function resizeCanvas(){
+  const w = Math.round(img.naturalWidth * (Math.min(1, (window.innerWidth - 420)/img.naturalWidth)) * scale);
+  const h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+  canvas.width = w; canvas.height = h;
+  ctx.clearRect(0,0,w,h);
+  ctx.drawImage(img, 0, 0, w, h);
+}
+
+/* ---------- palette extraction (k-means) ---------- */
+kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
+extractBtn.addEventListener('click', extractPalette);
+
+function extractPalette(){
+  if(!imgLoaded) return alert('Load an image first.');
+  // sampling
+  const w = canvas.width, h = canvas.height;
+  const data = ctx.getImageData(0,0,w,h).data;
+  const pixels = [];
+  // adaptive sampling to keep arrays small on large images
+  const targetSamples = 40000;
+  const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
+  for(let y=0;y<h;y+=step){
+    for(let x=0;x<w;x+=step){
+      const i = (y*w + x)*4;
+      const a = data[i+3];
+      if(a < 125) continue;
+      pixels.push([data[i], data[i+1], data[i+2]]);
+    }
   }
+  if(pixels.length === 0) return alert('No visible pixels found (image may be transparent).');
 
-  function loadImage(src){
-    imgLoaded = false;
-    img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      // fit to canvas with max width
-      const maxW = 900;
-      const maxH = 700;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      const ratio = Math.min(1, maxW/w, maxH/h);
-      w = Math.round(w * ratio); h = Math.round(h * ratio);
-      canvas.width = w; canvas.height = h;
-      ctx.clearRect(0,0,w,h);
-      ctx.drawImage(img,0,0,w,h);
-      imgLoaded = true;
-      lastImageData = ctx.getImageData(0,0,w,h);
-      extractPalette(); // auto-extract
-    };
-    img.onerror = ()=> alert('Failed to load image. Try a different image.');
-    img.src = src;
-  }
+  const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
+  const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
+  const items = centroids.map((c,i)=>({rgb:c, count:counts[i]})).sort((a,b)=>b.count-a.count);
+  lastPalette = items.map(it => {
+    const hex = rgbToHex(...it.rgb);
+    const pct = Math.round((it.count / pixels.length)*100);
+    return {hex, rgb: it.rgb, pct};
+  });
+  renderPalette();
+}
 
-  // clicking image to sample pixel
-  canvas.addEventListener('click', e=>{
-    if(!imgLoaded) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-    const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
-    const px = ctx.getImageData(x, y, 1, 1).data;
-    showPixel(px);
+/* ---------- render palette matching Tools visual style ---------- */
+function renderPalette(){
+  paletteEl.innerHTML = '';
+  lastPalette.forEach(p => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.style.background = p.hex;
+    // ensure text contrast depending on brightness (light text on dark bg)
+    const textColor = getContrastColor(p.hex);
+    sw.style.color = textColor;
+    sw.innerHTML = `
+      <div class="sw-left">
+        <div class="sw-hex">${p.hex}</div>
+        <div class="sw-pct">${p.pct}%</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;z-index:2">
+        <button class="sw-copy" data-hex="${p.hex}">Copy</button>
+      </div>
+    `;
+    // subtle overlay gradient to mimic cards on your tools site
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.inset = 0;
+    overlay.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02))';
+    overlay.style.borderRadius = '12px';
+    overlay.style.pointerEvents = 'none';
+    sw.appendChild(overlay);
+
+    paletteEl.appendChild(sw);
   });
 
-  function showPixel([r,g,b,a]){
-    const hex = rgbToHex(r,g,b);
-    pixelInfo.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
-      <div style="width:56px;height:36px;border-radius:8px;background:${hex};box-shadow:0 8px 18px rgba(0,0,0,0.08)"></div>
-      <div>
-        <div style="font-weight:800">${hex}</div>
-        <div class="muted small">${r}, ${g}, ${b} • alpha ${Math.round(a/255*100)}%</div>
-        <div style="margin-top:6px"><button class="btn" onclick="navigator.clipboard.writeText('${hex}')">Copy HEX</button></div>
-      </div>
-    </div>`;
-    pixelInfo.setAttribute('aria-hidden','false');
-  }
-
-  // extract palette (k-means)
-  extractBtn.addEventListener('click', extractPalette);
-  kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
-
-  function extractPalette(){
-    if(!imgLoaded) return alert('Load an image first.');
-    // sample pixels for speed
-    const sampleStep = Math.max(1, Math.round( (canvas.width*canvas.height) / 35000 )); // adapt sampling
-    const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-    const pixels = [];
-    for(let y=0; y<canvas.height; y+=sampleStep){
-      for(let x=0; x<canvas.width; x+=sampleStep){
-        const i = (y*canvas.width + x)*4;
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-        if(a < 125) continue; // ignore transparent-ish
-        // ignore near-white or near-black? maybe not
-        pixels.push([r,g,b]);
-      }
-    }
-    if(pixels.length === 0) return alert('No pixels to sample (image may be fully transparent).');
-
-    const k = parseInt(kRange.value,10) || 6;
-    // run k-means
-    const {centroids, counts} = kmeans(pixels, k, {maxIter:25});
-    // sort by counts desc
-    const items = centroids.map((c,i)=>({color:c, count:counts[i]})).sort((a,b)=>b.count-a.count);
-    currentPalette = items.map(it=>({hex: rgbToHex(...it.color), rgb: it.color, p: Math.round((it.count / pixels.length)*100)}));
-    renderPalette();
-  }
-
-  function renderPalette(){
-    paletteEl.innerHTML = '';
-    currentPalette.forEach((c, idx)=>{
-      const sw = document.createElement('div');
-      sw.className = 'sw';
-      sw.style.background = c.hex;
-      sw.innerHTML = `<div style="text-align:center;width:100%">
-        <div style="font-size:12px">${c.hex}</div>
-        <div style="font-size:11px;opacity:0.9">${c.p}%</div>
-        <div style="margin-top:6px"><button class="btn" onclick="navigator.clipboard.writeText('${c.hex}')">Copy</button></div>
-      </div>`;
-      paletteEl.appendChild(sw);
+  // hook copy buttons
+  paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const hex = e.currentTarget.dataset.hex;
+      navigator.clipboard.writeText(hex).then(()=> {
+        e.currentTarget.textContent = 'Copied';
+        setTimeout(()=> e.currentTarget.textContent = 'Copy', 900);
+      });
     });
-  }
+  });
+}
 
-  // basic k-means implementation (Euclidean, RGB)
-  function kmeans(samples, k, opts={}){
-    // samples: array of [r,g,b]
-    const maxIter = opts.maxIter || 20;
-    // init centroids by random sampling
-    const centroids = [];
-    const used = new Set();
-    while(centroids.length < k){
-      const idx = Math.floor(Math.random()*samples.length);
-      if(used.has(idx)) continue;
-      used.add(idx);
-      centroids.push(samples[idx].slice());
+/* ---------- copy/export ---------- */
+exportJSON.addEventListener('click', ()=>{
+  if(!lastPalette.length) return alert('No palette to export.');
+  const data = {palette: lastPalette, createdAt: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+downloadPng.addEventListener('click', ()=> {
+  if(!lastPalette.length) return alert('No palette to download.');
+  const sw = Math.max(80, Math.floor(900 / lastPalette.length));
+  const w = sw * lastPalette.length, h = 160;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  lastPalette.forEach((p,i)=>{
+    g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
+    g.fillStyle = getContrastColor(p.hex); g.font = 'bold 14px Inter, Arial'; g.textAlign = 'center';
+    g.fillText(p.hex, i*sw + sw/2, h - 18);
+  });
+  const url = c.toDataURL('image/png');
+  const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* ---------- canvas click to sample 1 pixel ---------- */
+canvas.addEventListener('click', (e)=>{
+  if(!imgLoaded) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+  const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+  const px = ctx.getImageData(x, y, 1, 1).data;
+  const hex = rgbToHex(px[0], px[1], px[2]);
+  // add to top of palette as first item (copy-style)
+  lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
+  // keep unique by hex and limit
+  const uniq = [];
+  for(const it of lastPalette){
+    if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
+    if(uniq.length >= 12) break;
+  }
+  lastPalette = uniq;
+  renderPalette();
+});
+
+/* ---------- clear ---------- */
+clearBtn.addEventListener('click', ()=> {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  canvas.width = canvas.height = 0;
+  canvasWrap.style.display = 'none';
+  imgLoaded = false;
+  lastPalette = [];
+  paletteEl.innerHTML = '';
+});
+
+/* ---------- helper: contrast color ---------- */
+function getContrastColor(hex){
+  const c = hex.replace('#','');
+  const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  const yiq = (r*299 + g*587 + b*114)/1000;
+  return (yiq >= 150) ? '#111' : '#fff';
+}
+
+/* ---------- k-means (small & fast) ---------- */
+function kmeans(samples, k, opts={}){
+  const maxIter = opts.maxIter || 20;
+  const centroids = [];
+  const used = new Set();
+  while(centroids.length < k){
+    const idx = Math.floor(Math.random()*samples.length);
+    if(used.has(idx)) continue;
+    used.add(idx);
+    centroids.push(samples[idx].slice());
+  }
+  const counts = new Array(k).fill(0);
+  const assignments = new Array(samples.length).fill(-1);
+  for(let iter=0; iter<maxIter; iter++){
+    let changed = false;
+    for(let i=0;i<samples.length;i++){
+      const s = samples[i];
+      let best=0, bestd=dist2(s, centroids[0]);
+      for(let j=1;j<k;j++){
+        const d = dist2(s, centroids[j]);
+        if(d < bestd){ bestd = d; best = j; }
+      }
+      if(assignments[i] !== best){ assignments[i] = best; changed = true; }
     }
-    const counts = new Array(k).fill(0);
-    const assignments = new Array(samples.length).fill(-1);
-    for(let iter=0; iter<maxIter; iter++){
-      let changed = false;
-      // assign
-      for(let i=0;i<samples.length;i++){
-        const s = samples[i];
-        let best = 0, bestd = dist2(s, centroids[0]);
-        for(let j=1;j<k;j++){
-          const d = dist2(s, centroids[j]);
-          if(d < bestd){ bestd = d; best = j; }
-        }
-        if(assignments[i] !== best){ assignments[i] = best; changed = true; }
-      }
-      // recompute centroids
-      const sums = new Array(k).fill(0).map(()=>[0,0,0]);
-      const cnts = new Array(k).fill(0);
-      for(let i=0;i<samples.length;i++){
-        const a = assignments[i];
-        const s = samples[i];
-        sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
-        cnts[a] ++;
-      }
-      for(let j=0;j<k;j++){
-        if(cnts[j] === 0) {
-          // reinit empty centroid randomly
-          const idx = Math.floor(Math.random()*samples.length);
-          centroids[j] = samples[idx].slice();
-        } else {
-          centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
-        }
+    const sums = new Array(k).fill(0).map(()=>[0,0,0]);
+    const cnts = new Array(k).fill(0);
+    for(let i=0;i<samples.length;i++){
+      const a = assignments[i];
+      const s = samples[i];
+      sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
+      cnts[a] ++;
+    }
+    for(let j=0;j<k;j++){
+      if(cnts[j] === 0){
+        const idx = Math.floor(Math.random()*samples.length);
+        centroids[j] = samples[idx].slice();
+        counts[j] = 1;
+      } else {
+        centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
         counts[j] = cnts[j];
       }
-      if(!changed) break;
     }
-    return {centroids, counts};
+    if(!changed) break;
   }
-  function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
+  return {centroids, counts};
+}
+function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
+function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
+function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-  // helpers
-  function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
-  function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
-
-  // export JSON
-  exportJSON.addEventListener('click', ()=>{
-    if(!currentPalette.length) return alert('No palette to export.');
-    const data = {palette: currentPalette, generatedAt: new Date().toISOString()};
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  });
-
-  // download palette png
-  downloadPng.addEventListener('click', ()=>{
-    if(!currentPalette.length) return alert('No palette to download.');
-    const sw = Math.max(64, Math.floor(360/currentPalette.length));
-    const w = sw * currentPalette.length;
-    const h = 120;
-    const c = document.createElement('canvas'); c.width=w; c.height=h;
-    const g = c.getContext('2d');
-    currentPalette.forEach((p,i)=>{
-      g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
-      g.fillStyle = invertColor(p.hex); g.font='14px Arial'; g.textAlign='center';
-      g.fillText(p.hex, i*sw + sw/2, h - 10);
-    });
-    const url = c.toDataURL('image/png');
-    const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
-  });
-
-  // clear
-  clearBtn.addEventListener('click', ()=> {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    canvas.width = canvas.height = 0;
-    imgLoaded = false;
-    paletteEl.innerHTML = '';
-    pixelInfo.innerHTML = '';
-    currentPalette = [];
-  });
-
-  // invert color for contrast (simple)
-  function invertColor(hex){
-    if(hex[0] === '#') hex = hex.slice(1);
-    const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
-    const yiq = (r*299 + g*587 + b*114)/1000;
-    return (yiq >= 128) ? '#111' : '#fff';
-  }
-
-  // expose one tiny helper so buttons inside sw can copy
-  window.navigatorClipboard = {
-    copy: (s)=> navigator.clipboard.writeText(s)
-  };
-
-  // keyboard sample: press E to extract
-  document.addEventListener('keydown',(e)=>{ if(e.key.toLowerCase()==='e') extractPalette(); });
-
-  // make functions accessible from inline onclick (copy)
-  window.navigator.clipboard = window.navigator.clipboard || { writeText: (t)=> Promise.resolve() };
-
-})();
 </script>
 </body>
 </html>
