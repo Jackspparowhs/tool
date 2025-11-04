@@ -1,1017 +1,343 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Utility Tools — PirateRuler.com</title>
-  <meta name="description" content="Utility Tools by PirateRuler.com — privacy-first, client-side web utilities: calculators, converters, text tools, generators, dev utilities and more." />
-  <meta name="theme-color" content="#f7fbff" />
-  <style>
-    /* -------------------------
-       Theme + base (adapted from your Calculator style)
-       ------------------------- */
-    :root{
-      --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
-      --accent-start:#6b7dff; --accent-end:#0bb3ff;
-      --glass: rgba(11,17,28,0.04);
-      --radius:14px;
-      --shadow-lg: 0 18px 50px rgba(3,12,30,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
-      --shadow-sm: 0 8px 24px rgba(3,12,30,0.08);
-    }
-    html.dark { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --glass: rgba(255,255,255,0.02); --shadow-lg: 0 18px 50px rgba(0,0,0,0.6); --shadow-sm: 0 8px 24px rgba(0,0,0,0.45); }
-    *{box-sizing:border-box}
-    body{background:linear-gradient(180deg,var(--bg), #e9f6ff); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:var(--text); margin:0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-    a{color:inherit;text-decoration:none}
-    .container{max-width:1100px;margin:18px auto;padding:18px;}
-
-    /* Header (two-line brand like Calculator) */
-    header.header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; border-radius:14px; background:linear-gradient(90deg, rgba(107,125,255,0.07), rgba(11,179,255,0.03)); box-shadow:var(--shadow-sm); position:sticky; top:12px; z-index:20; }
-    .brand {display:flex; align-items:center; gap:12px;}
-    .logo { width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800; background:linear-gradient(135deg,var(--accent-start),var(--accent-end)); color:white; font-size:20px; box-shadow:0 8px 26px rgba(11,123,255,0.15); flex-shrink:0; }
-    .brand-title {line-height:1;}
-    .brand-title .title-strong {font-size:20px;font-weight:800;margin:0}
-    .brand-title .by {font-size:12px;color:var(--muted); margin-top:3px}
-    .header-actions {display:flex; gap:10px; align-items:center;}
-    .btn {padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-    .btn.ghost {background:transparent;border:1px solid rgba(0,0,0,0.06); color:var(--text);}
-    .btn.theme {background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:white}
-    .hamb { width:46px;height:46px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(0,0,0,0.04) }
-
-    /* Sidebar */
-    .sidebar {
-      position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s cubic-bezier(.2,.9,.3,1); z-index:90;
-      background:var(--card); box-shadow: -40px 0 80px rgba(2,8,20,0.25);
-      padding:20px; border-left:1px solid rgba(0,0,0,0.04); overflow:auto; border-radius:0 0 0 14px;
-    }
-    .sidebar.open { transform:translateX(0); }
-    .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
-    .nav-list a{display:block;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02)); color:var(--text); font-weight:600}
-
-    /* Hero + categories */
-    .hero { margin-top:18px; padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96)); box-shadow:var(--shadow-lg); }
-    html.dark .hero { background:linear-gradient(180deg, rgba(1,6,12,0.6), rgba(2,8,16,0.6)); }
-    .hero .big {font-size:30px;font-weight:900;margin:0;text-align:center}
-    .hero .small {text-align:center;color:var(--muted);margin-top:8px; max-width:820px;margin-left:auto;margin-right:auto}
-    .category-tabs {display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:18px}
-    .cat {padding:8px 12px;border-radius:999px;background:transparent;border:1px solid rgba(11,17,28,0.06); cursor:pointer; color:var(--muted); font-weight:700}
-    .cat.active { background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:white; box-shadow:0 10px 30px rgba(11,107,255,0.12); transform:translateY(-2px); }
-
-    /* layout grid */
-    .grid { display:grid; grid-template-columns: 1fr 420px; gap:18px; margin-top:18px; align-items:start; }
-    @media (max-width:1100px){ .grid{ grid-template-columns: 1fr } }
-    .card { background:var(--card); border-radius:14px; padding:18px; box-shadow:var(--shadow-sm); border:1px solid rgba(0,0,0,0.04); animation:cardIn .42s both}
-    @keyframes cardIn { from { transform:translateY(8px); opacity:0 } to { transform:none; opacity:1 } }
-    .card h2{margin:0 0 8px 0;font-size:18px}
-    .hint{color:var(--muted); font-size:13px; margin-bottom:10px}
-
-    input[type="text"], input[type="number"], input[type="date"], select, textarea {
-      width:100%; padding:12px;border-radius:10px;border:1px solid rgba(10,20,40,0.06); font-size:15px; background:transparent; color:var(--text); resize:vertical;
-    }
-    textarea { min-height:120px }
-
-    .row {display:flex; gap:10px}
-    .primary { background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:white; padding:9px 14px; border-radius:10px; border:none; font-weight:800; cursor:pointer }
-    .ghost { background:transparent; border:1px solid rgba(0,0,0,0.06); padding:9px 12px;border-radius:10px; cursor:pointer }
-
-    .result { margin-top:12px; font-weight:800; color:#0b8a66 }
-    html.dark .result { color:#57f0b6 }
-
-    /* keypad */
-    .key-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:9px; margin-top:12px; }
-    .key { padding:14px; border-radius:12px; background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); border:1px solid rgba(0,0,0,0.04); font-weight:700; cursor:pointer; text-align:center }
-    .key.op { background:transparent; color:var(--muted) }
-    .key.eq { background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:white; box-shadow:0 10px 30px rgba(11,107,255,0.12) }
-
-    /* features */
-    .features { display:grid; grid-template-columns: repeat(1,1fr); gap:12px; margin-top:18px; }
-    .feature { display:flex; gap:14px; align-items:center; padding:14px; border-radius:12px; background:var(--card); box-shadow:var(--shadow-sm); border:1px solid rgba(0,0,0,0.04) }
-    .f-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center; font-weight:800; color:white; background: linear-gradient(135deg,#8ee36b,#2bbf6f); }
-    .f-title{font-weight:800}
-    .f-desc{color:var(--muted); font-size:13px}
-
-    /* small helpers */
-    .muted{color:var(--muted)}
-    .spacer{height:8px}
-    .tools-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:12px; margin-top:12px;}
-    @media (max-width:760px){ .tools-grid{ grid-template-columns:1fr } }
-    .tool-btn { padding:10px 14px; border-radius:999px; background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); border:1px solid rgba(0,0,0,0.04); text-align:center; cursor:pointer; font-weight:700; color:var(--muted); }
-    .tool-btn.active { background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:white; box-shadow:0 10px 30px rgba(11,107,255,0.12); transform:translateY(-2px); }
-
-    footer { margin-top:28px; padding:22px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.96)); text-align:center; box-shadow:var(--shadow-lg) }
-    .visit { padding:12px 20px; border-radius:999px; display:inline-block; background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%); color:white; font-weight:800; text-decoration:none }
-
-    /* small card list for footer links */
-    .link-card a{ display:block; padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); margin-bottom:8px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Image Color Finder — PirateRuler</title>
+<style>
+  :root{
+    --bg:#f3f7fb; --card:#fff; --text:#07212a; --muted:#66727b;
+    --accent:#6b7dff; --radius:14px;
+  }
+  html.dark { --bg:#071225; --card:#061028; --text:#e9f1ff; --muted:#98a7bf; --accent:#5ab3ff; }
+  body{background:linear-gradient(180deg,var(--bg),#e9f6ff);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--text);margin:0;padding:20px;}
+  .wrap{max-width:1100px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .logo{display:flex;gap:12px;align-items:center}
+  .logo .mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#0bb3ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:800}
+  .title{font-weight:800;font-size:18px}
+  .controls{display:flex;gap:10px;align-items:center}
+  button{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#0bb3ff);color:white}
+  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 8px 24px rgba(3,12,30,0.06);border:1px solid rgba(0,0,0,0.04)}
+  .uploader{display:flex;gap:12px;align-items:center}
+  .drop{flex:1;min-height:180px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--muted)}
+  .row{display:flex;gap:16px;margin-top:12px;align-items:flex-start}
+  canvas{max-width:100%;border-radius:12px;display:block}
+  .palette{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .sw{width:72px;height:72px;border-radius:8px;display:flex;align-items:flex-end;justify-content:center;padding:6px;color:white;font-weight:800;box-shadow:0 6px 16px rgba(3,12,30,0.12)}
+  .color-info{font-size:12px;background:rgba(0,0,0,0.18);padding:6px;border-radius:6px}
+  .muted{color:var(--muted)}
+  .picker{margin-top:8px;display:flex;gap:8px;align-items:center}
+  .small{font-size:13px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  input[type="range"]{width:160px}
+  @media(max-width:900px){ .row{flex-direction:column} .sw{width:56px;height:56px} }
+</style>
 </head>
 <body>
-  <div class="container">
-
-    <!-- Header -->
-    <header class="header" role="banner" aria-label="Site header">
-      <div class="brand">
-        <a href="/" aria-label="Home" style="display:flex; align-items:center; gap:12px">
-          <div class="logo" aria-hidden="true">PR</div>
-          <div class="brand-title">
-            <div class="title-strong" id="siteName">Utility Tools</div>
-            <div class="by">by PirateRuler.com</div>
-          </div>
-        </a>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="mark" aria-hidden="true">PR</div>
+        <div>
+          <div class="title">Image Color Finder</div>
+          <div class="muted small">Extract colors from images — client-side only</div>
+        </div>
       </div>
-
-      <div class="header-actions" role="navigation" aria-label="Header controls">
-        <button id="themeBtn" class="btn theme" title="Toggle theme">Theme</button>
-        <div class="hamb" id="hambBtn" title="Open menu" aria-haspopup="true" aria-controls="sidebar">☰</div>
+      <div class="controls">
+        <button id="themeBtn" class="btn-primary">Toggle Theme</button>
       </div>
     </header>
 
-    <!-- HERO -->
-    <section class="hero" aria-labelledby="heroTitle">
-      <h1 id="heroTitle" class="big">All-in-one Utility Tools</h1>
-      <p class="small">Everyday quick tools people love — zero APIs, instant execution. Notes, stopwatch, date difference, world clock, password generator, converters and text helpers — private and lightweight.</p>
-
-      <div class="category-tabs" role="tablist" aria-label="Tool categories">
-        <button class="cat active" data-cat="calculators">Calculators</button>
-        <button class="cat" data-cat="text">Text Tools</button>
-        <button class="cat" data-cat="converters">Converters</button>
-        <button class="cat" data-cat="time">Date & Time</button>
-        <button class="cat" data-cat="generators">Generators</button>
-        <button class="cat" data-cat="dev">Dev & Misc</button>
-      </div>
-    </section>
-
-    <!-- MAIN GRID -->
-    <main class="grid" role="main">
-
-      <!-- LEFT: Tools area (dynamic) -->
-      <div id="toolsArea">
-
-        <!-- A placeholder intro card -->
-        <section class="card" id="introCard">
-          <h2>Quick launch</h2>
-          <p class="hint">Choose a category above, then open any tool. Tools are lazy-initialized so the page stays fast even with many tools.</p>
-
-          <div class="tools-grid" id="quickLaunch">
-            <div class="tool-btn" data-tool="basic">Basic</div>
-            <div class="tool-btn" data-tool="json">JSON Pretty</div>
-            <div class="tool-btn" data-tool="word">Char/Word</div>
-            <div class="tool-btn" data-tool="password">Password</div>
-            <div class="tool-btn" data-tool="stopwatch">Stopwatch</div>
-            <div class="tool-btn" data-tool="dateDiff">Date Diff</div>
-          </div>
-        </section>
-
-        <!-- Container where each tool mounts -->
-        <div id="toolPanels"></div>
-
-      </div>
-
-      <!-- RIGHT: feature cards + quick links -->
-      <aside>
-        <div class="features" aria-hidden="false">
-          <div class="feature">
-            <div class="f-icon" style="background:linear-gradient(135deg,#6b7dff,#0bb3ff)">⚡</div>
-            <div>
-              <div class="f-title">Lightning fast</div>
-              <div class="f-desc">Optimized code, minimal dependencies — instant results on mobile & desktop.</div>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="f-icon" style="background:linear-gradient(135deg,#8ee36b,#2bbf6f)">🔒</div>
-            <div>
-              <div class="f-title">Private by design</div>
-              <div class="f-desc">Everything runs in your browser — no personal data is stored by default.</div>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="f-icon" style="background:linear-gradient(135deg,#ffb86b,#ff6b7a)">🧰</div>
-            <div>
-              <div class="f-title">All tools in one</div>
-              <div class="f-desc">Organized into categories for easy discovery — add dozens more without server work.</div>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="f-icon" style="background:linear-gradient(135deg,#c471ed,#7bffdd)">🌐</div>
-            <div>
-              <div class="f-title">Backup resources</div>
-              <div class="f-desc">If this site is offline, visit PirateRuler.com for backups & resources.</div>
-            </div>
-          </div>
-
-          <div class="feature">
-            <div class="f-icon" style="background:linear-gradient(135deg,#ff7aa2,#6b7dff)">🔧</div>
-            <div>
-              <div class="f-title">Developer friendly</div>
-              <div class="f-desc">Simple code structure — copy `registerTool()` to add new utilities quickly.</div>
-            </div>
-          </div>
+    <div class="card uploader" aria-live="polite">
+      <div id="dropZone" class="drop">
+        <div>
+          <div style="font-weight:800">Drop an image here or click to choose</div>
+          <div class="muted small">PNG, JPG, WEBP. Everything runs in your browser.</div>
+          <div style="margin-top:8px" class="muted small">Click the image to pick a pixel color.</div>
         </div>
+      </div>
+      <input id="fileInput" type="file" accept="image/*" style="display:none" />
+    </div>
 
-        <div style="height:18px"></div>
+    <div class="row">
+      <div style="flex:1">
+        <div class="card" id="imageCard">
+          <canvas id="imageCanvas" style="display:block"></canvas>
+          <div class="picker muted small">Click on image to sample color</div>
+          <div id="pixelInfo" class="picker" aria-hidden="true"></div>
+        </div>
+      </div>
 
-        <div class="card link-card" style="padding:12px">
-          <div style="display:flex;gap:12px; align-items:center">
-            <div style="width:56px;height:56px;border-radius:12px; background:linear-gradient(135deg,#6b7dff,#0bb3ff); display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">PR</div>
-            <div>
-              <div style="font-weight:800">Utility Tools by PirateRuler.com</div>
-              <div class="muted" style="font-size:13px">Lightweight, private web utilities you can run anywhere.</div>
-            </div>
+      <aside style="width:360px;max-width:40%">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-weight:900">Palette</div>
+            <div class="muted small">Colors extracted from image</div>
           </div>
 
-          <div class="spacer"></div>
-
-          <div style="display:flex;flex-direction:column; gap:8px">
-            <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
-            <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-            <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
-            <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+            <label class="small">Colors:</label>
+            <input id="kRange" type="range" min="2" max="12" value="6" />
+            <div id="kValue" class="muted small">6</div>
           </div>
 
-          <div class="backup" style="margin-top:14px">
-            Backup: <a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a>
+          <div class="palette" id="palette"></div>
+
+          <div class="actions">
+            <button class="btn-primary" id="extractBtn">Extract Palette</button>
+            <button id="exportJSON" class="btn">Export JSON</button>
+            <button id="downloadPng" class="btn">Download Pal PNG</button>
+            <button id="clearBtn" class="btn">Clear</button>
           </div>
+
+          <div style="margin-top:12px" class="muted small">Tip: reduce k for fewer colors. Sampling is optimized for speed.</div>
         </div>
       </aside>
-
-    </main>
-
-    <!-- Footer -->
-    <footer>
-      <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
-      <div style="height:12px"></div>
-      <small class="muted">© <span id="year"></span> Utility Tools — PirateRuler.com — All rights reserved. Backup & resources: pirateruler.com</small>
-    </footer>
+    </div>
   </div>
 
-  <!-- Sidebar markup -->
-  <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="close"><button class="ghost" id="closeSidebar">Close</button></div>
-    <h3>PirateRuler Links</h3>
-    <p class="muted">Quick links & backup resources</p>
-    <nav class="nav-list" aria-label="PirateRuler quick links">
-      <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
-      <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-      <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
-      <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
-    </nav>
-    <div class="backup">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
-  </aside>
+<script>
+(function(){
+  const drop = document.getElementById('dropZone');
+  const fileIn = document.getElementById('fileInput');
+  const canvas = document.getElementById('imageCanvas');
+  const ctx = canvas.getContext('2d', {willReadFrequently:true});
+  const paletteEl = document.getElementById('palette');
+  const extractBtn = document.getElementById('extractBtn');
+  const pixelInfo = document.getElementById('pixelInfo');
+  const kRange = document.getElementById('kRange');
+  const kValue = document.getElementById('kValue');
+  const exportJSON = document.getElementById('exportJSON');
+  const downloadPng = document.getElementById('downloadPng');
+  const clearBtn = document.getElementById('clearBtn');
+  const themeBtn = document.getElementById('themeBtn');
 
-  <script>
-    // -------------------------
-    // Boilerplate + UI utils
-    // -------------------------
-    document.getElementById('year').textContent = new Date().getFullYear();
-    const root = document.documentElement;
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(t){
-      if(t === 'dark'){ root.classList.add('dark'); localStorage.setItem('site-theme','dark'); themeBtn.textContent = 'Dark' }
-      else { root.classList.remove('dark'); localStorage.setItem('site-theme','light'); themeBtn.textContent = 'Light' }
+  let img = new Image();
+  let imgLoaded = false;
+  let currentPalette = [];
+  let lastImageData = null;
+
+  // theme
+  function toggleTheme(){ document.documentElement.classList.toggle('dark'); }
+  themeBtn.addEventListener('click', toggleTheme);
+
+  // drag/drop
+  drop.addEventListener('click', ()=> fileIn.click());
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.10)'; });
+  drop.addEventListener('dragleave', e=>{ e.preventDefault(); drop.style.borderColor=''; });
+  drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.borderColor=''; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
+  fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+  function handleFile(file){
+    if(!file.type.startsWith('image/')) return alert('Please pick an image file.');
+    const url = URL.createObjectURL(file);
+    loadImage(url);
+  }
+
+  function loadImage(src){
+    imgLoaded = false;
+    img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      // fit to canvas with max width
+      const maxW = 900;
+      const maxH = 700;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const ratio = Math.min(1, maxW/w, maxH/h);
+      w = Math.round(w * ratio); h = Math.round(h * ratio);
+      canvas.width = w; canvas.height = h;
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      imgLoaded = true;
+      lastImageData = ctx.getImageData(0,0,w,h);
+      extractPalette(); // auto-extract
+    };
+    img.onerror = ()=> alert('Failed to load image. Try a different image.');
+    img.src = src;
+  }
+
+  // clicking image to sample pixel
+  canvas.addEventListener('click', e=>{
+    if(!imgLoaded) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+    const px = ctx.getImageData(x, y, 1, 1).data;
+    showPixel(px);
+  });
+
+  function showPixel([r,g,b,a]){
+    const hex = rgbToHex(r,g,b);
+    pixelInfo.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
+      <div style="width:56px;height:36px;border-radius:8px;background:${hex};box-shadow:0 8px 18px rgba(0,0,0,0.08)"></div>
+      <div>
+        <div style="font-weight:800">${hex}</div>
+        <div class="muted small">${r}, ${g}, ${b} • alpha ${Math.round(a/255*100)}%</div>
+        <div style="margin-top:6px"><button class="btn" onclick="navigator.clipboard.writeText('${hex}')">Copy HEX</button></div>
+      </div>
+    </div>`;
+    pixelInfo.setAttribute('aria-hidden','false');
+  }
+
+  // extract palette (k-means)
+  extractBtn.addEventListener('click', extractPalette);
+  kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
+
+  function extractPalette(){
+    if(!imgLoaded) return alert('Load an image first.');
+    // sample pixels for speed
+    const sampleStep = Math.max(1, Math.round( (canvas.width*canvas.height) / 35000 )); // adapt sampling
+    const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    const pixels = [];
+    for(let y=0; y<canvas.height; y+=sampleStep){
+      for(let x=0; x<canvas.width; x+=sampleStep){
+        const i = (y*canvas.width + x)*4;
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+        if(a < 125) continue; // ignore transparent-ish
+        // ignore near-white or near-black? maybe not
+        pixels.push([r,g,b]);
+      }
     }
-    const saved = localStorage.getItem('site-theme');
-    if(saved) applyTheme(saved); else applyTheme('light');
-    themeBtn.addEventListener('click', ()=> applyTheme(root.classList.contains('dark') ? 'light' : 'dark'));
+    if(pixels.length === 0) return alert('No pixels to sample (image may be fully transparent).');
 
-    // Sidebar open/close
-    const sidebar = document.getElementById('sidebar');
-    const hambBtn = document.getElementById('hambBtn');
-    const closeSidebar = document.getElementById('closeSidebar');
-    function openSidebar(){ sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); closeSidebar.focus(); }
-    function closeSB(){ sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
-    hambBtn.addEventListener('click', openSidebar);
-    closeSidebar.addEventListener('click', closeSB);
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSB(); });
-    function updateSidebarWidth(){ if(window.innerWidth < 420) sidebar.style.width = '94vw'; else sidebar.style.width = '360px'; }
-    window.addEventListener('resize', updateSidebarWidth);
-    updateSidebarWidth();
+    const k = parseInt(kRange.value,10) || 6;
+    // run k-means
+    const {centroids, counts} = kmeans(pixels, k, {maxIter:25});
+    // sort by counts desc
+    const items = centroids.map((c,i)=>({color:c, count:counts[i]})).sort((a,b)=>b.count-a.count);
+    currentPalette = items.map(it=>({hex: rgbToHex(...it.color), rgb: it.color, p: Math.round((it.count / pixels.length)*100)}));
+    renderPalette();
+  }
 
-    // Category tabs
-    const cats = Array.from(document.querySelectorAll('.cat'));
-    let currentCategory = 'calculators';
-    cats.forEach(c=>{
-      c.addEventListener('click', ()=>{
-        cats.forEach(x=>x.classList.remove('active'));
-        c.classList.add('active');
-        currentCategory = c.dataset.cat;
-        // when category changes, show quick tool buttons filtered (simple)
-        filterQuickButtons();
-      });
+  function renderPalette(){
+    paletteEl.innerHTML = '';
+    currentPalette.forEach((c, idx)=>{
+      const sw = document.createElement('div');
+      sw.className = 'sw';
+      sw.style.background = c.hex;
+      sw.innerHTML = `<div style="text-align:center;width:100%">
+        <div style="font-size:12px">${c.hex}</div>
+        <div style="font-size:11px;opacity:0.9">${c.p}%</div>
+        <div style="margin-top:6px"><button class="btn" onclick="navigator.clipboard.writeText('${c.hex}')">Copy</button></div>
+      </div>`;
+      paletteEl.appendChild(sw);
     });
+  }
 
-    // quick tool buttons
-    const quickButtons = document.querySelectorAll('.tool-btn');
-    function filterQuickButtons(){
-      const mapping = {
-        calculators: ['basic','stopwatch','dateDiff','mortgage','tip','gst'],
-        text: ['json','word','case','format'],
-        converters: ['units','filesize','temp'],
-        time: ['worldclock','dateDiff','stopwatch'],
-        generators: ['password','dice','pick'],
-        dev: ['regex','slug']
-      };
-      const list = mapping[currentCategory] || [];
-      quickButtons.forEach(b=>{
-        if(list.includes(b.dataset.tool)) { b.style.display='block'; } else { b.style.display='none'; }
-      });
+  // basic k-means implementation (Euclidean, RGB)
+  function kmeans(samples, k, opts={}){
+    // samples: array of [r,g,b]
+    const maxIter = opts.maxIter || 20;
+    // init centroids by random sampling
+    const centroids = [];
+    const used = new Set();
+    while(centroids.length < k){
+      const idx = Math.floor(Math.random()*samples.length);
+      if(used.has(idx)) continue;
+      used.add(idx);
+      centroids.push(samples[idx].slice());
     }
-    filterQuickButtons();
-
-    quickButtons.forEach(b=>{
-      b.addEventListener('click', ()=> openTool(b.dataset.tool));
-    });
-
-    // -------------------------
-    // Tool registry (lazy init)
-    // -------------------------
-    const toolPanels = document.getElementById('toolPanels');
-    const registered = {}; // id -> {title, category, init}
-    const inited = {};
-
-    function registerTool({id, title, category, init}) {
-      registered[id] = {id, title, category, init};
-      // create the card shell (hidden by default)
-      const wrapper = document.createElement('section');
-      wrapper.className = 'card';
-      wrapper.id = 'tool-'+id;
-      wrapper.style.display = 'none';
-      wrapper.setAttribute('aria-labelledby', id + '-title');
-      wrapper.innerHTML = `<h2 id="${id}-title">${title}</h2><div class="tool-body" data-tool="${id}"><div class="hint">Loading...</div></div>`;
-      toolPanels.appendChild(wrapper);
+    const counts = new Array(k).fill(0);
+    const assignments = new Array(samples.length).fill(-1);
+    for(let iter=0; iter<maxIter; iter++){
+      let changed = false;
+      // assign
+      for(let i=0;i<samples.length;i++){
+        const s = samples[i];
+        let best = 0, bestd = dist2(s, centroids[0]);
+        for(let j=1;j<k;j++){
+          const d = dist2(s, centroids[j]);
+          if(d < bestd){ bestd = d; best = j; }
+        }
+        if(assignments[i] !== best){ assignments[i] = best; changed = true; }
+      }
+      // recompute centroids
+      const sums = new Array(k).fill(0).map(()=>[0,0,0]);
+      const cnts = new Array(k).fill(0);
+      for(let i=0;i<samples.length;i++){
+        const a = assignments[i];
+        const s = samples[i];
+        sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
+        cnts[a] ++;
+      }
+      for(let j=0;j<k;j++){
+        if(cnts[j] === 0) {
+          // reinit empty centroid randomly
+          const idx = Math.floor(Math.random()*samples.length);
+          centroids[j] = samples[idx].slice();
+        } else {
+          centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
+        }
+        counts[j] = cnts[j];
+      }
+      if(!changed) break;
     }
+    return {centroids, counts};
+  }
+  function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
 
-    function openTool(id){
-      // hide others
-      Array.from(toolPanels.children).forEach(c=>c.style.display='none');
-      // show requested panel
-      const panel = document.getElementById('tool-'+id);
-      if(!panel) {
-        console.warn('Tool not found', id);
-        return;
-      }
-      panel.style.display = '';
-      // init lazily once
-      if(!inited[id]) {
-        const body = panel.querySelector('.tool-body');
-        body.innerHTML = ''; // clear loading
-        registered[id].init(body);
-        inited[id] = true;
-      }
-      // scroll into view
-      setTimeout(()=> {
-        const rect = panel.getBoundingClientRect();
-        window.scrollTo({top: window.scrollY + rect.top - 80, behavior:'smooth'});
-      }, 80);
-    }
+  // helpers
+  function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
+  function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-    // -------------------------
-    // Tools: register many useful client-side utilities below
-    // Follow pattern: registerTool({id, title, category, init(body){ ... }});
-    // -------------------------
+  // export JSON
+  exportJSON.addEventListener('click', ()=>{
+    if(!currentPalette.length) return alert('No palette to export.');
+    const data = {palette: currentPalette, generatedAt: new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
 
-    /* ---------- 1) Basic calculator ---------- */
-    registerTool({
-      id: 'basic',
-      title: 'Basic Calculator',
-      category: 'calculators',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Use keypad or type on your keyboard. Supports + - * / ( ) and decimals.</div>
-          <input id="calcDisplay" type="text" value="0" aria-label="Calculator display" />
-          <div class="key-grid" style="margin-top:12px">
-            <div class="key" data-k="7">7</div>
-            <div class="key" data-k="8">8</div>
-            <div class="key" data-k="9">9</div>
-            <div class="key op" data-k="/">÷</div>
-
-            <div class="key" data-k="4">4</div>
-            <div class="key" data-k="5">5</div>
-            <div class="key" data-k="6">6</div>
-            <div class="key op" data-k="*">×</div>
-
-            <div class="key" data-k="1">1</div>
-            <div class="key" data-k="2">2</div>
-            <div class="key" data-k="3">3</div>
-            <div class="key op" data-k="-">−</div>
-
-            <div class="key" data-k="0">0</div>
-            <div class="key" data-k=".">.</div>
-            <div class="key eq" id="calcEq">=</div>
-            <div class="key op" data-k="+">+</div>
-
-            <div class="key" style="grid-column:span 2" id="calcClear">Clear</div>
-            <div class="key" style="grid-column:span 2" id="calcBack">Back</div>
-          </div>
-          <div id="calcRes" class="result" aria-live="polite"></div>
-        `;
-        const disp = mount.querySelector('#calcDisplay');
-        const res = mount.querySelector('#calcRes');
-
-        function setRes(v){ res.textContent = v; }
-        function safeEval(expr){
-          const safe = expr.replace(/[^0-9+\-*/().% ]/g,'');
-          try {
-            return Function('"use strict";return ('+safe+')')();
-          } catch(e){ return null; }
-        }
-
-        mount.querySelectorAll('[data-k]').forEach(btn=>{
-          btn.addEventListener('click', ()=> {
-            if(disp.value === '0' && btn.dataset.k !== '.') disp.value = '';
-            disp.value = disp.value + btn.dataset.k;
-          });
-        });
-        mount.querySelector('#calcClear').addEventListener('click', ()=> { disp.value='0'; setRes(''); });
-        mount.querySelector('#calcBack').addEventListener('click', ()=> { disp.value = disp.value.slice(0,-1) || '0'; });
-        mount.querySelector('#calcEq').addEventListener('click', ()=> {
-          const r = safeEval(disp.value);
-          if(r === null || !isFinite(r)) setRes('Invalid expression');
-          else { setRes('Result: '+r); disp.value = String(r); }
-        });
-        // keyboard support while this tool is visible
-        function keyHandler(e){
-          if(document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement !== disp) return;
-          if(/^[0-9+\-*/().%]$/.test(e.key)) { if(disp.value==='0' && e.key !== '.') disp.value=''; disp.value += e.key; }
-          if(e.key === 'Enter') { mount.querySelector('#calcEq').click(); }
-          if(e.key === 'Backspace') { mount.querySelector('#calcBack').click(); }
-        }
-        window.addEventListener('keydown', keyHandler);
-        // cleanup when tool removed (not strictly necessary in single-page but safe)
-        mount._cleanup = ()=> window.removeEventListener('keydown', keyHandler);
-      }
+  // download palette png
+  downloadPng.addEventListener('click', ()=>{
+    if(!currentPalette.length) return alert('No palette to download.');
+    const sw = Math.max(64, Math.floor(360/currentPalette.length));
+    const w = sw * currentPalette.length;
+    const h = 120;
+    const c = document.createElement('canvas'); c.width=w; c.height=h;
+    const g = c.getContext('2d');
+    currentPalette.forEach((p,i)=>{
+      g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
+      g.fillStyle = invertColor(p.hex); g.font='14px Arial'; g.textAlign='center';
+      g.fillText(p.hex, i*sw + sw/2, h - 10);
     });
+    const url = c.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
+  });
 
-    /* ---------- 2) JSON Pretty / Minify ---------- */
-    registerTool({
-      id:'json',
-      title:'JSON Pretty / Minify',
-      category:'text',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Paste JSON and click <strong>Pretty</strong> or <strong>Minify</strong>.</div>
-          <textarea id="jsonInput" placeholder='{"hello": "world"}'></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="primary" id="jsonPretty">JSON pretty</button>
-            <button class="ghost" id="jsonMinify">JSON minify</button>
-            <button class="ghost" id="jsonCopy">Copy</button>
-            <button class="ghost" id="jsonClear">Clear</button>
-          </div>
-          <div id="jsonMsg" class="muted" style="margin-top:8px"></div>
-        `;
-        const ta = mount.querySelector('#jsonInput'), msg = mount.querySelector('#jsonMsg');
-        mount.querySelector('#jsonPretty').addEventListener('click', ()=>{
-          try { const obj = JSON.parse(ta.value); ta.value = JSON.stringify(obj, null, 2); msg.textContent='Pretty-printed'; }
-          catch(e){ msg.textContent = 'Invalid JSON'; }
-        });
-        mount.querySelector('#jsonMinify').addEventListener('click', ()=>{
-          try { const obj = JSON.parse(ta.value); ta.value = JSON.stringify(obj); msg.textContent='Minified'; }
-          catch(e){ msg.textContent = 'Invalid JSON'; }
-        });
-        mount.querySelector('#jsonCopy').addEventListener('click', async ()=>{
-          try { await navigator.clipboard.writeText(ta.value); msg.textContent='Copied to clipboard'; } catch(e){ msg.textContent='Copy failed'; }
-        });
-        mount.querySelector('#jsonClear').addEventListener('click', ()=>{ ta.value=''; msg.textContent=''; });
-      }
-    });
+  // clear
+  clearBtn.addEventListener('click', ()=> {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    canvas.width = canvas.height = 0;
+    imgLoaded = false;
+    paletteEl.innerHTML = '';
+    pixelInfo.innerHTML = '';
+    currentPalette = [];
+  });
 
-    /* ---------- 3) Character & Word Counter ---------- */
-    registerTool({
-      id:'word',
-      title:'Character & Word counter',
-      category:'text',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Paste text and click <strong>Count</strong>.</div>
-          <textarea id="cwText" placeholder="Paste text here..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="primary" id="cwCount">Count</button>
-            <button class="ghost" id="cwClear">Clear</button>
-            <button class="ghost" id="cwCopy">Copy</button>
-          </div>
-          <div id="cwRes" class="muted" style="margin-top:10px"></div>
-        `;
-        const ta = mount.querySelector('#cwText'), res = mount.querySelector('#cwRes');
-        mount.querySelector('#cwCount').addEventListener('click', ()=>{
-          const text = ta.value || '';
-          const chars = text.length;
-          const words = (text.trim().length === 0) ? 0 : text.trim().split(/\s+/).length;
-          const lines = text.split(/\r\n|\r|\n/).length;
-          res.textContent = `Chars: ${chars} · Words: ${words} · Lines: ${lines}`;
-        });
-        mount.querySelector('#cwClear').addEventListener('click', ()=>{ ta.value=''; res.textContent=''; });
-        mount.querySelector('#cwCopy').addEventListener('click', async ()=> {
-          try { await navigator.clipboard.writeText(ta.value); res.textContent='Copied to clipboard'; } catch(e){ res.textContent='Copy failed'; }
-        });
-      }
-    });
+  // invert color for contrast (simple)
+  function invertColor(hex){
+    if(hex[0] === '#') hex = hex.slice(1);
+    const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+    const yiq = (r*299 + g*587 + b*114)/1000;
+    return (yiq >= 128) ? '#111' : '#fff';
+  }
 
-    /* ---------- 4) Password Generator ---------- */
-    registerTool({
-      id:'password',
-      title:'Password Generator',
-      category:'generators',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Generate secure passwords. Toggle charset options.</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <label><input id="pwLen" type="number" value="16" style="width:86px;padding:8px;border-radius:8px"> length</label>
-            <label><input id="pwUpper" type="checkbox" checked> A-Z</label>
-            <label><input id="pwLower" type="checkbox" checked> a-z</label>
-            <label><input id="pwDigits" type="checkbox" checked> 0-9</label>
-            <label><input id="pwSymbols" type="checkbox"> symbols</label>
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button class="primary" id="genPw">Generate</button>
-            <button class="ghost" id="copyPw">Copy</button>
-            <button class="ghost" id="clearPw">Clear</button>
-          </div>
-          <div style="margin-top:10px"><input id="pwOut" type="text" readonly placeholder="Generated password appears here" /></div>
-        `;
-        const pwLen = mount.querySelector('#pwLen');
-        const pwUpper = mount.querySelector('#pwUpper');
-        const pwLower = mount.querySelector('#pwLower');
-        const pwDigits = mount.querySelector('#pwDigits');
-        const pwSymbols = mount.querySelector('#pwSymbols');
-        const out = mount.querySelector('#pwOut');
+  // expose one tiny helper so buttons inside sw can copy
+  window.navigatorClipboard = {
+    copy: (s)=> navigator.clipboard.writeText(s)
+  };
 
-        function gen(){
-          const len = Math.min(256, Math.max(4, parseInt(pwLen.value||16)));
-          let chars = '';
-          if(pwUpper.checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-          if(pwLower.checked) chars += 'abcdefghijklmnopqrstuvwxyz';
-          if(pwDigits.checked) chars += '0123456789';
-          if(pwSymbols.checked) chars += '!@#$%^&*()-_=+[]{};:,.<>?';
-          if(!chars) { out.value = ''; return; }
-          let r = '';
-          const pool = chars;
-          const rng = crypto.getRandomValues ? crypto.getRandomValues(new Uint32Array(len)) : null;
-          for(let i=0;i<len;i++){
-            const idx = rng ? rng[i] % pool.length : Math.floor(Math.random()*pool.length);
-            r += pool.charAt(idx);
-          }
-          out.value = r;
-        }
+  // keyboard sample: press E to extract
+  document.addEventListener('keydown',(e)=>{ if(e.key.toLowerCase()==='e') extractPalette(); });
 
-        mount.querySelector('#genPw').addEventListener('click', gen);
-        mount.querySelector('#copyPw').addEventListener('click', async ()=> {
-          try { await navigator.clipboard.writeText(out.value); out.placeholder = 'Copied!'; } catch(e){ out.placeholder='Copy failed'; }
-        });
-        mount.querySelector('#clearPw').addEventListener('click', ()=> { out.value=''; out.placeholder=''; });
-      }
-    });
+  // make functions accessible from inline onclick (copy)
+  window.navigator.clipboard = window.navigator.clipboard || { writeText: (t)=> Promise.resolve() };
 
-    /* ---------- 5) Stopwatch (works and buttons shift) ---------- */
-    registerTool({
-      id:'stopwatch',
-      title:'Stopwatch',
-      category:'time',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Start / stop / lap / reset. Laps display below.</div>
-          <div style="font-size:32px;font-weight:800" id="swDisplay">00:00:00.00</div>
-          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" id="swButtons">
-            <button class="primary" id="swStart">Start</button>
-            <button class="ghost" id="swLap">Lap</button>
-            <button class="ghost" id="swReset">Reset</button>
-          </div>
-          <div style="margin-top:12px"><strong>Laps</strong></div>
-          <ol id="swLaps" style="margin-top:8px;padding-left:18px"></ol>
-        `;
-        const display = mount.querySelector('#swDisplay');
-        const btnStart = mount.querySelector('#swStart');
-        const btnLap = mount.querySelector('#swLap');
-        const btnReset = mount.querySelector('#swReset');
-        const lapsList = mount.querySelector('#swLaps');
-
-        let startTs = 0, elapsed = 0, raf = null, running = false;
-
-        function format(ms){
-          const cs = Math.floor(ms/10)%100;
-          const s = Math.floor(ms/1000)%60;
-          const m = Math.floor(ms/60000)%60;
-          const h = Math.floor(ms/3600000);
-          return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
-        }
-        function tick(){
-          const now = performance.now();
-          const total = elapsed + (now - startTs);
-          display.textContent = format(Math.floor(total));
-          raf = requestAnimationFrame(tick);
-        }
-        btnStart.addEventListener('click', ()=>{
-          if(!running){
-            startTs = performance.now();
-            running = true;
-            btnStart.textContent = 'Stop';
-            btnStart.classList.remove('primary'); btnStart.classList.add('ghost');
-            raf = requestAnimationFrame(tick);
-          } else {
-            running = false;
-            cancelAnimationFrame(raf);
-            elapsed += performance.now() - startTs;
-            btnStart.textContent = 'Start';
-            btnStart.classList.remove('ghost'); btnStart.classList.add('primary');
-          }
-        });
-        btnLap.addEventListener('click', ()=>{
-          if(!running) return;
-          const now = performance.now();
-          const total = elapsed + (now - startTs);
-          const li = document.createElement('li'); li.textContent = format(Math.floor(total));
-          lapsList.insertBefore(li, lapsList.firstChild);
-        });
-        btnReset.addEventListener('click', ()=>{
-          running = false;
-          cancelAnimationFrame(raf);
-          elapsed = 0; startTs = 0;
-          display.textContent = '00:00:00.00';
-          lapsList.innerHTML = '';
-          btnStart.textContent = 'Start';
-          btnStart.classList.remove('ghost'); btnStart.classList.add('primary');
-        });
-      }
-    });
-
-    /* ---------- 6) Date difference finder ---------- */
-    registerTool({
-      id:'dateDiff',
-      title:'Date Difference Finder',
-      category:'time',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Calculate days between two dates.</div>
-          <div class="row"><input id="d1" type="date"><input id="d2" type="date"></div>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="primary" id="calcDates">Calculate</button>
-            <button class="ghost" id="clearDates">Clear</button>
-          </div>
-          <div id="dateRes" class="result" style="margin-top:10px"></div>
-        `;
-        const d1 = mount.querySelector('#d1'), d2 = mount.querySelector('#d2'), out = mount.querySelector('#dateRes');
-        mount.querySelector('#calcDates').addEventListener('click', ()=>{
-          if(!d1.value || !d2.value) { out.textContent = 'Choose both dates'; return; }
-          const a = new Date(d1.value), b = new Date(d2.value);
-          const diff = Math.abs(b - a);
-          const days = Math.floor(diff / (1000*60*60*24));
-          out.textContent = `${days} day(s)`;
-        });
-        mount.querySelector('#clearDates').addEventListener('click', ()=> { d1.value=''; d2.value=''; out.textContent=''; });
-      }
-    });
-
-    /* ---------- 7) World Clock (multiple timezones) ---------- */
-    registerTool({
-      id:'worldclock',
-      title:'World Clock (multiple zones)',
-      category:'time',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Watch multiple time zones. Add zones by IANA name (e.g. "Asia/Kolkata", "America/New_York").</div>
-          <div style="display:flex;gap:8px">
-            <input id="tzInput" placeholder="e.g. Asia/Kolkata" />
-            <button class="primary" id="tzAdd">Add</button>
-            <button class="ghost" id="tzClear">Clear</button>
-          </div>
-          <div style="margin-top:12px" id="tzList"></div>
-        `;
-        const tzInput = mount.querySelector('#tzInput'), tzAdd = mount.querySelector('#tzAdd'), tzList = mount.querySelector('#tzList'), tzClear = mount.querySelector('#tzClear');
-        const zones = ['UTC','Europe/London','Asia/Kolkata','America/New_York','Asia/Tokyo'];
-        function render(){
-          tzList.innerHTML = '';
-          zones.forEach(z=>{
-            const box = document.createElement('div');
-            box.style.padding='12px'; box.style.borderRadius='10px'; box.style.marginBottom='8px';
-            box.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01))';
-            box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-              <div><strong>${z}</strong><div class="muted" style="font-size:13px" id="tz-${z}">--:--:--</div></div>
-              <button class="ghost" data-del="${z}">Remove</button>
-            </div>`;
-            tzList.appendChild(box);
-          });
-        }
-        function updateTimes(){
-          zones.forEach(z=>{
-            try {
-              const now = new Date();
-              const s = now.toLocaleTimeString('en-GB',{timeZone:z});
-              const el = document.getElementById('tz-'+z);
-              if(el) el.textContent = s;
-            } catch(e){ /* ignore invalid */ }
-          });
-        }
-        tzAdd.addEventListener('click', ()=>{
-          const v = tzInput.value.trim(); if(!v) return;
-          try {
-            // test timezone by formatting
-            new Date().toLocaleTimeString('en-GB',{timeZone:v});
-            if(!zones.includes(v)) zones.push(v);
-            tzInput.value='';
-            render();
-            updateTimes();
-          } catch(e){ alert('Invalid timezone name'); }
-        });
-        tzClear.addEventListener('click', ()=>{ zones.length=0; render(); });
-        tzList.addEventListener('click', (ev)=>{
-          const del = ev.target.dataset.del;
-          if(!del) return;
-          const idx = zones.indexOf(del);
-          if(idx>=0) zones.splice(idx,1);
-          render();
-        });
-        render();
-        updateTimes();
-        setInterval(updateTimes, 1000);
-      }
-    });
-
-    /* ---------- 8) Unit converters (length, weight, temperature) ---------- */
-    registerTool({
-      id:'units',
-      title:'Unit converters (length / weight / temp)',
-      category:'converters',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Quick unit converters (client-side only).</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <select id="unitType"><option value="length">Length</option><option value="weight">Weight</option><option value="temp">Temperature</option></select>
-            <input id="unitFrom" placeholder="value" style="width:110px"/>
-            <select id="unitFromSel"></select>
-            <span style="align-self:center">→</span>
-            <select id="unitToSel"></select>
-            <button class="primary" id="unitCalc">Convert</button>
-            <button class="ghost" id="unitClear">Clear</button>
-          </div>
-          <div id="unitRes" class="muted" style="margin-top:10px"></div>
-        `;
-        const type = mount.querySelector('#unitType'), val = mount.querySelector('#unitFrom'), from = mount.querySelector('#unitFromSel'), to = mount.querySelector('#unitToSel'), res = mount.querySelector('#unitRes');
-        const units = {
-          length: { m:1, km:1000, cm:0.01, mm:0.001, in:0.0254, ft:0.3048, yd:0.9144 },
-          weight: { kg:1, g:0.001, lb:0.45359237, oz:0.0283495231 },
-        };
-        function populate(){
-          const t = type.value;
-          from.innerHTML = ''; to.innerHTML='';
-          if(t === 'temp'){
-            ['C','F','K'].forEach(u=> { from.appendChild(new Option(u,u)); to.appendChild(new Option(u,u)); });
-          } else {
-            Object.keys(units[t]).forEach(u=> { from.appendChild(new Option(u,u)); to.appendChild(new Option(u,u)); });
-          }
-        }
-        type.addEventListener('change', populate);
-        populate();
-        mount.querySelector('#unitCalc').addEventListener('click', ()=>{
-          const t = type.value;
-          const v = parseFloat(val.value);
-          if(isNaN(v)){ res.textContent='Enter a number'; return; }
-          const a = from.value, b = to.value;
-          if(t === 'temp'){
-            let c;
-            if(a === 'C'){ c = v; }
-            else if(a === 'F'){ c = (v-32)/1.8; }
-            else if(a === 'K'){ c = v-273.15; }
-            let out;
-            if(b === 'C') out = c;
-            else if(b === 'F') out = c*1.8+32;
-            else if(b === 'K') out = c+273.15;
-            res.textContent = `${v} ${a} = ${out.toFixed(4)} ${b}`;
-          } else {
-            const m = v * units[t][a];
-            const out = m / units[t][b];
-            res.textContent = `${v} ${a} = ${out} ${b}`;
-          }
-        });
-        mount.querySelector('#unitClear').addEventListener('click', ()=>{ val.value=''; res.textContent=''; });
-      }
-    });
-
-    /* ---------- 9) File size converter ---------- */
-    registerTool({
-      id:'filesize',
-      title:'File Size Converter',
-      category:'converters',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Convert bytes ↔ KB/MB/GB (decimal and binary).</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input id="fsVal" placeholder="value" style="width:120px"/>
-            <select id="fsUnit"><option>bytes</option><option>KB</option><option>MB</option><option>GB</option><option>TB</option></select>
-            <select id="fsOut"><option>bytes</option><option>KB</option><option>MB</option><option>GB</option><option>TB</option></select>
-            <button class="primary" id="fsCalc">Convert</button>
-            <button class="ghost" id="fsClear">Clear</button>
-          </div>
-          <div id="fsRes" style="margin-top:10px" class="muted"></div>
-        `;
-        const v = mount.querySelector('#fsVal'), u = mount.querySelector('#fsUnit'), o = mount.querySelector('#fsOut'), r = mount.querySelector('#fsRes');
-        const order = ['bytes','KB','MB','GB','TB'];
-        mount.querySelector('#fsCalc').addEventListener('click', ()=>{
-          const num = parseFloat(v.value); if(isNaN(num)){ r.textContent='Enter a number'; return; }
-          const from = order.indexOf(u.value), to = order.indexOf(o.value);
-          const bytes = num * Math.pow(1000, from);
-          const out = bytes / Math.pow(1000, to);
-          r.textContent = `${num} ${u.value} = ${out} ${o.value}`;
-        });
-        mount.querySelector('#fsClear').addEventListener('click', ()=>{ v.value=''; r.textContent=''; });
-      }
-    });
-
-    /* ---------- 10) Case converter ---------- */
-    registerTool({
-      id:'case',
-      title:'Case Converter',
-      category:'text',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">UPPER, lower, Title Case and sentence case.</div>
-          <textarea id="caseIn" placeholder="Paste text here..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="primary" id="toUpper">UPPER</button>
-            <button class="primary" id="toLower">lower</button>
-            <button class="ghost" id="toTitle">Title Case</button>
-            <button class="ghost" id="toSentence">Sentence case</button>
-            <button class="ghost" id="caseCopy">Copy</button>
-          </div>
-        `;
-        const ta = mount.querySelector('#caseIn');
-        mount.querySelector('#toUpper').addEventListener('click', ()=> ta.value = ta.value.toUpperCase());
-        mount.querySelector('#toLower').addEventListener('click', ()=> ta.value = ta.value.toLowerCase());
-        mount.querySelector('#toTitle').addEventListener('click', ()=> ta.value = ta.value.replace(/\w\S*/g, w=> w.charAt(0).toUpperCase()+w.substr(1).toLowerCase()));
-        mount.querySelector('#toSentence').addEventListener('click', ()=> ta.value = ta.value.replace(/(^\s*\w|[.!?]\s*\w)/g, c=> c.toUpperCase()));
-        mount.querySelector('#caseCopy').addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(ta.value); }catch(e){} });
-      }
-    });
-
-    /* ---------- 11) Text formatter (indent / tidy) ---------- */
-    registerTool({
-      id:'format',
-      title:'Text Formatter / Indenter',
-      category:'text',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">JSON pretty-print, JSON minify, basic HTML tidy (very simple).</div>
-          <textarea id="fmtIn" placeholder='{"hello":"world"}'></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="primary" id="jsonPretty2">JSON pretty</button>
-            <button class="ghost" id="jsonMinify2">JSON minify</button>
-            <button class="ghost" id="htmlTidy">HTML tidy (basic)</button>
-            <button class="ghost" id="fmtCopy">Copy</button>
-          </div>
-        `;
-        const ta = mount.querySelector('#fmtIn');
-        mount.querySelector('#jsonPretty2').addEventListener('click', ()=> {
-          try { ta.value = JSON.stringify(JSON.parse(ta.value), null, 2); } catch(e){ alert('Invalid JSON'); }
-        });
-        mount.querySelector('#jsonMinify2').addEventListener('click', ()=> {
-          try { ta.value = JSON.stringify(JSON.parse(ta.value)); } catch(e){ alert('Invalid JSON'); }
-        });
-        mount.querySelector('#htmlTidy').addEventListener('click', ()=> {
-          // very naive tidy: collapse multiple spaces and newlines
-          ta.value = ta.value.replace(/\s+/g,' ').replace(/> </g,'>\n<');
-        });
-        mount.querySelector('#fmtCopy').addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(ta.value); }catch(e){} });
-      }
-    });
-
-    /* ---------- 12) Regex tester (simple) ---------- */
-    registerTool({
-      id:'regex',
-      title:'Regex Tester',
-      category:'dev',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Test regex (JS flavour). Enter pattern (no leading/trailing / required).</div>
-          <input id="rePat" placeholder="pattern (e.g. \\d+)" />
-          <input id="reFlags" placeholder="flags (e.g. g,i)" style="width:120px"/>
-          <textarea id="reText" placeholder="Text to test against..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="primary" id="reTest">Test</button>
-            <button class="ghost" id="reClear">Clear</button>
-          </div>
-          <div id="reRes" style="margin-top:8px" class="muted"></div>
-        `;
-        const pat = mount.querySelector('#rePat'), flags = mount.querySelector('#reFlags'), txt = mount.querySelector('#reText'), out = mount.querySelector('#reRes');
-        mount.querySelector('#reTest').addEventListener('click', ()=>{
-          try {
-            const r = new RegExp(pat.value, flags.value);
-            const m = txt.value.match(r);
-            if(!m) out.textContent = 'No match';
-            else out.textContent = `Match: ${JSON.stringify(m)}`;
-          } catch(e){
-            out.textContent = 'Invalid regex';
-          }
-        });
-        mount.querySelector('#reClear').addEventListener('click', ()=>{ pat.value=''; flags.value=''; txt.value=''; out.textContent=''; });
-      }
-    });
-
-    /* ---------- 13) Dice / Random picker ---------- */
-    registerTool({
-      id:'dice',
-      title:'Dice & Random picker',
-      category:'generators',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Roll dice (NdM) or pick random item from lines.</div>
-          <div style="display:flex;gap:8px">
-            <input id="diceExpr" placeholder="e.g. 2d6" />
-            <button class="primary" id="roll">Roll</button>
-            <button class="ghost" id="clearDice">Clear</button>
-          </div>
-          <div style="margin-top:12px">
-            <textarea id="choices" placeholder="one item per line (optional)"></textarea>
-            <div style="display:flex;gap:8px;margin-top:8px"><button class="primary" id="pick">Pick random</button><button class="ghost" id="copyRes">Copy</button></div>
-          </div>
-          <div id="diceRes" style="margin-top:10px" class="muted"></div>
-        `;
-        const expr = mount.querySelector('#diceExpr'), res = mount.querySelector('#diceRes');
-        mount.querySelector('#roll').addEventListener('click', ()=>{
-          const v = expr.value.trim();
-          const m = v.match(/^(\d+)d(\d+)$/i);
-          if(!m){ res.textContent='Invalid expression'; return; }
-          const n = parseInt(m[1]), s = parseInt(m[2]);
-          const rolls = [];
-          for(let i=0;i<n;i++) rolls.push(1 + Math.floor(Math.random()*s));
-          res.textContent = `Result: ${rolls.join(', ')} (sum: ${rolls.reduce((a,b)=>a+b,0)})`;
-        });
-        mount.querySelector('#pick').addEventListener('click', ()=>{
-          const list = mount.querySelector('#choices').value.split(/\r\n|\n/).map(x=>x.trim()).filter(Boolean);
-          if(!list.length){ res.textContent='No choices'; return; }
-          const pick = list[Math.floor(Math.random()*list.length)];
-          res.textContent = `Picked: ${pick}`;
-        });
-        mount.querySelector('#copyRes').addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(res.textContent); }catch(e){} });
-        mount.querySelector('#clearDice').addEventListener('click', ()=>{ expr.value=''; res.textContent=''; mount.querySelector('#choices').value=''; });
-      }
-    });
-
-    /* ---------- 14) Slug / URL-friendly generator ---------- */
-    registerTool({
-      id:'slug',
-      title:'Slug / URL generator',
-      category:'dev',
-      init: (mount) => {
-        mount.innerHTML = `
-          <div class="hint">Convert text to URL slug.</div>
-          <input id="slugIn" placeholder="Title to slugify..." />
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="primary" id="slugBtn">Make slug</button>
-            <button class="ghost" id="slugCopy">Copy</button>
-          </div>
-          <div style="margin-top:10px"><input id="slugOut" readonly /></div>
-        `;
-        const inp = mount.querySelector('#slugIn'), out = mount.querySelector('#slugOut');
-        mount.querySelector('#slugBtn').addEventListener('click', ()=> {
-          const s = inp.value.trim().toLowerCase()
-            .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-            .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-          out.value = s;
-        });
-        mount.querySelector('#slugCopy').addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(out.value); }catch(e){} });
-      }
-    });
-
-    /* ---------- 15) Case study / template to add hundreds more ----------
-       You can add more tools by copying the registerTool pattern above.
-       For performance at 100+ tools, break modules into separate files and lazy import them:
-           import('./tools/hugetool.js').then(m => m.init(mount));
-       But this single-file approach keeps everything together as requested.
-    */
-
-    // -------------------------
-    // small helpers: open first quick tool by clicking "Basic" in quickLaunch
-    // -------------------------
-    // select initial quick launch visible set based on category
-    document.querySelectorAll('.tool-btn').forEach(b => {
-      // make them keyboard focusable
-      b.tabIndex = 0;
-    });
-
-    // open tool when quick-launch clicked
-    document.getElementById('quickLaunch').addEventListener('click', (e)=>{
-      const t = e.target.closest('.tool-btn');
-      if(!t) return;
-      openTool(t.dataset.tool);
-      // mark active quickly
-      document.querySelectorAll('.tool-btn').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-    });
-
-    // open basic by default so user sees something
-    openTool('basic');
-
-    // tidy: when navigating to a new tool, if the tool has cleanup saved under mount._cleanup call it
-    // Note: registerTool init can assign mount._cleanup = () => { ... } if it wants to remove handlers
-    // (we used that in basic calculator example for key handlers)
-
-    // close sidebar if click outside
-    document.addEventListener('click', function(e){
-      if(!sidebar.classList.contains('open')) return;
-      const inside = sidebar.contains(e.target) || hambBtn.contains(e.target);
-      if(!inside) closeSB();
-    });
-
-    // end of main script
-  </script>
+})();
+</script>
 </body>
 </html>
