@@ -238,7 +238,7 @@
   applyTheme(savedTheme);
 
   themeBtn.addEventListener('click', ()=> {
-    // simple dropdown mimic: rotate through themes
+    // rotate through themes
     const current = themes.indexOf(root.classList[0] || savedTheme);
     const next = (current + 1) % themes.length;
     applyTheme(themes[next]);
@@ -258,7 +258,6 @@
   function closeSidebar(){ sidebar.style.transform='translateX(120%)'; sidebar.setAttribute('aria-hidden','true'); }
   openSidebarBtn.addEventListener('click', ()=> {
     if(window.innerWidth < 980){
-      // show overlay on mobile by scrolling into view
       openSidebar(); sidebar.scrollIntoView({behavior:'smooth'});
     } else openSidebar();
   });
@@ -292,35 +291,108 @@
   drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
   drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
   drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
-
   fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
 
+  /* ---------- robust file handler + loader ----------
+     Uses FileReader -> dataURL; tries createImageBitmap for best results,
+     falls back to Image() when needed. Keeps the canvas visible after load. */
+
   function handleFile(file){
-    if(!file.type.startsWith('image/')) return alert('Choose an image file.');
-    const url = URL.createObjectURL(file);
-    loadImage(url);
+    if(!file || !file.type || !file.type.startsWith('image/')) return alert('Choose an image file (PNG/JPG/WEBP).');
+
+    // Use FileReader to get dataURL (best cross-browser for local files)
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target.result;
+      // Try createImageBitmap (faster and handles some formats better)
+      if(window.createImageBitmap){
+        try {
+          // createImageBitmap can accept a Blob - convert dataURL to blob via fetch
+          const blob = await (await fetch(dataUrl)).blob();
+          const bitmap = await createImageBitmap(blob).catch(()=> null);
+          if(bitmap){
+            drawImageBitmapToCanvas(bitmap);
+            return;
+          }
+        } catch(err){
+          // fallback to Image below
+          console.warn('createImageBitmap path failed:', err);
+        }
+      }
+      // final fallback: load using Image() and draw to canvas
+      loadImageFromDataURL(dataUrl);
+    };
+    reader.onerror = ()=> alert('Failed to read the file.');
+    reader.readAsDataURL(file);
   }
 
-  function loadImage(src){
+  // draw ImageBitmap path (recommended)
+  function drawImageBitmapToCanvas(bit){
+    imgLoaded = true;
+    const maxW = Math.min(1200, window.innerWidth - 420);
+    const maxH = 900;
+    let w = bit.width, h = bit.height;
+    const ratio = Math.min(1, maxW/w, maxH/h);
+    w = Math.round(w * ratio); h = Math.round(h * ratio);
+    scale = 1;
+    canvas.width = w; canvas.height = h;
+    ctx.clearRect(0,0,w,h);
+    try {
+      ctx.drawImage(bit, 0, 0, w, h);
+      canvasWrap.style.display = 'block';
+      // keep an image reference for other functions that rely on img.naturalWidth
+      img = new Image();
+      img.src = canvas.toDataURL('image/png');
+      setTimeout(()=> extractPalette(), 160);
+    } catch(err){
+      console.warn('drawImageBitmapToCanvas failed:', err);
+      // fallback to dataURL example
+      img = new Image();
+      img.onload = ()=> {
+        canvas.width = w; canvas.height = h;
+        ctx.clearRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        canvasWrap.style.display = 'block';
+        imgLoaded = true;
+        setTimeout(()=> extractPalette(), 160);
+      };
+      img.onerror = ()=> alert('Could not draw image.');
+      img.src = canvas.toDataURL('image/png');
+    }
+  }
+
+  // fallback: load an image element from dataURL and draw
+  function loadImageFromDataURL(dataUrl){
     img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = ()=> {
-      // fit canvas to available area but keep resolution comfortable
       const maxW = Math.min(1200, window.innerWidth - 420);
       const maxH = 900;
-      let w = img.naturalWidth, h = img.naturalHeight;
+      let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
       const ratio = Math.min(1, maxW/w, maxH/h);
       w = Math.round(w * ratio); h = Math.round(h * ratio);
       scale = 1;
       canvas.width = w; canvas.height = h;
       ctx.clearRect(0,0,w,h);
-      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        ctx.drawImage(img, 0, 0, w, h);
+      } catch(e) {
+        console.warn('drawImage failed; trying fallback draw via temporary canvas', e);
+        const tmp = document.createElement('canvas');
+        tmp.width = img.width; tmp.height = img.height;
+        const tctx = tmp.getContext('2d');
+        tctx.drawImage(img,0,0);
+        try { ctx.drawImage(tmp, 0, 0, w, h); } catch(err2){ console.error('fallback draw also failed', err2); }
+      }
       canvasWrap.style.display = 'block';
       imgLoaded = true;
-      // auto extract default palette lightly after draw
       setTimeout(()=> extractPalette(), 160);
     };
-    img.onerror = ()=> alert('Could not load image.');
-    img.src = src;
+    img.onerror = (ev)=> {
+      console.warn('img.onerror', ev);
+      alert('Could not load image. Try saving the image as PNG/JPG and re-upload.');
+    };
+    img.src = dataUrl;
   }
 
   // zoom
@@ -337,11 +409,11 @@
   function resizeCanvas(){
     if(!imgLoaded) return;
     const maxW = Math.min(1200, window.innerWidth - 420);
-    const w = Math.round(Math.min(img.naturalWidth, maxW) * scale);
-    const h = Math.round(w * (img.naturalHeight / img.naturalWidth));
+    const w = Math.round(Math.min(img.naturalWidth || img.width, maxW) * scale);
+    const h = Math.round(w * ((img.naturalHeight || img.height) / (img.naturalWidth || img.width)));
     canvas.width = w; canvas.height = h;
     ctx.clearRect(0,0,w,h);
-    ctx.drawImage(img, 0, 0, w, h);
+    try { ctx.drawImage(img, 0, 0, w, h); } catch(e){ console.warn('resize draw failed', e); }
   }
 
   // k range UI
@@ -356,16 +428,14 @@
     try{
       const data = ctx.getImageData(0,0,w,h).data;
       const pixels = [];
-      // adaptive sampling target
       const targetSamples = 40000;
       const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
       for(let y=0;y<h;y+=step){
         for(let x=0;x<w;x+=step){
           const i = (y*w + x)*4;
           const a = data[i+3];
-          if(a === 0) continue; // transparent skip
+          if(a === 0) continue; // skip fully transparent
           const r = data[i], g = data[i+1], b = data[i+2];
-          // skip near-white/near-transparent noise? keep all but we can filter tiny alpha already
           pixels.push([r,g,b]);
         }
       }
@@ -376,7 +446,6 @@
 
       const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
       const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
-      // if kmeans returned zeros, fallback to sampling top pixels by frequency
       let items = centroids.map((c,i)=>({rgb:c, count:counts[i]})).filter(Boolean);
       items = items.sort((a,b)=>b.count - a.count);
       lastPalette = items.map(it => {
@@ -384,14 +453,13 @@
         const pct = Math.round((it.count / pixels.length) * 100);
         return {hex, rgb: it.rgb, pct};
       });
-      // If everything failed (all black), try a light heuristic: pick some sampled pixels as fallback
       if(lastPalette.length === 0){
         const fallback = pixels.slice(0, Math.min(6,pixels.length));
         lastPalette = fallback.map(px=>({hex: rgbToHex(px[0],px[1],px[2]), rgb:px, pct: Math.round(100/fallback.length)}));
       }
       renderPalette();
     }catch(e){
-      alert('Failed to read image data. Make sure the image is not blocked by cross-origin or broken.');
+      alert('Failed to read image data. Make sure the image is not blocked by cross-origin or corrupted.');
       console.error(e);
     }
   }
@@ -489,7 +557,6 @@
     canvas.width = canvas.height = 0;
     canvasWrap.style.display = 'none';
     imgLoaded = false; lastPalette = []; paletteEl.innerHTML = '';
-    // reset file input so same file can be reselected
     fileIn.value = '';
   });
 
@@ -503,7 +570,6 @@
   drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
   drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
 
-  // helpful error when getImageData fails on some iOS images (rare): try draw via Image object (we already do)
   // Helpers
   function getContrastColor(hex){
     const c = hex.replace('#','');
@@ -517,7 +583,6 @@
   // small & robust kmeans
   function kmeans(samples, k, opts={}){
     const maxIter = opts.maxIter || 24;
-    // initialize centroids from random distinct samples
     const centroids = [];
     const used = new Set();
     while(centroids.length < k && used.size < samples.length){
@@ -526,17 +591,13 @@
       used.add(idx);
       centroids.push(samples[idx].slice());
     }
-    // if not enough distinct (rare), pad with random picks
     while(centroids.length < k){
       centroids.push(samples[Math.floor(Math.random()*samples.length)].slice());
     }
-
     const assignments = new Array(samples.length).fill(-1);
     let counts = new Array(k).fill(0);
-
     for(let iter=0; iter<maxIter; iter++){
       let changed = false;
-      // assign
       for(let i=0;i<samples.length;i++){
         const s = samples[i];
         let best=0, bestd=dist2(s, centroids[0]);
@@ -546,7 +607,6 @@
         }
         if(assignments[i] !== best){ assignments[i] = best; changed = true; }
       }
-      // recompute centroids
       const sums = new Array(k).fill(0).map(()=>[0,0,0]);
       const cnts = new Array(k).fill(0);
       for(let i=0;i<samples.length;i++){
@@ -569,9 +629,6 @@
     return {centroids, counts};
   }
   function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
-
-  // small improvement: allow clicking the drop area to open file and keep placeholder hint
-  // clicking drop area opens file selector handled above
 </script>
 </body>
 </html>
