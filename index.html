@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Color Finder — PirateRuler</title>
+<meta name="description" content="Color Finder — extract palettes from images in the browser. No APIs. Private & fast." />
 <meta name="theme-color" content="#f7fbff" />
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
@@ -35,10 +36,10 @@
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--content-max);margin:14px auto;padding:16px}
 
-  /* header */
+  /* header - match other site */
   header.header{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:12px; border-radius:12px;
+    padding:14px; border-radius:14px;
     background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));
     box-shadow:var(--shadow-sm);
   }
@@ -47,32 +48,31 @@
   .title-strong{font-weight:900;font-size:18px}
   .by{font-size:12px;color:var(--muted)}
 
-  /* theme selector */
+  /* header controls */
   .controls{display:flex;gap:10px;align-items:center}
   .btn{padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:800;background:transparent}
   .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
   .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff}
 
-  /* layout - tightened for laptop so no huge whitespace */
+  /* sidebar (slideout) like Calculator */
+  .sidebar { position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s cubic-bezier(.2,.9,.3,1); z-index:90; background:var(--card); box-shadow: -40px 0 80px rgba(2,8,20,0.25); padding:20px; border-left:1px solid rgba(0,0,0,0.04); overflow:auto; border-radius:0 0 0 14px; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar .close { display:flex; justify-content:flex-end }
+  .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
+  .nav-list a{display:block;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02)); color:var(--text); font-weight:600}
+  .backup{margin-top:18px;color:var(--muted);font-size:13px}
+
+  /* main layout */
   main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 320px)}
-  @media(max-width:980px){ main{grid-template-columns:1fr; } }
+  @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
 
   /* left card */
   .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
   .drop{flex:1;min-height:260px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
   input[type=file]{display:none}
-  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
+  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:720px;object-fit:contain;background:transparent}
 
-  /* right panel (sidebar) — behaves like tools */
-  aside.right{align-self:start}
-  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
-  .panel h3{margin:0 0 8px 0;font-weight:900}
-  .muted{color:var(--muted);font-size:13px}
-
-  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
-  .settings .small{font-size:13px;color:var(--muted)}
-
-  /* palette */
+  /* palette styles */
   .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
   @media(min-width:480px){ .palette{grid-template-columns:repeat(2,1fr)} }
   @media(min-width:720px){ .palette{grid-template-columns:repeat(2,1fr)} }
@@ -88,14 +88,22 @@
   .sw-copy{align-self:flex-end;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:2}
   .sw-copy:active{transform:translateY(1px)}
 
-  /* subtle overlay to mimic Tools cards */
   .swatch::after{
     content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
     mix-blend-mode: overlay;
   }
 
-  /* small PR badge (mobile) + PR square in sidebar (desktop) */
+  /* right panel (feature + palette controls) */
+  aside.right{align-self:start}
+  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .panel h3{margin:0 0 8px 0;font-weight:900}
+  .muted{color:var(--muted);font-size:13px}
+
+  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .settings .small{font-size:13px;color:var(--muted)}
+
+  /* pr small badge */
   .pr-badge{
     position:fixed;left:18px;bottom:18px;width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999;
   }
@@ -104,20 +112,37 @@
     width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);
   }
 
+  /* features (six equal boxes) - same style as calculator */
+  .feature-panel{
+    background:var(--card); border:1px solid rgba(0,0,0,0.06); border-radius:14px; box-shadow:var(--shadow-sm); padding:12px;
+  }
+  @media(min-width:981px){
+    .feature-panel{ position:sticky; top:18px; max-height:calc(100vh - 36px); overflow:auto; }
+  }
+  .panel-title{font-weight:900; margin:6px 6px 12px 6px;}
+  .features{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:700px){ .features{ grid-template-columns:1fr; } }
+
+  .feature{
+    display:flex; gap:14px; align-items:center; padding:16px; border-radius:12px; background:var(--card);
+    border:1px solid rgba(0,0,0,0.06); box-shadow:var(--shadow-sm); min-height:110px;
+  }
+  .f-icon{ width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--accent-start),var(--accent-end)); flex-shrink:0; }
+  .f-title{font-weight:800}
+  .f-desc{color:var(--muted); font-size:13px}
+
   /* footer */
   footer{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));text-align:center;box-shadow:var(--shadow-lg)}
   footer .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
 
-  /* compact on dark */
-  html.theme-dark footer{background:linear-gradient(180deg, rgba(10,14,20,0.6), rgba(6,10,14,0.6));}
-
-  /* small helpers */
+  /* helpers */
   .row{display:flex;gap:8px;align-items:center}
   .flex-fill{flex:1}
 </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- Header -->
     <header class="header" role="banner">
       <div class="brand">
         <a href="/" aria-label="Home" style="display:flex;align-items:center;gap:12px">
@@ -148,7 +173,7 @@
         <div id="dropZone" class="drop" title="Click or drop an image">
           <div>
             <div style="font-weight:900" id="mainTitle">Drop an image here or click to choose</div>
-            <div class="muted" style="margin-top:8px">PNG / JPG / WEBP — everything stays in your browser.</div>
+            <div class="muted" style="margin-top:8px">PNG / JPG / WEBP — processed locally in your browser (no upload).</div>
           </div>
         </div>
 
@@ -157,7 +182,7 @@
         <div id="canvasWrap" style="margin-top:14px;display:none">
           <canvas id="imageCanvas" aria-label="Loaded image"></canvas>
           <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:10px">
-            <div class="muted small">Click the image to pick a pixel — it will appear at the top of the palette.</div>
+            <div class="muted small">Click the image to pick a pixel — it will appear at top of the palette.</div>
             <div class="row">
               <button id="zoomIn" class="btn ghost">Zoom +</button>
               <button id="zoomOut" class="btn ghost">Zoom -</button>
@@ -167,7 +192,7 @@
         </div>
       </section>
 
-      <!-- RIGHT: sidebar panel (behaves like Tools site) -->
+      <!-- RIGHT: panel with palette & features -->
       <aside class="right" id="rightPanel">
         <div class="panel" role="complementary" aria-label="Palette panel">
           <div style="display:flex;gap:12px;align-items:center">
@@ -176,7 +201,7 @@
             <div class="pr-sidebar" title="PirateRuler">PR</div>
           </div>
 
-          <div class="muted" style="margin-top:8px">Extracted colors — click Copy to copy HEX.</div>
+          <div class="muted" style="margin-top:8px">Extracted colors — click <strong>Copy</strong> to copy HEX.</div>
 
           <div class="settings">
             <div class="small muted">Colors</div>
@@ -196,12 +221,82 @@
 
           <div class="muted" style="margin-top:12px;font-size:13px">Tip: use fewer colors for simpler palettes. Sampling is optimized for speed.</div>
         </div>
+
+        <div style="height:18px"></div>
+
+        <div class="feature-panel" role="complementary" aria-label="Features">
+          <div class="panel-title">Why PirateRuler tools?</div>
+          <div class="features">
+            <div class="feature">
+              <div class="f-icon">⚡</div>
+              <div>
+                <div class="f-title">Lightning fast</div>
+                <div class="f-desc">Client-side processing — instant results on mobile & desktop.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="f-icon" style="background:linear-gradient(135deg,#8ee36b,#2bbf6f)">🔒</div>
+              <div>
+                <div class="f-title">Private by design</div>
+                <div class="f-desc">No images leave your device — everything runs in your browser.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="f-icon" style="background:linear-gradient(135deg,#ffb86b,#ff6b7a)">🧰</div>
+              <div>
+                <div class="f-title">All-in-one</div>
+                <div class="f-desc">Extract, export, download and copy — no fuss.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="f-icon" style="background:linear-gradient(135deg,#c471ed,#7bffdd)">🌐</div>
+              <div>
+                <div class="f-title">Backup resources</div>
+                <div class="f-desc">If this page is offline, visit PirateRuler.com for backups.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="f-icon" style="background:linear-gradient(135deg,#7bd6ff,#6b7dff)">📱</div>
+              <div>
+                <div class="f-title">Mobile-first</div>
+                <div class="f-desc">Compact UI and sticky panel on larger screens.</div>
+              </div>
+            </div>
+
+            <div class="feature">
+              <div class="f-icon" style="background:linear-gradient(135deg,#ff7aa2,#6b7dff)">🔧</div>
+              <div>
+                <div class="f-title">Developer friendly</div>
+                <div class="f-desc">Lightweight, forkable and easy to customize.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="feature" style="min-height:unset; align-items:flex-start; padding:14px">
+            <div class="f-icon" style="background:linear-gradient(135deg,var(--accent-start),var(--accent-end))">PR</div>
+            <div>
+              <div class="f-title">PirateRuler</div>
+              <div class="f-desc" style="margin-top:6px">
+                <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About</a> ·
+                <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a> ·
+                <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </aside>
     </main>
 
     <!-- mobile PR badge -->
     <div class="pr-badge" title="PirateRuler">PR</div>
 
+    <!-- footer -->
     <footer>
       <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
       <div style="height:12px"></div>
@@ -209,26 +304,30 @@
     </footer>
   </div>
 
+  <!-- Sidebar (same as Calculator) -->
+  <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="close"><button class="ghost" id="closeSidebar">Close</button></div>
+    <h3>PirateRuler Links</h3>
+    <p class="muted">Quick links & backup resources</p>
+    <nav class="nav-list" aria-label="PirateRuler quick links">
+      <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
+      <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+      <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
+      <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
+    </nav>
+    <div class="backup">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
+  </aside>
+
 <script>
-/* ---------- year and theme ---------- */
+/* ---------- small UX + theme ---------- */
 document.getElementById('year').textContent = new Date().getFullYear();
 const root = document.documentElement;
 const themeSelect = document.getElementById('themeSelect');
-
-// load saved theme (or keep ocean default)
 const saved = localStorage.getItem('pr-theme') || 'theme-ocean';
 themeSelect.value = saved;
 applyTheme(saved);
-
-themeSelect.addEventListener('change', (e)=> {
-  applyTheme(e.target.value);
-  localStorage.setItem('pr-theme', e.target.value);
-});
-
-function applyTheme(cls){
-  ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c));
-  root.classList.add(cls);
-}
+themeSelect.addEventListener('change', (e)=> { applyTheme(e.target.value); localStorage.setItem('pr-theme', e.target.value); });
+function applyTheme(cls){ ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c)); root.classList.add(cls); }
 
 /* ---------- elements ---------- */
 const drop = document.getElementById('dropZone');
@@ -254,10 +353,9 @@ let lastPalette = [];
 
 /* ---------- drag & choose ---------- */
 drop.addEventListener('click', ()=> fileIn.click());
-drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
-drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
-drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
-
+drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; drop.style.boxShadow='0 8px 30px rgba(3,12,30,0.06)'; });
+drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; drop.style.boxShadow='none'; });
+drop.addEventListener('drop', e=> { e.preventDefault(); drop.style.borderColor=''; drop.style.boxShadow='none'; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
 fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
 
 function handleFile(file){
@@ -273,7 +371,7 @@ function loadImage(src){
   img.onload = ()=> {
     // fit canvas to available area but keep resolution comfortable
     const maxW = Math.min(1200, window.innerWidth - 420);
-    const maxH = 700;
+    const maxH = 720;
     let w = img.naturalWidth, h = img.naturalHeight;
     const ratio = Math.min(1, maxW/w, maxH/h);
     w = Math.round(w * ratio); h = Math.round(h * ratio);
@@ -283,7 +381,6 @@ function loadImage(src){
     ctx.drawImage(img, 0, 0, w, h);
     canvasWrap.style.display = 'block';
     imgLoaded = true;
-    // auto extract a default palette
     setTimeout(()=> extractPalette(), 120);
   };
   img.onerror = ()=> alert('Could not load image.');
@@ -310,7 +407,7 @@ function resizeCanvas(){
   ctx.drawImage(img, 0, 0, w, h);
 }
 
-/* ---------- k-means palette extraction ---------- */
+/* ---------- k-means extraction ---------- */
 kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
 extractBtn.addEventListener('click', extractPalette);
 
@@ -342,7 +439,7 @@ function extractPalette(){
   renderPalette();
 }
 
-/* ---------- render swatches (Tools-like) ---------- */
+/* ---------- render palette (Tools style) ---------- */
 function renderPalette(){
   paletteEl.innerHTML = '';
   lastPalette.forEach(p => {
@@ -360,10 +457,10 @@ function renderPalette(){
         <button class="sw-copy" data-hex="${p.hex}">Copy</button>
       </div>
     `;
-    // subtle overlay gradient is done via CSS ::after
     paletteEl.appendChild(sw);
   });
 
+  // hook copy buttons
   paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const hex = e.currentTarget.dataset.hex;
@@ -405,8 +502,9 @@ copyAll.addEventListener('click', ()=> {
   if(!lastPalette.length) return;
   const all = lastPalette.map(p=>p.hex).join(', ');
   navigator.clipboard.writeText(all).then(()=> {
+    const prev = copyAll.textContent;
     copyAll.textContent = 'Copied';
-    setTimeout(()=> copyAll.textContent = 'Copy All', 1200);
+    setTimeout(()=> copyAll.textContent = prev, 1200);
   });
 });
 
@@ -443,8 +541,10 @@ function getContrastColor(hex){
   const yiq = (r*299 + g*587 + b*114)/1000;
   return (yiq >= 150) ? '#111' : '#fff';
 }
+function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
+function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-/* small fast k-means (client-side) */
+/* small & fast K-means */
 function kmeans(samples, k, opts={}){
   const maxIter = opts.maxIter || 20;
   const centroids = [];
@@ -491,32 +591,43 @@ function kmeans(samples, k, opts={}){
   return {centroids, counts};
 }
 function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
-function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
-function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-/* ---------- handle resize so canvas fits nicely ---------- */
-window.addEventListener('resize', ()=> {
-  if(!imgLoaded) return;
-  resizeCanvas();
-});
+/* ---------- resize and small UX ---------- */
+window.addEventListener('resize', ()=> { if(!imgLoaded) return resizeCanvas(); });
 
-/* ---------- keyboard: open/close sidebar on mobile ---------- */
+drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
+drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
+
+/* ---------- sidebar open/close (same as calculator) ---------- */
+const sidebar = document.getElementById('sidebar');
 const openSidebarBtn = document.getElementById('openSidebarBtn');
+const closeSidebar = document.getElementById('closeSidebar');
 openSidebarBtn.addEventListener('click', ()=> {
-  const right = document.getElementById('rightPanel');
   if(window.innerWidth < 980){
-    // on small screens, toggle panel visibility
+    // small screens: toggle the right panel visibility instead of full sidebar
+    const right = document.getElementById('rightPanel');
     right.style.display = right.style.display === 'none' ? 'block' : 'none';
     if(right.style.display === 'block') right.scrollIntoView({behavior:'smooth'});
   } else {
-    // focus panel on desktop
-    right.querySelector('.panel').focus();
+    sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); closeSidebar.focus();
   }
 });
+closeSidebar.addEventListener('click', ()=> { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); } });
+document.addEventListener('click', function(e){
+  if(!sidebar.classList.contains('open')) return;
+  const inside = sidebar.contains(e.target) || openSidebarBtn.contains(e.target);
+  if(!inside) { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
+});
 
-/* ---------- tiny UX: click drop zone hint ---------- */
-drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
-drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
+/* responsive sidebar width */
+function updateSidebarWidth(){
+  if(window.innerWidth < 420) sidebar.style.width = '94vw';
+  else sidebar.style.width = '360px';
+}
+window.addEventListener('resize', updateSidebarWidth);
+updateSidebarWidth();
+
 </script>
 </body>
 </html>
