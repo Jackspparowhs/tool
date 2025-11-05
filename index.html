@@ -5,79 +5,156 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Color Finder — PirateRuler</title>
 <meta name="theme-color" content="#f7fbff" />
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
+  /* PirateRuler tokens & themes */
   :root{
-    --bg:#f3f7fb; --card:#fff; --muted:#6b7480; --text:#0b2130;
-    --accent-start:#6b7dff; --accent-end:#0bb3ff; --shadow-sm:0 8px 24px rgba(3,12,30,0.08);
+    --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
+    --accent-start:#6b7dff; --accent-end:#0bb3ff;
+    --glass: rgba(11,17,28,0.04);
+    --radius:14px; --shadow-lg: 0 18px 50px rgba(3,12,30,0.18);
+    --shadow-sm: 0 8px 24px rgba(3,12,30,0.08);
     --content-max:1280px;
   }
-  html.theme-dark{--bg:#071225;--card:#061028;--muted:#98a7bf;--text:#e9f1ff;--accent-start:#5ab3ff;--accent-end:#6b7dff}
-  html.theme-ocean{--bg:#e8f7fb;--card:#fff;--muted:#4f6b75;--text:#063242;--accent-start:#00c2d1;--accent-end:#2b9fff}
-  html.theme-sunset{--bg:#fff6f8;--card:#fff;--muted:#7a6b77;--text:#2a1020;--accent-start:#ff7aa2;--accent-end:#ffb86b}
+  html.theme-dark { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --accent-start:#5ab3ff; --accent-end:#6b7dff; --glass: rgba(255,255,255,0.02); }
+  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; }
+  html.theme-sunset{ --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; }
+  html.theme-light { /* default */ }
 
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:linear-gradient(180deg,var(--bg),#e9f6ff);color:var(--text)}
+  body{
+    margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background: linear-gradient(180deg,var(--bg), #e9f6ff);
+    color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--content-max);margin:14px auto;padding:18px}
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:14px;background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));box-shadow:var(--shadow-sm)}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
+
+  /* Header (compact, single line on phones) */
+  header.header{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px; border-radius:14px;
+    background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));
+    box-shadow:var(--shadow-sm);
+  }
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px;flex-shrink:0}
+  .brand-text{min-width:0}
   .title-strong{font-weight:900;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .by{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:8px;align-items:center}
-  .btn{padding:9px 12px;border-radius:999px;border:none;cursor:pointer;font-weight:800}
-  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
-  .btn.theme{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff;box-shadow:0 8px 30px rgba(75,120,255,0.18)}
-  main{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
-  @media(max-width:980px){ main{grid-template-columns:1fr} .right{position:relative;width:auto} }
+
+  /* theme button like calculator with glow */
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{padding:9px 12px;border-radius:999px;border:none;cursor:pointer;font-weight:800;background:transparent}
+  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
+  .btn.theme {
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    color:white; box-shadow:0 8px 30px rgba(75,120,255,0.18);
+    border-radius:999px;padding:10px 16px;
+  }
+
+  /* main grid layout */
+  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 320px)}
+  @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
+
+  /* left card */
   .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
-  .drop{min-height:260px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
+  .drop{flex:1;min-height:260px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:22px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
   input[type=file]{display:none}
-  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
-  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm)}
-  .muted{color:var(--muted)}
-  .palette{display:grid;gap:12px;margin-top:12px}
-  .swatch{height:84px;border-radius:14px;display:flex;align-items:center;justify-content:space-between;padding:14px;color:var(--text);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.04)}
-  .sw-hex{font-weight:900}
-  .sw-copy{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.98);border:1px solid rgba(0,0,0,0.06);cursor:pointer}
-  .info-grid{display:grid;gap:16px;margin-top:12px}
+  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:720px;object-fit:contain;background:transparent;box-shadow:0 8px 26px rgba(2,10,20,0.04) inset}
+  .image-wrap{border-radius:14px;overflow:hidden}
+
+  /* right panel (behaves like tools) */
+  aside.right{align-self:start}
+  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .panel h3{margin:0 0 8px 0;font-weight:900}
+  .muted{color:var(--muted);font-size:13px}
+
+  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .settings .small{font-size:13px;color:var(--muted)}
+
+  /* palette grid / swatches */
+  .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
+  @media(min-width:480px){ .palette{grid-template-columns:repeat(2,1fr)} }
+  @media(min-width:900px){ .palette{grid-template-columns:repeat(1,1fr)} }
+
+  .swatch{
+    height:84px;border-radius:14px;display:flex;align-items:center;justify-content:space-between;padding:14px;color:var(--text);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.04);
+    transition:transform .14s ease, box-shadow .14s ease;
+  }
+  .swatch:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(3,12,30,0.12) }
+  .sw-left{display:flex;flex-direction:column;gap:6px;z-index:2}
+  .sw-hex{font-weight:900;color:inherit;font-size:16px;text-shadow:0 1px 0 rgba(255,255,255,0.18)}
+  .sw-pct{font-weight:800;color:var(--muted);font-size:13px}
+  .sw-copy{align-self:flex-end;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.98);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:2}
+  .sw-copy:active{transform:translateY(1px)}
+  .swatch::after{ content:""; position:absolute; inset:0; border-radius:14px; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); mix-blend-mode: overlay; }
+
+  /* info cards under hero */
+  .info-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:12px}
   @media(min-width:900px){ .info-grid{grid-template-columns:1fr 1fr} }
-  footer{margin-top:18px;padding:14px;border-radius:12px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0.96));box-shadow:var(--shadow-sm)}
+  .info-card{padding:20px;border-radius:14px;background:var(--card);box-shadow:var(--shadow-lg);border:1px solid rgba(0,0,0,0.04)}
+  .info-card h4{margin:0 0 6px 0;font-size:18px}
+  .info-card p{margin:0;color:var(--muted)}
+
+  /* small spinner */
+  .spinner{width:36px;height:36px;border-radius:999px;border:4px solid rgba(255,255,255,0.3);border-left-color:rgba(255,255,255,0.9);animation:spin .9s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* footer */
+  footer{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));text-align:center;box-shadow:var(--shadow-lg)}
+  footer .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
+
+  /* small helpers */
+  .row{display:flex;gap:8px;align-items:center}
+  .flex-fill{flex:1}
+  .hide-mobile{display:inline-block}
+  @media(max-width:480px){ .hide-mobile{display:none} }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <!-- Header -->
+    <header class="header">
       <div class="brand">
-        <div class="logo">PR</div>
-        <div>
-          <div class="title-strong">Color Finder</div>
-          <div class="by">by PirateRuler.com</div>
-        </div>
+        <a href="/" aria-label="Home" style="display:flex;align-items:center;gap:12px">
+          <div class="logo" aria-hidden="true">PR</div>
+          <div class="brand-text">
+            <div class="title-strong">Color Finder</div>
+            <div class="by">by PirateRuler.com</div>
+          </div>
+        </a>
       </div>
-      <div class="controls">
-        <button id="themeBtn" class="btn theme">Ocean ▾</button>
-        <button id="openSidebarBtn" class="btn ghost">☰</button>
+
+      <div class="controls" role="navigation" aria-label="Header controls">
+        <button id="themeBtn" class="btn theme" title="Theme">Ocean ▾</button>
+        <button id="openSidebarBtn" class="btn ghost" title="Open menu">☰</button>
       </div>
     </header>
 
+    <!-- Main grid -->
     <main>
-      <section class="card">
-        <h2 style="margin:0 0 8px 0">Extract colors from any image</h2>
-        <p class="muted">Drop an image or pick a pixel. Everything happens in your browser — no upload.</p>
+      <!-- LEFT -->
+      <section class="card" aria-labelledby="mainTitle">
+        <h2 id="mainTitle" style="margin:0 0 8px 0">Extract colors from any image</h2>
+        <div class="hint" style="margin-bottom:12px">Drop an image or pick a pixel. Everything happens in your browser — no upload, no server.</div>
 
-        <div id="dropZone" class="drop" title="Click or drop an image">
+        <div id="dropZone" class="drop" title="Click or drop an image" role="button" aria-label="Drop or select an image">
           <div id="dropInner">
             <div style="font-weight:900">Drop an image here or click to choose</div>
-            <div class="muted" style="margin-top:6px">PNG / JPG / WEBP — processed locally.</div>
+            <div class="muted" style="margin-top:6px">PNG / JPG / WEBP — processed locally in your browser (no upload).</div>
+            <div style="margin-top:10px;color:var(--muted);font-size:13px">Tip: screenshots & phone photos are supported — choose from gallery.</div>
           </div>
         </div>
+
+        <!-- hidden file input; works for screenshots and gallery picks on phones -->
         <input id="fileInput" type="file" accept="image/*" />
 
-        <div id="canvasWrap" class="card" style="margin-top:14px;display:none">
+        <div id="canvasWrap" style="margin-top:14px;display:none" class="card image-wrap">
           <canvas id="imageCanvas" aria-label="Loaded image"></canvas>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-            <div class="muted small">Click image to pick a pixel.</div>
-            <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:10px">
+            <div class="muted small">Click the image to pick a pixel — it will be added to the top of the palette.</div>
+            <div class="row">
               <button id="zoomIn" class="btn ghost">Zoom +</button>
               <button id="zoomOut" class="btn ghost">Zoom -</button>
               <button id="clear" class="btn ghost">Clear</button>
@@ -85,412 +162,511 @@
           </div>
         </div>
 
-        <div class="info-grid">
-          <div class="card info">
-            <h4 style="margin:0 0 6px 0">How it works</h4>
-            <p class="muted" style="margin:0">The page samples pixels from your image and runs a small k-means on your device to find common colors. Click a swatch to copy the HEX code.</p>
+        <!-- Info cards moved under finder -->
+        <div class="info-grid" style="margin-top:18px">
+          <div class="info-card">
+            <h4>How it works</h4>
+            <p>Choose an image (PNG, JPG, WEBP). The page samples pixels and runs a small k-means on your device to find the most common colors. Click any swatch to copy the hex code. Everything stays in your browser.</p>
           </div>
-          <div class="card info">
-            <h4 style="margin:0 0 6px 0">Privacy & Performance</h4>
-            <p class="muted" style="margin:0">Images never leave your device — we use FileReader + canvas. Sampling is adaptive to keep mobile fast.</p>
+          <div class="info-card">
+            <h4>Privacy & Performance</h4>
+            <p>Images never leave your device — we use FileReader + canvas + createImageBitmap when available. Sampling is adaptive so large photos stay fast on mobile.</p>
           </div>
         </div>
       </section>
 
-      <aside class="panel right">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <h3 style="margin:0">Palette</h3>
-          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">PR</div>
-        </div>
+      <!-- RIGHT: palette panel -->
+      <aside class="right" id="rightPanel">
+        <div class="panel" role="complementary" aria-label="Palette panel">
+          <div style="display:flex;gap:12px;align-items:center">
+            <h3 style="margin:0">Palette</h3>
+            <div class="flex-fill"></div>
+            <!-- small PR box (desktop only) -->
+            <div style="display:inline-flex" title="PirateRuler">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 8px 26px rgba(11,107,255,0.12);">PR</div>
+            </div>
+          </div>
 
-        <p class="muted" style="margin-top:8px">Extracted colors — click <strong>Copy</strong> to copy HEX.</p>
+          <div class="muted" style="margin-top:8px">Extracted colors — click <strong>Copy</strong> to copy HEX.</div>
 
-        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-          <label class="muted">Colors</label>
-          <input id="kRange" type="range" min="2" max="12" value="6" style="flex:1" />
-          <div style="width:36px;text-align:center"><strong id="kValue">6</strong></div>
-        </div>
+          <div class="settings">
+            <div class="small muted">Colors</div>
+            <input id="kRange" type="range" min="2" max="12" value="6" />
+            <div class="small muted"><strong id="kValue">6</strong></div>
+            <div class="flex-fill"></div>
+            <div id="loadingIndicator" style="display:none"><span class="spinner" aria-hidden="true"></span></div>
+          </div>
 
-        <div id="palette" class="palette" aria-live="polite"></div>
+          <div class="palette" id="palette" aria-live="polite"></div>
 
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button id="extractBtn" class="btn theme">Extract Palette</button>
-          <button id="exportJSON" class="btn ghost">Export JSON</button>
-          <button id="downloadPng" class="btn ghost">Download PNG</button>
-          <button id="copyAll" class="btn ghost">Copy All</button>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button id="extractBtn" class="btn theme">Extract Palette</button>
+            <button id="exportJSON" class="btn ghost">Export JSON</button>
+            <button id="downloadPng" class="btn ghost">Download Pal PNG</button>
+            <button id="copyAll" class="btn ghost">Copy All</button>
+          </div>
+
+          <div class="muted" style="margin-top:12px;font-size:13px">Tip: use fewer colors for simpler palettes. Sampling is adaptive to keep things fast.</div>
         </div>
       </aside>
     </main>
 
+    <!-- Footer -->
     <footer>
+      <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
+      <div style="height:12px"></div>
       <small class="muted">© <span id="year"></span> PirateRuler — private & fast</small>
     </footer>
+
+    <!-- Sidebar (calculator-style) -->
+    <aside id="sidebar" style="position:fixed;top:0;right:0;height:100vh;width:360px;transform:translateX(120%);background:var(--card);box-shadow:-40px 0 80px rgba(2,8,20,0.25);padding:20px;border-left:1px solid rgba(0,0,0,0.04);border-radius:0 0 0 14px;overflow:auto;z-index:90;">
+      <div style="display:flex;justify-content:flex-end"><button id="closeSidebar" class="btn ghost">Close</button></div>
+      <h3>PirateRuler Links</h3>
+      <p class="muted">Quick links & backup resources</p>
+      <nav style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+        <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
+        <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
+        <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
+      </nav>
+      <div style="margin-top:18px;color:var(--muted);font-size:13px">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
+    </aside>
   </div>
 
 <script>
-document.getElementById('year').textContent = new Date().getFullYear();
+  // small helpers
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
+  const themes = ['theme-ocean','theme-light','theme-dark','theme-sunset'];
+  const themeNames = { 'theme-ocean':'Ocean', 'theme-light':'Light', 'theme-dark':'Dark', 'theme-sunset':'Sunset' };
+  const savedTheme = localStorage.getItem('pr-theme') || 'theme-ocean';
+  applyTheme(savedTheme);
+  themeBtn.addEventListener('click', ()=> {
+    const current = themes.indexOf([...root.classList].find(c=>themes.includes(c)) || savedTheme);
+    const next = (current + 1) % themes.length;
+    applyTheme(themes[next]);
+    localStorage.setItem('pr-theme', themes[next]);
+  });
+  function applyTheme(cls){
+    themes.forEach(t=> root.classList.remove(t));
+    root.classList.add(cls);
+    themeBtn.textContent = (themeNames[cls] || 'Ocean') + ' ▾';
+  }
 
-/* THEMES - rotate */
-const root = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-const themes = ['theme-ocean','theme-light','theme-dark','theme-sunset'];
-const names = {'theme-ocean':'Ocean','theme-light':'Light','theme-dark':'Dark','theme-sunset':'Sunset'};
-let curTheme = localStorage.getItem('pr-theme') || 'theme-ocean';
-applyTheme(curTheme);
-themeBtn.addEventListener('click', ()=> {
-  const idx = themes.indexOf(curTheme);
-  curTheme = themes[(idx+1)%themes.length];
-  applyTheme(curTheme);
-  localStorage.setItem('pr-theme', curTheme);
-});
-function applyTheme(t){
-  themes.forEach(x=>root.classList.remove(x));
-  root.classList.add(t);
-  themeBtn.textContent = (names[t]||'Ocean') + ' ▾';
-}
+  // sidebar
+  const sidebar = document.getElementById('sidebar');
+  const openSidebarBtn = document.getElementById('openSidebarBtn');
+  const closeSidebarBtn = document.getElementById('closeSidebar');
+  function openSidebar(){ sidebar.style.transform='translateX(0)'; sidebar.setAttribute('aria-hidden','false'); }
+  function closeSidebar(){ sidebar.style.transform='translateX(120%)'; sidebar.setAttribute('aria-hidden','true'); }
+  openSidebarBtn.addEventListener('click', ()=> {
+    if(window.innerWidth < 980){ openSidebar(); sidebar.scrollIntoView({behavior:'smooth'}); } else openSidebar();
+  });
+  closeSidebarBtn.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e=> { if(e.key === 'Escape') closeSidebar(); });
 
-/* SIDEBAR (simple toggle) */
-const openSidebarBtn = document.getElementById('openSidebarBtn');
-openSidebarBtn.addEventListener('click', ()=> {
-  const sidebar = document.querySelector('#openSidebarBtn').dataset.open;
-  const side = document.getElementById('sidebar');
-  // we used fixed inline sidebar previously — this page uses a simple open/close -> just scroll
-  // Keep it simple: show the right panel (already visible on desktop), on mobile scroll to it:
-  document.querySelector('.right').scrollIntoView({behavior:'smooth'});
-});
+  // main elements
+  const drop = document.getElementById('dropZone');
+  const fileIn = document.getElementById('fileInput');
+  const canvas = document.getElementById('imageCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently:true });
+  const canvasWrap = document.getElementById('canvasWrap');
+  const kRange = document.getElementById('kRange');
+  const kValue = document.getElementById('kValue');
+  const paletteEl = document.getElementById('palette');
+  const extractBtn = document.getElementById('extractBtn');
+  const exportJSON = document.getElementById('exportJSON');
+  const downloadPng = document.getElementById('downloadPng');
+  const clearBtn = document.getElementById('clear');
+  const zoomIn = document.getElementById('zoomIn');
+  const zoomOut = document.getElementById('zoomOut');
+  const copyAll = document.getElementById('copyAll');
+  const loadingIndicator = document.getElementById('loadingIndicator');
 
-/* ELEMENTS */
-const drop = document.getElementById('dropZone');
-const fileIn = document.getElementById('fileInput');
-const canvas = document.getElementById('imageCanvas');
-const ctx = canvas.getContext('2d', { willReadFrequently:true });
-const canvasWrap = document.getElementById('canvasWrap');
-const kRange = document.getElementById('kRange');
-const kValue = document.getElementById('kValue');
-const paletteEl = document.getElementById('palette');
-const extractBtn = document.getElementById('extractBtn');
-const exportJSON = document.getElementById('exportJSON');
-const downloadPng = document.getElementById('downloadPng');
-const clearBtn = document.getElementById('clear');
-const zoomIn = document.getElementById('zoomIn');
-const zoomOut = document.getElementById('zoomOut');
-const copyAll = document.getElementById('copyAll');
+  let img = new Image();
+  let imgLoaded = false;
+  let scale = 1;
+  let lastPalette = [];
+  let lastObjectUrl = null;
 
-let img = new Image();
-let imgLoaded = false;
-let scale = 1;
-let lastPalette = [];
+  // drop / pick handlers
+  drop.addEventListener('click', ()=> fileIn.click());
+  drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
+  drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
+  drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
 
-drop.addEventListener('click', ()=> fileIn.click());
-drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
-drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
-drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
-fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+  fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
 
-/* Robust file loader:
-   - FileReader -> dataURL
-   - try createImageBitmap (when available)
-   - fallback to Image + await decode()
-*/
-async function handleFile(file){
-  if(!file || !file.type || !file.type.startsWith('image/')) return alert('Choose an image file (PNG / JPG / WEBP).');
-
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
-    const dataUrl = ev.target.result;
-    // Try createImageBitmap from blob (works better in some browsers)
-    try {
-      if(window.createImageBitmap){
-        const blob = await (await fetch(dataUrl)).blob();
-        const bitmap = await createImageBitmap(blob).catch(()=> null);
-        if(bitmap){
-          drawBitmap(bitmap);
-          return;
-        }
+  function handleFile(file){
+    if(!file.type.startsWith('image/')) return alert('Choose an image file.');
+    // revoke previous
+    if(lastObjectUrl){ URL.revokeObjectURL(lastObjectUrl); lastObjectUrl = null; }
+    // prefer FileReader -> dataURL (more compatible on iOS)
+    const reader = new FileReader();
+    reader.onerror = ()=> alert('Could not read file.');
+    reader.onload = async (evt) => {
+      const dataUrl = evt.target.result;
+      // create object url for createImageBitmap fallback if needed
+      try {
+        await loadImageFromDataURL(dataUrl);
+      } catch(err){
+        console.error('load error', err);
+        alert('Could not decode image. Try a different image or screenshot format.');
       }
-    } catch(e){ console.warn('createImageBitmap failed', e); }
-    // fallback: Image approach
-    loadImageFromDataURL(dataUrl);
-  };
-  reader.onerror = ()=> alert('Failed to read file.');
-  reader.readAsDataURL(file);
-}
-
-function drawBitmap(bitmap){
-  try{
-    imgLoaded = true;
-    const maxW = Math.min(1200, window.innerWidth - 420);
-    const maxH = 900;
-    let w = bitmap.width, h = bitmap.height;
-    const ratio = Math.min(1, maxW/w, maxH/h);
-    w = Math.round(w * ratio); h = Math.round(h * ratio);
-    scale = 1;
-    canvas.width = w; canvas.height = h;
-    ctx.clearRect(0,0,w,h);
-    ctx.drawImage(bitmap, 0, 0, w, h);
-    // keep a fallback image reference
-    img = new Image();
-    img.src = canvas.toDataURL('image/png');
-    canvasWrap.style.display = 'block';
-    setTimeout(()=> extractPalette(), 160);
-  } catch(e){
-    console.warn('drawBitmap error', e);
-    alert('Could not draw image via bitmap.');
+    };
+    reader.readAsDataURL(file);
+    // reset input to allow reselecting same file
+    fileIn.value = '';
   }
-}
 
-async function loadImageFromDataURL(dataUrl){
-  img = new Image();
-  // do not set crossOrigin for data URLs — it can cause issues in some iOS builds
-  try{
-    img.src = dataUrl;
-    if(img.decode) await img.decode(); // wait until fully decoded (better than onload in some browsers)
-  }catch(e){
-    // ignore; we'll also handle onload fallback
-  }
-  img.onload = ()=> {
-    imgLoaded = true;
-    const maxW = Math.min(1200, window.innerWidth - 420);
-    const maxH = 900;
-    let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
-    const ratio = Math.min(1, maxW/w, maxH/h);
-    w = Math.round(w * ratio); h = Math.round(h * ratio);
-    scale = 1;
-    canvas.width = w; canvas.height = h;
-    ctx.clearRect(0,0,w,h);
-    try{ ctx.drawImage(img, 0, 0, w, h); }catch(e){ console.warn('drawImage failed', e); }
-    canvasWrap.style.display = 'block';
-    setTimeout(()=> extractPalette(), 160);
-  };
-  img.onerror = ()=> {
-    alert('Could not load image (format unsupported or corrupt). Try re-saving as PNG/JPG and re-upload.');
-  };
-}
+  async function loadImageFromDataURL(dataUrl){
+    showLoading(true);
+    // clean canvas area first
+    try { ctx.clearRect(0,0,canvas.width,canvas.height); } catch(e){/*ignore*/}
 
-/* Zoom handlers */
-zoomIn.addEventListener('click', ()=> { if(!imgLoaded) return; scale = Math.min(3, scale+0.25); resizeCanvas(); });
-zoomOut.addEventListener('click', ()=> { if(!imgLoaded) return; scale = Math.max(0.5, scale-0.25); resizeCanvas(); });
-function resizeCanvas(){
-  if(!imgLoaded) return;
-  const maxW = Math.min(1200, window.innerWidth - 420);
-  const naturalW = img.naturalWidth || img.width || canvas.width;
-  const naturalH = img.naturalHeight || img.height || canvas.height;
-  const w = Math.round(Math.min(naturalW, maxW) * scale);
-  const h = Math.round(w * (naturalH / naturalW));
-  canvas.width = w; canvas.height = h;
-  try{ ctx.clearRect(0,0,w,h); ctx.drawImage(img, 0, 0, w, h); }catch(e){ console.warn('resize draw failed', e); }
-}
-
-/* k-range UI */
-kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
-extractBtn.addEventListener('click', extractPalette);
-
-/* extractPalette with stronger fallbacks */
-function extractPalette(){
-  if(!imgLoaded) return alert('Load an image first.');
-  try{
-    const w = canvas.width, h = canvas.height;
-    const data = ctx.getImageData(0,0,w,h).data;
-    const pixels = samplePixelsFromImageData(data, w, h);
-    if(pixels.length === 0){
-      // fallback 1: sample from a small thumbnail canvas (avoid strange alpha/size issues)
-      const thumb = document.createElement('canvas');
-      const tw = 200, th = Math.round((img.naturalHeight || img.height) * (tw / (img.naturalWidth || img.width)));
-      thumb.width = tw; thumb.height = th || 200;
-      const tctx = thumb.getContext('2d');
+    // try using createImageBitmap first (fast / avoids some Safari race issues)
+    let bitmap = null;
+    if(window.createImageBitmap){
       try{
-        tctx.drawImage(img, 0, 0, thumb.width, thumb.height);
-        const tdata = tctx.getImageData(0,0,thumb.width, thumb.height).data;
-        const tpixels = samplePixelsFromImageData(tdata, thumb.width, thumb.height);
-        if(tpixels.length > 0) {
-          performClustering(tpixels);
-          return;
-        }
-      }catch(e){ console.warn('thumbnail fallback failed', e); }
-      // fallback 2: tiny direct sampling from img (guaranteed some pixels)
-      const raw = sampleSomePixelsDirectly(img, 12);
-      if(raw.length > 0){
-        performClustering(raw);
-        return;
+        // createImageBitmap can accept a Blob; convert dataURL -> blob
+        const blob = dataURLtoBlob(dataUrl);
+        bitmap = await createImageBitmap(blob);
+      } catch(e){
+        // fallback to image decode path below
+        bitmap = null;
       }
-      // final: give user guidance
-      alert('No visible pixels found (image may be fully transparent or unsupported). Try re-saving the image as PNG/JPG and re-upload.');
+    }
+
+    if(bitmap){
+      // draw bitmap
+      const maxW = Math.min(1200, window.innerWidth - 420);
+      const ratio = Math.min(1, maxW / bitmap.width, 900 / bitmap.height);
+      const w = Math.round(bitmap.width * ratio), h = Math.round(bitmap.height * ratio);
+      canvas.width = w; canvas.height = h;
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      imgLoaded = true;
+      showLoading(false);
+      // auto-extract
+      setTimeout(()=> extractPalette(), 120);
       return;
     }
-    performClustering(pixels);
-  }catch(e){
-    console.error('extractPalette error', e);
-    alert('Failed to read image. If you are on iOS Safari, try saving the image as PNG/JPG and then upload.');
-  }
-}
 
-/* helper to sample pixels from ImageData with simple alpha filter */
-function samplePixelsFromImageData(data, w, h){
-  const pixels = [];
-  const targetSamples = 40000;
-  const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
-  for(let y=0;y<h;y+=step){
-    for(let x=0;x<w;x+=step){
-      const i = (y*w + x)*4;
-      const a = data[i+3]; // alpha 0-255
-      if(a === 0) continue; // skip fully transparent only
-      const r = data[i], g = data[i+1], b = data[i+2];
-      pixels.push([r,g,b]);
-    }
+    // fallback: standard Image + decode
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = async () => {
+        try {
+          // ensure fully decoded (img.decode exists on modern browsers)
+          if(image.decode) {
+            try { await image.decode(); } catch(e){ /* continue even if decode fails */ }
+          }
+          // fit canvas
+          const maxW = Math.min(1200, window.innerWidth - 420);
+          const ratio = Math.min(1, maxW / image.naturalWidth, 900 / image.naturalHeight);
+          const w = Math.round(image.naturalWidth * ratio), h = Math.round(image.naturalHeight * ratio);
+          canvas.width = w; canvas.height = h;
+          ctx.clearRect(0,0,w,h);
+          ctx.drawImage(image, 0, 0, w, h);
+          imgLoaded = true;
+          showLoading(false);
+          // slight delay to guard against platform race; then try extract
+          setTimeout(()=> { extractPalette().then(()=>resolve()).catch(()=>resolve()); }, 140);
+        } catch(e){
+          showLoading(false);
+          reject(e);
+        }
+      };
+      image.onerror = (e) => { showLoading(false); reject(e); };
+      image.src = dataUrl;
+      // keep reference so GC doesn't drop quickly on some platforms
+      img = image;
+    });
   }
-  return pixels;
-}
 
-/* last-resort sampling: pick some pixels from image by drawing small canvas and reading center samples */
-function sampleSomePixelsDirectly(image, count){
-  try{
+  // small helper to convert dataURL -> Blob
+  function dataURLtoBlob(dataurl) {
+    const parts = dataurl.split(','), meta = parts[0].match(/:(.*?);/);
+    const mime = meta ? meta[1] : 'image/png';
+    const bstr = atob(parts[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while(n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], {type:mime});
+  }
+
+  // zoom
+  zoomIn.addEventListener('click', ()=> {
+    if(!imgLoaded) return;
+    scale = Math.min(3, scale + 0.25);
+    resizeCanvas();
+  });
+  zoomOut.addEventListener('click', ()=> {
+    if(!imgLoaded) return;
+    scale = Math.max(0.5, scale - 0.25);
+    resizeCanvas();
+  });
+  function resizeCanvas(){
+    if(!imgLoaded) return;
+    // If we have an Image object use its natural dimensions, otherwise simply scale current canvas
+    const naturalW = img && (img.naturalWidth || img.width) || canvas.width;
+    const naturalH = img && (img.naturalHeight || img.height) || canvas.height;
+    const maxW = Math.min(1200, window.innerWidth - 420);
+    const w = Math.round(Math.min(naturalW, maxW) * scale);
+    const h = Math.round(w * (naturalH / naturalW));
     const tmp = document.createElement('canvas');
-    const tw = Math.min(128, image.naturalWidth || image.width || 128);
-    const th = Math.min(128, image.naturalHeight || image.height || 128);
-    tmp.width = tw; tmp.height = th;
-    const tctx = tmp.getContext('2d');
-    tctx.drawImage(image, 0, 0, tw, th);
-    const d = tctx.getImageData(0,0,tw,th).data;
-    const res = [];
-    for(let i=0;i<count;i++){
-      const x = Math.floor((i+1)/(count+1) * (tw-1));
-      const y = Math.floor((i+1)/(count+1) * (th-1));
-      const idx = (y*tw + x)*4;
-      const a = d[idx+3];
-      if(a === 0) continue;
-      res.push([d[idx], d[idx+1], d[idx+2]]);
-    }
-    return res;
-  }catch(e){ console.warn('direct sample failed', e); return []; }
-}
-
-/* perform kmeans and render */
-function performClustering(pixels){
-  const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
-  const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
-  let items = centroids.map((c,i)=>({rgb:c, count:counts[i]})).filter(Boolean);
-  items = items.sort((a,b)=>b.count - a.count);
-  lastPalette = items.map(it => {
-    const hex = rgbToHex(...it.rgb);
-    const pct = Math.round((it.count / pixels.length) * 100);
-    return {hex, rgb: it.rgb, pct};
-  });
-  if(lastPalette.length === 0){
-    // fallback: create palette from some pixels
-    const fallback = pixels.slice(0, Math.min(6,pixels.length));
-    lastPalette = fallback.map(px=>({hex: rgbToHex(px[0],px[1],px[2]), rgb:px, pct: Math.round(100/fallback.length)}));
+    tmp.width = canvas.width; tmp.height = canvas.height;
+    tmp.getContext('2d').drawImage(canvas,0,0);
+    canvas.width = w; canvas.height = h;
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(tmp, 0, 0, tmp.width, tmp.height, 0, 0, w, h);
   }
-  renderPalette();
-}
 
-/* render palette UI */
-function renderPalette(){
-  paletteEl.innerHTML = '';
-  lastPalette.forEach(p=>{
-    const sw = document.createElement('div');
-    sw.className = 'swatch';
-    sw.style.background = p.hex;
-    const textColor = getContrastColor(p.hex);
-    sw.style.color = textColor;
-    sw.innerHTML = `<div><div class="sw-hex">${p.hex}</div><div class="muted sw-pct">${p.pct}%</div></div>
-      <div><button class="sw-copy" data-hex="${p.hex}">Copy</button></div>`;
-    paletteEl.appendChild(sw);
-  });
-  paletteEl.querySelectorAll('.sw-copy').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      const hex = e.currentTarget.dataset.hex;
-      navigator.clipboard.writeText(hex).then(()=> {
-        const prev = e.currentTarget.textContent;
-        e.currentTarget.textContent = 'Copied';
-        setTimeout(()=> e.currentTarget.textContent = prev, 900);
+  // k range UI
+  kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
+
+  // palette extraction with retries for iOS issues
+  extractBtn.addEventListener('click', extractPalette);
+
+  async function extractPalette(){
+    if(!imgLoaded) return alert('Load an image first.');
+    showLoading(true);
+    // attempt to read pixels; if we get no pixels, retry a few times with small delays (iOS race)
+    let attempts = 0, data = null;
+    while(attempts < 4){
+      try {
+        data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+        // check if data contains any non-zero alpha or color
+        let visible = false;
+        for(let i=0;i<data.length;i+=4){
+          if(data[i+3] !== 0){ visible = true; break; }
+        }
+        if(!visible){
+          // retry after small delay
+          attempts++;
+          await new Promise(r=>setTimeout(r, 140 + attempts*60));
+          continue;
+        }
+        break;
+      } catch(e){
+        // getImageData might throw if canvas is tainted; bail with message
+        console.error('getImageData error', e);
+        showLoading(false);
+        return alert('Failed to read image pixels. The image might be blocked due to browser security. Try a different image or convert it to PNG/JPG first.');
+      }
+    }
+
+    if(!data){
+      showLoading(false);
+      return alert('No visible pixels found (image may be transparent). Try a different image or screenshot.');
+    }
+
+    // collect sampled pixels
+    const w = canvas.width, h = canvas.height;
+    const pixels = [];
+    const targetSamples = 40000;
+    const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
+    for(let y=0;y<h;y+=step){
+      for(let x=0;x<w;x+=step){
+        const i = (y*w + x)*4;
+        const a = data[i+3];
+        if(a === 0) continue;
+        const r = data[i], g = data[i+1], b = data[i+2];
+        pixels.push([r,g,b]);
+      }
+    }
+
+    if(pixels.length === 0){
+      showLoading(false);
+      return alert('No visible pixels found (image may be transparent).');
+    }
+
+    const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
+    const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
+    let items = centroids.map((c,i)=>({rgb:c, count:counts[i]})).filter(Boolean);
+    items = items.sort((a,b)=>b.count - a.count);
+    lastPalette = items.map(it => {
+      const hex = rgbToHex(...it.rgb);
+      const pct = Math.round((it.count / pixels.length) * 100);
+      return {hex, rgb: it.rgb, pct};
+    });
+    if(lastPalette.length === 0){
+      // fallback: sample first N pixels
+      const fallback = pixels.slice(0, Math.min(6,pixels.length));
+      lastPalette = fallback.map(px=>({hex: rgbToHex(px[0],px[1],px[2]), rgb:px, pct: Math.round(100/fallback.length)}));
+    }
+    renderPalette();
+    showLoading(false);
+  }
+
+  // render swatches
+  function renderPalette(){
+    paletteEl.innerHTML = '';
+    lastPalette.forEach(p => {
+      const sw = document.createElement('div');
+      sw.className = 'swatch';
+      sw.style.background = p.hex;
+      const textColor = getContrastColor(p.hex);
+      sw.style.color = textColor;
+      sw.innerHTML = `
+        <div class="sw-left">
+          <div class="sw-hex">${p.hex}</div>
+          <div class="sw-pct">${p.pct}%</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;z-index:2">
+          <button class="sw-copy" data-hex="${p.hex}">Copy</button>
+        </div>
+      `;
+      paletteEl.appendChild(sw);
+    });
+
+    paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const hex = e.currentTarget.dataset.hex;
+        navigator.clipboard.writeText(hex).then(()=> {
+          const prev = e.currentTarget.textContent;
+          e.currentTarget.textContent = 'Copied';
+          setTimeout(()=> e.currentTarget.textContent = prev, 900);
+        });
       });
     });
-  });
-}
-
-/* export / download / copy all */
-document.getElementById('exportJSON').addEventListener('click', ()=>{
-  if(!lastPalette.length) return alert('No palette to export.');
-  const blob = new Blob([JSON.stringify({palette:lastPalette,createdAt:new Date().toISOString()},null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download='palette.json'; a.click(); URL.revokeObjectURL(url);
-});
-downloadPng.addEventListener('click', ()=>{
-  if(!lastPalette.length) return alert('No palette to download.');
-  const sw = Math.max(80, Math.floor(900/lastPalette.length)); const w = sw*lastPalette.length; const h = 160;
-  const c = document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d');
-  lastPalette.forEach((p,i)=>{ g.fillStyle=p.hex; g.fillRect(i*sw,0,sw,h); g.fillStyle=getContrastColor(p.hex); g.font='700 14px Inter, Arial'; g.textAlign='center'; g.fillText(p.hex, i*sw+sw/2, h-18); });
-  const url = c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='palette.png'; a.click();
-});
-copyAll.addEventListener('click', ()=> {
-  if(!lastPalette.length) return;
-  navigator.clipboard.writeText(lastPalette.map(p=>p.hex).join(', ')).then(()=> {
-    const prev = copyAll.textContent; copyAll.textContent = 'Copied'; setTimeout(()=> copyAll.textContent = prev, 1200);
-  });
-});
-
-/* single-pixel pick */
-canvas.addEventListener('click', (e)=>{
-  if(!imgLoaded) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-  const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
-  try{
-    const px = ctx.getImageData(x,y,1,1).data;
-    const hex = rgbToHex(px[0],px[1],px[2]);
-    lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
-    const uniq = [];
-    for(const it of lastPalette){ if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it); if(uniq.length>=12) break; }
-    lastPalette = uniq;
-    renderPalette();
-  }catch(e){ console.warn('pixel pick failed', e); }
-});
-
-/* clear */
-clearBtn.addEventListener('click', ()=> {
-  try{ ctx.clearRect(0,0,canvas.width,canvas.height); }catch(e){}
-  canvas.width = canvas.height = 0; canvasWrap.style.display = 'none'; imgLoaded = false; lastPalette=[]; paletteEl.innerHTML=''; fileIn.value='';
-});
-
-/* helpers */
-function getContrastColor(hex){
-  const c = hex.replace('#',''); const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
-  const yiq = (r*299 + g*587 + b*114)/1000; return (yiq >= 150) ? '#111' : '#fff';
-}
-function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
-function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
-
-/* kmeans (same robust impl) */
-function kmeans(samples, k, opts={}) {
-  const maxIter = opts.maxIter || 24;
-  const centroids = []; const used = new Set();
-  while(centroids.length < k && used.size < samples.length){
-    const idx = Math.floor(Math.random()*samples.length);
-    if(used.has(idx)) continue; used.add(idx); centroids.push(samples[idx].slice());
   }
-  while(centroids.length < k) centroids.push(samples[Math.floor(Math.random()*samples.length)].slice());
-  const assignments = new Array(samples.length).fill(-1);
-  let counts = new Array(k).fill(0);
-  for(let iter=0; iter<maxIter; iter++){
-    let changed=false;
-    for(let i=0;i<samples.length;i++){
-      const s = samples[i];
-      let best=0, bestd=dist2(s,centroids[0]);
-      for(let j=1;j<k;j++){ const d=dist2(s,centroids[j]); if(d<bestd){bestd=d;best=j;} }
-      if(assignments[i]!==best){ assignments[i]=best; changed=true; }
-    }
-    const sums = new Array(k).fill(0).map(()=>[0,0,0]); const cnts = new Array(k).fill(0);
-    for(let i=0;i<samples.length;i++){ const a=assignments[i]; const s=samples[i]; sums[a][0]+=s[0]; sums[a][1]+=s[1]; sums[a][2]+=s[2]; cnts[a]++; }
-    for(let j=0;j<k;j++){
-      if(cnts[j]===0){ centroids[j]=samples[Math.floor(Math.random()*samples.length)].slice(); counts[j]=1; }
-      else { centroids[j]=[Math.round(sums[j][0]/cnts[j]),Math.round(sums[j][1]/cnts[j]),Math.round(sums[j][2]/cnts[j])]; counts[j]=cnts[j]; }
-    }
-    if(!changed) break;
-  }
-  return {centroids, counts};
-}
-function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
 
+  // export & download
+  exportJSON.addEventListener('click', ()=>{
+    if(!lastPalette.length) return alert('No palette to export.');
+    const data = {palette: lastPalette, createdAt: new Date().toISOString()};
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+  downloadPng.addEventListener('click', ()=> {
+    if(!lastPalette.length) return alert('No palette to download.');
+    const sw = Math.max(80, Math.floor(900 / lastPalette.length));
+    const w = sw * lastPalette.length, h = 160;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d');
+    lastPalette.forEach((p,i)=>{
+      g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
+      g.fillStyle = getContrastColor(p.hex); g.font = '700 14px Inter, Arial'; g.textAlign = 'center';
+      g.fillText(p.hex, i*sw + sw/2, h - 18);
+    });
+    const url = c.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
+  });
+  copyAll.addEventListener('click', ()=> {
+    if(!lastPalette.length) return;
+    const all = lastPalette.map(p=>p.hex).join(', ');
+    navigator.clipboard.writeText(all).then(()=> {
+      const prev = copyAll.textContent;
+      copyAll.textContent = 'Copied';
+      setTimeout(()=> copyAll.textContent = prev, 1200);
+    });
+  });
+
+  // single-pixel sample on click (adds to top)
+  canvas.addEventListener('click', (e)=>{
+    if(!imgLoaded) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+    try{
+      const px = ctx.getImageData(x, y, 1, 1).data;
+      const hex = rgbToHex(px[0], px[1], px[2]);
+      lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
+      const uniq = [];
+      for(const it of lastPalette){
+        if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
+        if(uniq.length >= 12) break;
+      }
+      lastPalette = uniq;
+      renderPalette();
+    }catch(e){
+      console.error(e);
+    }
+  });
+
+  // clear
+  clearBtn.addEventListener('click', ()=> {
+    try{ ctx.clearRect(0,0,canvas.width,canvas.height); }catch(e){}
+    canvas.width = canvas.height = 0;
+    canvasWrap.style.display = 'none';
+    imgLoaded = false; lastPalette = []; paletteEl.innerHTML = '';
+    fileIn.value = '';
+  });
+
+  // resize behavior
+  window.addEventListener('resize', ()=> {
+    // keep canvas as-is; user can re-upload for full resolution or use zoom controls
+  });
+
+  // hover visual
+  drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
+  drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
+
+  // utilities
+  function showLoading(on){
+    loadingIndicator.style.display = on ? 'inline-block' : 'none';
+  }
+  function getContrastColor(hex){
+    const c = hex.replace('#','');
+    const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+    const yiq = (r*299 + g*587 + b*114)/1000;
+    return (yiq >= 150) ? '#111' : '#fff';
+  }
+  function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
+  function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
+
+  // kmeans (same robust implementation)
+  function kmeans(samples, k, opts={}){
+    const maxIter = opts.maxIter || 24;
+    const centroids = [];
+    const used = new Set();
+    while(centroids.length < k && used.size < samples.length){
+      const idx = Math.floor(Math.random()*samples.length);
+      if(used.has(idx)) continue;
+      used.add(idx);
+      centroids.push(samples[idx].slice());
+    }
+    while(centroids.length < k){
+      centroids.push(samples[Math.floor(Math.random()*samples.length)].slice());
+    }
+    const assignments = new Array(samples.length).fill(-1);
+    let counts = new Array(k).fill(0);
+    for(let iter=0; iter<maxIter; iter++){
+      let changed = false;
+      for(let i=0;i<samples.length;i++){
+        const s = samples[i];
+        let best=0, bestd=dist2(s, centroids[0]);
+        for(let j=1;j<k;j++){
+          const d = dist2(s, centroids[j]);
+          if(d < bestd){ bestd = d; best = j; }
+        }
+        if(assignments[i] !== best){ assignments[i] = best; changed = true; }
+      }
+      const sums = new Array(k).fill(0).map(()=>[0,0,0]);
+      const cnts = new Array(k).fill(0);
+      for(let i=0;i<samples.length;i++){
+        const a = assignments[i];
+        const s = samples[i];
+        sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
+        cnts[a] ++;
+      }
+      for(let j=0;j<k;j++){
+        if(cnts[j] === 0){
+          centroids[j] = samples[Math.floor(Math.random()*samples.length)].slice();
+          counts[j] = 1;
+        } else {
+          centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
+          counts[j] = cnts[j];
+        }
+      }
+      if(!changed) break;
+    }
+    return {centroids, counts};
+  }
+  function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
 </script>
 </body>
 </html>
