@@ -4,36 +4,37 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Color Finder — PirateRuler</title>
-<meta name="description" content="Extract a color palette from any image — client-side. No upload, no API." />
 <meta name="theme-color" content="#f7fbff" />
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
-  /* === PR design tokens (shared look) === */
+  /* PR tokens (keeps Calculator look) */
   :root{
     --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
     --accent-start:#6b7dff; --accent-end:#0bb3ff;
     --glass: rgba(11,17,28,0.04);
-    --radius:14px; --shadow-lg: 0 18px 50px rgba(3,12,30,0.18);
+    --radius:14px;
+    --shadow-lg: 0 18px 50px rgba(3,12,30,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
     --shadow-sm: 0 8px 24px rgba(3,12,30,0.08);
     --content-max:1280px;
   }
+  html.theme-light { /* default */ }
   html.theme-dark { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --accent-start:#5ab3ff; --accent-end:#6b7dff; --glass: rgba(255,255,255,0.02); }
-  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; }
-  html.theme-sunset{ --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; }
+  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; --glass: rgba(6,50,66,0.03); }
+  html.theme-sunset { --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; --glass: rgba(42,16,32,0.03); }
 
   *{box-sizing:border-box}
   body{
-    margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     background: linear-gradient(180deg,var(--bg), #e9f6ff);
-    color:var(--text); -webkit-font-smoothing:antialiased;
+    color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--content-max);margin:14px auto;padding:16px}
 
-  /* header */
+  /* header (Calculator style) */
   header.header{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:14px; border-radius:14px;
+    padding:12px; border-radius:12px;
     background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));
     box-shadow:var(--shadow-sm);
   }
@@ -41,75 +42,67 @@
   .logo{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:22px;flex-shrink:0}
   .title-strong{font-weight:900;font-size:18px}
   .by{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:10px;align-items:center}
 
-  /* theme selector button like calculator (glow) */
+  /* theme button resembling calculator (glow + gradient) */
   .theme-btn {
-    padding:10px 14px;border-radius:999px;border:none;cursor:pointer;font-weight:800;background:linear-gradient(90deg,var(--accent-start),var(--accent-end)); color:#fff;
-    box-shadow:0 10px 30px rgba(11,107,255,0.12), 0 0 0 0 rgba(107,125,255,0.15);
-    transition:transform .14s ease, box-shadow .14s ease;
+    padding:10px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:800;
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    color:white; box-shadow:0 8px 28px rgba(107,125,255,0.18);
+    display:inline-flex; align-items:center; gap:8px;
   }
-  .theme-btn:active{ transform:translateY(1px) }
-  .theme-ghost { padding:10px 14px;border-radius:999px;border:1px solid rgba(0,0,0,0.06); background:transparent; font-weight:800; cursor:pointer; }
+  .theme-btn .caret{ width:10px; height:10px; border-left:3px solid rgba(255,255,255,0.9); transform:rotate(45deg); margin-left:6px }
 
   /* layout */
-  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 340px)}
-  @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
+  main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 320px)}
+  @media(max-width:980px){ main{grid-template-columns:1fr;} aside.right{position:relative;width:auto} }
 
-  /* left card */
+  /* left card (image area) */
   .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
-  .drop{flex:1;min-height:320px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
+  .drop{
+    flex:1;min-height:280px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);
+    display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);
+    cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent);
+  }
   input[type=file]{display:none}
-  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
+  .canvas-wrap{margin-top:14px;display:none}
+  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:720px;object-fit:contain;background:transparent}
 
-  /* right panel */
+  /* right panel (Tools-like) */
   aside.right{align-self:start}
-  .panel{padding:16px;border-radius:14px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
   .panel h3{margin:0 0 8px 0;font-weight:900}
   .muted{color:var(--muted);font-size:13px}
 
   .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
   .settings .small{font-size:13px;color:var(--muted)}
 
-  /* palette swatches (bigger/rounded) */
+  /* palette swatches */
   .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
   @media(min-width:480px){ .palette{grid-template-columns:repeat(1,1fr)} }
   .swatch{
-    height:96px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:16px;color:var(--text);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.04);
+    height:92px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:18px;color:var(--text);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;border:1px solid rgba(0,0,0,0.04);
     transition:transform .14s ease, box-shadow .14s ease;
   }
   .swatch:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(3,12,30,0.12) }
-  .sw-left{display:flex;flex-direction:column;gap:8px;z-index:2}
-  .sw-hex{font-weight:900;font-size:18px;text-shadow:0 1px 0 rgba(255,255,255,0.15)}
-  .sw-pct{font-weight:800;color:var(--muted);font-size:14px}
-  .sw-copy{align-self:flex-end;padding:10px 12px;border-radius:999px;background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:2}
+  .sw-left{display:flex;flex-direction:column;gap:6px;z-index:2}
+  .sw-hex{font-weight:900;color:inherit;font-size:18px;text-shadow:0 1px 0 rgba(255,255,255,0.18)}
+  .sw-pct{font-weight:800;color:var(--muted);font-size:13px}
+  .sw-copy{align-self:flex-end;padding:9px 12px;border-radius:999px;background:rgba(255,255,255,0.94);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:3}
+  .sw-copy:active{transform:translateY(1px)}
 
-  /* overlay gradient (subtle) */
-  .swatch::after{
-    content:""; position:absolute; inset:0; border-radius:16px; pointer-events:none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-    mix-blend-mode: overlay;
-  }
-
-  /* info tiles */
-  .info-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
-  @media(max-width:980px){ .info-row{grid-template-columns:1fr} }
-  .info{
-    padding:16px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04);
-  }
-  .info h4{margin:0 0 8px 0}
-  .pr-badge{
-    position:fixed;left:18px;bottom:18px;width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999;
-  }
-  @media(min-width:980px){ .pr-badge{display:none} }
+  /* how it works / details blocks */
+  .info-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:18px}
+  @media(min-width:980px){ .info-grid{grid-template-columns:1fr 1fr} }
+  .info-box{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));box-shadow:var(--shadow-lg);border:1px solid rgba(0,0,0,0.02)}
+  .info-box h4{margin:0 0 8px 0;font-size:16px}
+  .info-box p{margin:0;color:var(--muted);font-size:14px;line-height:1.4}
 
   footer{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));text-align:center;box-shadow:var(--shadow-lg)}
-  .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
+  footer .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
 
-  /* small tweaks */
+  /* small helpers */
   .row{display:flex;gap:8px;align-items:center}
   .flex-fill{flex:1}
-  .kbd{font-family:monospace;background:rgba(0,0,0,0.04);padding:6px 8px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -127,49 +120,74 @@
         </a>
       </div>
 
-      <div class="controls" role="navigation" aria-label="Header controls">
-        <select id="themeSelect" class="theme-ghost" aria-label="Theme select" title="Theme">
-          <option value="theme-ocean">Ocean</option>
-          <option value="theme-light">Light</option>
-          <option value="theme-dark">Dark</option>
-          <option value="theme-sunset">Sunset</option>
-        </select>
-        <button id="openSidebarBtn" class="theme-ghost" title="Open sidebar">☰</button>
-      </div>
-    </header>
-
-    <main>
-      <!-- LEFT: image area -->
-      <section class="card" aria-labelledby="mainTitle">
-        <div id="dropZone" class="drop" title="Click or drop an image">
-          <div id="mainTitle">
-            <div style="font-weight:900;font-size:18px">Drop an image here or click to choose</div>
-            <div class="muted" style="margin-top:8px">PNG / JPG / WEBP — processed locally in your browser (no upload).</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <!-- theme control (matches your calculator style) -->
+        <div style="position:relative">
+          <button id="themeBtn" class="theme-btn" aria-haspopup="true" aria-expanded="false">Ocean <span class="caret"></span></button>
+          <div id="themeMenu" style="display:none;position:absolute;right:0;top:60px;background:var(--card);border-radius:12px;box-shadow:var(--shadow-sm);min-width:160px;overflow:hidden">
+            <button class="themeItem" data-theme="theme-ocean" style="display:block;padding:10px 12px;border:none;background:transparent;width:100%;text-align:left">Ocean</button>
+            <button class="themeItem" data-theme="theme-light" style="display:block;padding:10px 12px;border:none;background:transparent;width:100%;text-align:left">Light</button>
+            <button class="themeItem" data-theme="theme-dark" style="display:block;padding:10px 12px;border:none;background:transparent;width:100%;text-align:left">Dark</button>
+            <button class="themeItem" data-theme="theme-sunset" style="display:block;padding:10px 12px;border:none;background:transparent;width:100%;text-align:left">Sunset</button>
           </div>
         </div>
 
+        <!-- sidebar trigger (keeps Calculator's behavior) -->
+        <button id="openSidebarBtn" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none;">☰</button>
+      </div>
+    </header>
+
+    <!-- hero + how it works -->
+    <section style="margin-top:16px;">
+      <div class="card" aria-labelledby="heroTitle">
+        <h1 id="heroTitle" style="margin:0;font-size:22px;font-weight:900">Extract colors from any image — private, client-side</h1>
+        <p style="margin-top:8px;color:var(--muted)">Drop an image or pick a pixel. Everything happens in your browser — no upload, no server.</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <h4>How it works</h4>
+          <p>Choose an image (PNG, JPG, WEBP). The page samples pixels and runs a small k-means on your device to find the most common colors. Click any extracted swatch to copy the hex code.</p>
+        </div>
+        <div class="info-box">
+          <h4>Privacy & Performance</h4>
+          <p>Images never leave your device — we use <strong>FileReader</strong> and canvas APIs. Sampling is adaptive so large photos are fast on mobile.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- main content -->
+    <main>
+      <!-- left: uploader + canvas -->
+      <section class="card" aria-labelledby="uploadTitle">
+        <div id="dropZone" class="drop" title="Click or drop an image" role="button" aria-label="Upload image">
+          <div>
+            <div style="font-weight:900" id="uploadTitle">Drop an image here or click to choose</div>
+            <div class="muted" style="margin-top:8px">PNG / JPG / WEBP — processed locally in your browser (no upload).</div>
+          </div>
+        </div>
         <input id="fileInput" type="file" accept="image/*" />
 
-        <div id="canvasWrap" style="margin-top:14px;display:none">
+        <div id="canvasWrap" class="canvas-wrap" style="margin-top:14px;display:none">
           <canvas id="imageCanvas" aria-label="Loaded image"></canvas>
+
           <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px">
             <div class="muted small">Click the image to pick a pixel — it will be added to the top of the palette.</div>
             <div class="row">
-              <button id="zoomIn" class="theme-ghost">Zoom +</button>
-              <button id="zoomOut" class="theme-ghost">Zoom -</button>
-              <button id="clear" class="theme-ghost">Clear</button>
+              <button id="zoomIn" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Zoom +</button>
+              <button id="zoomOut" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Zoom -</button>
+              <button id="clear" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Clear</button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- RIGHT: palette and controls -->
+      <!-- right: palette panel -->
       <aside class="right" id="rightPanel">
         <div class="panel" role="complementary" aria-label="Palette panel">
-          <div style="display:flex;gap:12px;align-items:center">
+          <div style="display:flex;align-items:center;gap:12px">
             <h3 style="margin:0">Palette</h3>
             <div class="flex-fill"></div>
-            <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12)">PR</div>
           </div>
 
           <div class="muted" style="margin-top:8px">Extracted colors — click <strong>Copy</strong> to copy HEX.</div>
@@ -185,286 +203,309 @@
 
           <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
             <button id="extractBtn" class="theme-btn">Extract Palette</button>
-            <button id="exportJSON" class="theme-ghost">Export JSON</button>
-            <button id="downloadPng" class="theme-ghost">Download Pal PNG</button>
-            <button id="copyAll" class="theme-ghost" title="Copy all hex">Copy All</button>
+            <button id="exportJSON" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Export JSON</button>
+            <button id="downloadPng" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Download Pal PNG</button>
+            <button id="copyAll" class="theme-btn" style="background:var(--glass); color:var(--text); box-shadow:none">Copy All</button>
           </div>
 
-          <div class="muted" style="margin-top:12px;font-size:13px">Tip: fewer colors = cleaner palettes. Click any swatch to add that exact pixel to the top of the palette.</div>
-        </div>
-
-        <!-- Info / help tiles -->
-        <div class="info-row" style="margin-top:16px">
-          <div class="info">
-            <h4>How it works</h4>
-            <p class="muted" style="margin:0">Everything runs locally in your browser. We sample pixels from your image, cluster them with k-means, and show the most common colors. No image leaves your device.</p>
-          </div>
-          <div class="info">
-            <h4>Tips</h4>
-            <ul style="margin:0 0 0 18px;color:var(--muted)">
-              <li>Use lower k for simpler palettes (2–6).</li>
-              <li>Click an area in the image to add an exact pixel color to the palette.</li>
-              <li>If your image is very large, the sampler downsamples for speed.</li>
-            </ul>
-          </div>
+          <div class="muted" style="margin-top:12px;font-size:13px">Tip: use fewer colors for simpler palettes. Sampling is optimized for speed — large images are downsampled automatically.</div>
         </div>
       </aside>
     </main>
 
-    <!-- mobile PR badge -->
-    <div class="pr-badge" title="PirateRuler">PR</div>
-
-    <footer style="margin-top:22px">
+    <footer>
       <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
       <div style="height:12px"></div>
-      <small class="muted">© <span id="year"></span> PirateRuler — private & fast — Backup & resources: pirateruler.com</small>
+      <small class="muted">© <span id="year"></span> PirateRuler — private & fast</small>
     </footer>
   </div>
 
-  <!-- Sidebar (shared with tools) -->
-  <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true" style="position:fixed;top:0;right:0;height:100vh;width:360px;transform:translateX(120%);transition:transform .28s;z-index:120;background:var(--card);box-shadow:-40px 0 80px rgba(2,8,20,0.25);padding:18px;border-left:1px solid rgba(0,0,0,0.04);overflow:auto;border-radius:0 0 0 14px">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button id="closeSidebar" class="theme-ghost">Close</button></div>
-    <h3 style="margin:6px 6px 6px 0">PirateRuler Links</h3>
+  <!-- sidebar (same as Calculator behavior) -->
+  <aside id="sidebar" class="sidebar" style="position:fixed;top:0;right:0;height:100vh;width:360px;transform:translateX(120%);transition:transform .28s;background:var(--card);padding:20px;border-left:1px solid rgba(0,0,0,0.04);box-shadow:-40px 0 80px rgba(2,8,20,0.25);border-radius:0 0 0 14px;overflow:auto;z-index:90" role="dialog" aria-modal="true" aria-hidden="true">
+    <div style="display:flex;justify-content:flex-end"><button id="closeSidebar" style="padding:8px 10px;border-radius:10px;border:none;background:var(--glass);cursor:pointer">Close</button></div>
+    <h3>PirateRuler Links</h3>
     <p class="muted">Quick links & backup resources</p>
-    <nav style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
-      <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer" class="muted" style="padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02));">About — PirateRuler</a>
-      <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer" class="muted" style="padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02));">Privacy Policy</a>
-      <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer" class="muted" style="padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02));">Contact</a>
-      <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer" class="muted" style="padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02));">Terms</a>
+    <nav style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+      <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
+      <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+      <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
+      <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
     </nav>
-    <div style="margin-top:16px;color:var(--muted)">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
+    <div style="margin-top:18px;color:var(--muted);font-size:13px">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank">pirateruler.com</a></div>
   </aside>
 
 <script>
-  /* ---------- year and theme ---------- */
-  document.getElementById('year').textContent = new Date().getFullYear();
-  const root = document.documentElement;
-  const themeSelect = document.getElementById('themeSelect');
-  const savedTheme = localStorage.getItem('pr-theme') || 'theme-ocean';
-  themeSelect.value = savedTheme;
-  applyTheme(savedTheme);
-  themeSelect.addEventListener('change', (e)=> { applyTheme(e.target.value); localStorage.setItem('pr-theme', e.target.value); });
-  function applyTheme(cls){
-    ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c));
-    root.classList.add(cls);
-  }
+/* ---------- init ---------- */
+document.getElementById('year').textContent = new Date().getFullYear();
+const root = document.documentElement;
 
-  /* ---------- elements ---------- */
-  const drop = document.getElementById('dropZone');
-  const fileIn = document.getElementById('fileInput');
-  const canvas = document.getElementById('imageCanvas');
-  const ctx = canvas.getContext('2d', { willReadFrequently:true });
-  const canvasWrap = document.getElementById('canvasWrap');
-  const kRange = document.getElementById('kRange');
-  const kValue = document.getElementById('kValue');
-  const paletteEl = document.getElementById('palette');
-  const extractBtn = document.getElementById('extractBtn');
-  const exportJSON = document.getElementById('exportJSON');
-  const downloadPng = document.getElementById('downloadPng');
-  const clearBtn = document.getElementById('clear');
-  const zoomIn = document.getElementById('zoomIn');
-  const zoomOut = document.getElementById('zoomOut');
-  const copyAll = document.getElementById('copyAll');
+/* ---------- theme dropdown ---------- */
+const themeBtn = document.getElementById('themeBtn');
+const themeMenu = document.getElementById('themeMenu');
+const themeItems = Array.from(document.querySelectorAll('.themeItem'));
 
-  let img = new Image();
-  let imgLoaded = false;
-  let scale = 1;
-  let lastPalette = [];
+const saved = localStorage.getItem('pr-theme') || 'theme-ocean';
+applyTheme(saved);
 
-  /* ---------- drag & choose ---------- */
-  drop.addEventListener('click', ()=> fileIn.click());
-  drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
-  drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
-  drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
+themeBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = themeMenu.style.display === 'block';
+  themeMenu.style.display = open ? 'none' : 'block';
+  themeBtn.setAttribute('aria-expanded', String(!open));
+});
+document.addEventListener('click', ()=> { themeMenu.style.display='none'; themeBtn.setAttribute('aria-expanded','false'); });
 
-  fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+themeItems.forEach(it => it.addEventListener('click', (e) => {
+  const cls = e.currentTarget.dataset.theme;
+  applyTheme(cls);
+  localStorage.setItem('pr-theme', cls);
+  themeMenu.style.display = 'none';
+}));
 
-  function handleFile(file){
-    if(!file.type.startsWith('image/')) return alert('Choose an image file.');
-    const url = URL.createObjectURL(file);
-    loadImage(url);
-  }
+function applyTheme(cls){
+  ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c => root.classList.remove(c));
+  root.classList.add(cls);
+  // set visible text on button (beauty)
+  let label = 'Ocean';
+  if(cls === 'theme-light') label = 'Light';
+  if(cls === 'theme-dark') label = 'Dark';
+  if(cls === 'theme-sunset') label = 'Sunset';
+  themeBtn.firstChild && (themeBtn.firstChild.textContent = label);
+  // small update to button text (some browsers don't show firstChild span)
+  themeBtn.childNodes[0].nodeValue = label + ' ';
+}
 
-  /* ---------- image load & draw ---------- */
-  function loadImage(src){
-    img = new Image();
-    // DON'T set crossOrigin when using createObjectURL (can taint canvas unexpectedly)
-    img.onload = ()=> {
-      // fit canvas to available area but keep resolution comfortable
-      const maxW = Math.min(1200, window.innerWidth - 420);
-      const maxH = 800;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      const ratio = Math.min(1, maxW / w, maxH / h);
-      w = Math.max(200, Math.round(w * ratio));
-      h = Math.max(200, Math.round(h * ratio));
-      scale = 1;
-      canvas.width = w; canvas.height = h;
-      ctx.clearRect(0,0,w,h);
-      ctx.drawImage(img, 0, 0, w, h);
-      canvasWrap.style.display = 'block';
-      imgLoaded = true;
-      // auto extract default palette slightly delayed so browser updates UI
-      setTimeout(()=> extractPalette(), 160);
-    };
-    img.onerror = ()=> alert('Could not load image. Try another file.');
-    img.src = src;
-  }
+/* ---------- sidebar ---------- */
+const sidebar = document.getElementById('sidebar');
+const openSidebarBtn = document.getElementById('openSidebarBtn');
+const closeSidebar = document.getElementById('closeSidebar');
+openSidebarBtn.addEventListener('click', openSidebar);
+closeSidebar.addEventListener('click', closeSB);
+function openSidebar(){ sidebar.style.transform = 'translateX(0)'; sidebar.setAttribute('aria-hidden','false'); }
+function closeSB(){ sidebar.style.transform = 'translateX(120%)'; sidebar.setAttribute('aria-hidden','true'); }
+window.addEventListener('resize', ()=> { if(window.innerWidth < 420) sidebar.style.width = '94vw'; else sidebar.style.width = '360px'; });
+if(window.innerWidth < 420) sidebar.style.width = '94vw'; else sidebar.style.width = '360px';
 
-  /* ---------- zoom controls ---------- */
-  zoomIn.addEventListener('click', ()=> {
-    if(!imgLoaded) return;
-    scale = Math.min(3, scale + 0.25);
-    resizeCanvas();
-  });
-  zoomOut.addEventListener('click', ()=> {
-    if(!imgLoaded) return;
-    scale = Math.max(0.5, scale - 0.25);
-    resizeCanvas();
-  });
-  function resizeCanvas(){
-    if(!imgLoaded) return;
-    const maxW = Math.min(1200, window.innerWidth - 420);
-    const w = Math.round(Math.min(img.naturalWidth, maxW) * scale);
-    const h = Math.round(w * (img.naturalHeight / img.naturalWidth));
+/* ---------- image load & UI ---------- */
+const drop = document.getElementById('dropZone');
+const fileIn = document.getElementById('fileInput');
+const canvas = document.getElementById('imageCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently:true });
+const canvasWrap = document.getElementById('canvasWrap');
+const kRange = document.getElementById('kRange');
+const kValue = document.getElementById('kValue');
+const paletteEl = document.getElementById('palette');
+const extractBtn = document.getElementById('extractBtn');
+const exportJSON = document.getElementById('exportJSON');
+const downloadPng = document.getElementById('downloadPng');
+const clearBtn = document.getElementById('clear');
+const zoomIn = document.getElementById('zoomIn');
+const zoomOut = document.getElementById('zoomOut');
+const copyAll = document.getElementById('copyAll');
+
+let img = new Image();
+let imgLoaded = false;
+let scale = 1;
+let lastPalette = [];
+let imageDataURL = null;
+
+/* Drag & click */
+drop.addEventListener('click', ()=> fileIn.click());
+drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; });
+drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; });
+drop.addEventListener('drop', e=> { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
+
+fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file){
+  if(!file.type.startsWith('image/')) return alert('Choose an image file.');
+  // Use FileReader -> dataURL to avoid objectURL quirks on iOS
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    imageDataURL = ev.target.result;
+    loadImage(imageDataURL);
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Draw image onto canvas and keep it visible (do not revoke) */
+function loadImage(src){
+  img = new Image();
+  // do not set crossOrigin (local dataURL works fine and avoids CORS)
+  img.onload = ()=> {
+    // fit canvas but preserve reasonable resolution for sampling
+    const padding = 40;
+    const maxW = Math.min(1200, window.innerWidth - 420, window.innerWidth - padding);
+    const maxH = 720;
+    let w = img.naturalWidth, h = img.naturalHeight;
+    const ratio = Math.min(1, maxW / w, maxH / h);
+    w = Math.round(w * ratio); h = Math.round(h * ratio);
+    scale = 1;
     canvas.width = w; canvas.height = h;
     ctx.clearRect(0,0,w,h);
     ctx.drawImage(img, 0, 0, w, h);
-  }
+    canvasWrap.style.display = 'block';
+    imgLoaded = true;
+    // auto extract default palette (if any)
+    setTimeout(()=> extractPalette(), 140);
+  };
+  img.onerror = ()=> alert('Could not load image.');
+  img.src = src;
+}
 
-  /* ---------- palette extraction (k-means) ---------- */
-  kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
-  extractBtn.addEventListener('click', extractPalette);
+/* ---------- zoom ---------- */
+zoomIn.addEventListener('click', ()=> {
+  if(!imgLoaded) return;
+  scale = Math.min(2.5, scale + 0.25);
+  resizeCanvas();
+});
+zoomOut.addEventListener('click', ()=> {
+  if(!imgLoaded) return;
+  scale = Math.max(0.4, scale - 0.25);
+  resizeCanvas();
+});
+function resizeCanvas(){
+  if(!imgLoaded) return;
+  // keep within available width
+  const maxW = Math.min(1200, window.innerWidth - 420, window.innerWidth - 40);
+  const w = Math.round(Math.min(img.naturalWidth, maxW) * scale);
+  const h = Math.round(w * (img.naturalHeight / img.naturalWidth));
+  canvas.width = w; canvas.height = h;
+  ctx.clearRect(0,0,w,h);
+  ctx.drawImage(img, 0, 0, w, h);
+}
 
-  function extractPalette(){
-    if(!imgLoaded) return alert('Load an image first.');
-    // get image data safely
+/* ---------- sampling & kmeans ---------- */
+kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
+extractBtn.addEventListener('click', extractPalette);
+
+function extractPalette(){
+  if(!imgLoaded) return alert('Load an image first.');
+  try{
     const w = canvas.width, h = canvas.height;
-    let data;
-    try {
-      data = ctx.getImageData(0,0,w,h).data;
-    } catch (err) {
-      // if canvas is tainted or other error
-      return alert('Unable to read image pixels (this can happen with cross-origin images). Use a local file or a different image.');
-    }
-
+    const data = ctx.getImageData(0,0,w,h).data;
     const pixels = [];
-    // adaptive sampling to keep arrays small on large images
     const targetSamples = 40000;
     const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
-    // alpha threshold low so semi-transparent images still count
-    const ALPHA_MIN = 10;
     for(let y=0;y<h;y+=step){
       for(let x=0;x<w;x+=step){
         const i = (y*w + x)*4;
         const a = data[i+3];
-        if(a <= ALPHA_MIN) continue;
-        pixels.push([data[i], data[i+1], data[i+2]]);
+        if(a < 64) continue; // ignore near-transparent pixels
+        const r = data[i], g = data[i+1], b = data[i+2];
+        // skip pure white near-bound (optional) ? keep for accuracy
+        pixels.push([r,g,b]);
       }
     }
-    if(pixels.length === 0) return alert('No visible pixels found (image may be fully transparent).');
+    if(pixels.length === 0) return alert('No visible pixels found (image may be transparent).');
 
     const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
     const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
-    const items = centroids.map((c,i)=>({rgb:c, count:counts[i]})).sort((a,b)=>b.count-a.count);
+    // pair and filter any centroids with zero counts and normalize
+    const items = [];
+    for(let i=0;i<centroids.length;i++){
+      if(!counts[i] || counts[i] <= 0) continue;
+      const rgb = centroids[i];
+      if(!rgb || rgb.length !== 3) continue;
+      items.push({rgb, count: counts[i]});
+    }
+    if(items.length === 0) return alert('Could not compute palette — try reducing colors or use a different image.');
+    // sort by most common
+    items.sort((a,b)=> b.count - a.count);
+    const total = pixels.length;
     lastPalette = items.map(it => {
       const hex = rgbToHex(...it.rgb);
-      const pct = Math.round((it.count / pixels.length)*100);
+      const pct = Math.max(1, Math.round((it.count / total)*100));
       return {hex, rgb: it.rgb, pct};
-    }).filter(Boolean);
-
-    // fix situation where algorithm returns duplicates or #000000 due to edge cases:
-    // keep unique hexes and optionally move pure black/white lower if they dominate due to background
-    const uniq = [];
-    for(const it of lastPalette){
-      if(!uniq.some(u=>u.hex === it.hex)) uniq.push(it);
-    }
-    lastPalette = uniq.slice(0, 12);
-    renderPalette();
-  }
-
-  /* ---------- render palette ---------- */
-  function renderPalette(){
-    paletteEl.innerHTML = '';
-    if(!lastPalette.length) { paletteEl.innerHTML = '<div class="muted">No colors extracted yet</div>'; return; }
-    lastPalette.forEach(p => {
-      const sw = document.createElement('div');
-      sw.className = 'swatch';
-      sw.style.background = p.hex;
-      const textColor = getContrastColor(p.hex);
-      sw.style.color = textColor;
-      // content
-      sw.innerHTML = `
-        <div class="sw-left">
-          <div class="sw-hex">${p.hex}</div>
-          <div class="sw-pct">${p.pct}%</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;z-index:2">
-          <button class="sw-copy" data-hex="${p.hex}">Copy</button>
-        </div>
-      `;
-      // when user clicks a swatch, copy color and flash
-      paletteEl.appendChild(sw);
     });
+    // limit to requested K
+    lastPalette = lastPalette.slice(0, k);
+    renderPalette();
+  }catch(e){
+    console.error(e);
+    alert('Palette extraction failed — try a smaller image or a different file.');
+  }
+}
 
-    // attach copy handlers
-    paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const hex = e.currentTarget.dataset.hex;
-        navigator.clipboard.writeText(hex).then(()=> {
-          const prev = e.currentTarget.textContent;
-          e.currentTarget.textContent = 'Copied';
-          setTimeout(()=> e.currentTarget.textContent = prev, 900);
-        }).catch(()=> alert('Copy failed'));
+/* ---------- render palette ---------- */
+function renderPalette(){
+  paletteEl.innerHTML = '';
+  lastPalette.forEach(p => {
+    // make sure hex is valid
+    if(!p.hex || p.hex.length !== 7) p.hex = '#000000';
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.style.background = p.hex;
+    const textColor = getContrastColor(p.hex);
+    sw.style.color = textColor;
+    sw.innerHTML = `
+      <div class="sw-left">
+        <div class="sw-hex">${p.hex}</div>
+        <div class="sw-pct">${p.pct}%</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;z-index:2">
+        <button class="sw-copy" data-hex="${p.hex}">Copy</button>
+      </div>
+    `;
+    paletteEl.appendChild(sw);
+  });
+
+  // copy hook
+  paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const hex = e.currentTarget.dataset.hex;
+      navigator.clipboard.writeText(hex).then(()=> {
+        const prev = e.currentTarget.textContent;
+        e.currentTarget.textContent = 'Copied';
+        setTimeout(()=> e.currentTarget.textContent = prev, 900);
       });
     });
-  }
-
-  /* ---------- export / download ---------- */
-  exportJSON.addEventListener('click', ()=>{
-    if(!lastPalette.length) return alert('No palette to export.');
-    const data = {palette: lastPalette, createdAt: new Date().toISOString()};
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   });
+}
 
-  downloadPng.addEventListener('click', ()=> {
-    if(!lastPalette.length) return alert('No palette to download.');
-    const sw = Math.max(120, Math.floor(1200 / lastPalette.length));
-    const w = sw * lastPalette.length, h = 220;
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const g = c.getContext('2d');
-    lastPalette.forEach((p,i)=>{
-      g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
-      g.fillStyle = getContrastColor(p.hex); g.font = '700 16px Inter, Arial'; g.textAlign = 'center';
-      g.fillText(p.hex, i*sw + sw/2, h - 24);
-    });
-    const url = c.toDataURL('image/png');
-    const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
+/* ---------- export / download ---------- */
+exportJSON.addEventListener('click', ()=>{
+  if(!lastPalette.length) return alert('No palette to export.');
+  const data = {palette: lastPalette, createdAt: new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+downloadPng.addEventListener('click', ()=> {
+  if(!lastPalette.length) return alert('No palette to download.');
+  const sw = Math.max(80, Math.floor(900 / lastPalette.length));
+  const w = sw * lastPalette.length, h = 160;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  lastPalette.forEach((p,i)=>{
+    g.fillStyle = p.hex; g.fillRect(i*sw, 0, sw, h);
+    g.fillStyle = getContrastColor(p.hex); g.font = '700 14px Inter, Arial'; g.textAlign = 'center';
+    g.fillText(p.hex, i*sw + sw/2, h - 18);
   });
-
-  /* copy all */
-  copyAll.addEventListener('click', ()=> {
-    if(!lastPalette.length) return;
-    const all = lastPalette.map(p=>p.hex).join(', ');
-    navigator.clipboard.writeText(all).then(()=> {
-      copyAll.textContent = 'Copied';
-      setTimeout(()=> copyAll.textContent = 'Copy All', 1200);
-    }).catch(()=> alert('Copy failed'));
+  const url = c.toDataURL('image/png');
+  const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
+});
+copyAll.addEventListener('click', ()=> {
+  if(!lastPalette.length) return;
+  const all = lastPalette.map(p=>p.hex).join(', ');
+  navigator.clipboard.writeText(all).then(()=> {
+    copyAll.textContent = 'Copied';
+    setTimeout(()=> copyAll.textContent = 'Copy All', 1200);
   });
+});
 
-  /* ---------- canvas click to sample 1 pixel ---------- */
-  canvas.addEventListener('click', (e)=>{
-    if(!imgLoaded) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-    const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
-    let px;
-    try { px = ctx.getImageData(x, y, 1, 1).data; }
-    catch(e){ return alert('Could not read pixel (security restriction). Use another image.'); }
+/* ---------- sample single pixel ---------- */
+canvas.addEventListener('click', (e)=>{
+  if(!imgLoaded) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+  const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+  try{
+    const px = ctx.getImageData(x, y, 1, 1).data;
     const hex = rgbToHex(px[0], px[1], px[2]);
-    // add to top of palette and dedupe
+    // prepend to palette
     lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
+    // de-dup by hex
     const uniq = [];
     for(const it of lastPalette){
       if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
@@ -472,109 +513,93 @@
     }
     lastPalette = uniq;
     renderPalette();
-  });
-
-  /* ---------- clear ---------- */
-  clearBtn.addEventListener('click', ()=> {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    canvas.width = canvas.height = 0;
-    canvasWrap.style.display = 'none';
-    imgLoaded = false;
-    lastPalette = [];
-    paletteEl.innerHTML = '';
-    fileIn.value = '';
-  });
-
-  /* ---------- helpers ---------- */
-  function getContrastColor(hex){
-    const c = hex.replace('#','');
-    const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
-    const yiq = (r*299 + g*587 + b*114)/1000;
-    return (yiq >= 150) ? '#111' : '#fff';
+  }catch(err){
+    console.error(err);
   }
-  function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
-  function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
+});
 
-  /* small fast k-means (client-side) */
-  function kmeans(samples, k, opts={}){
-    const maxIter = opts.maxIter || 20;
-    // initialize centroids by random unique samples
-    const centroids = [];
-    const used = new Set();
-    while(centroids.length < k){
-      const idx = Math.floor(Math.random()*samples.length);
-      if(used.has(idx)) continue;
-      used.add(idx);
-      centroids.push(samples[idx].slice());
-    }
-    const counts = new Array(k).fill(0);
-    const assignments = new Array(samples.length).fill(-1);
-    for(let iter=0; iter<maxIter; iter++){
-      let changed = false;
-      for(let i=0;i<samples.length;i++){
-        const s = samples[i];
-        let best=0, bestd=dist2(s, centroids[0]);
-        for(let j=1;j<k;j++){
-          const d = dist2(s, centroids[j]);
-          if(d < bestd){ bestd = d; best = j; }
-        }
-        if(assignments[i] !== best){ assignments[i] = best; changed = true; }
-      }
-      const sums = new Array(k).fill(0).map(()=>[0,0,0]);
-      const cnts = new Array(k).fill(0);
-      for(let i=0;i<samples.length;i++){
-        const a = assignments[i];
-        const s = samples[i];
-        sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
-        cnts[a] ++;
-      }
-      for(let j=0;j<k;j++){
-        if(cnts[j] === 0){
-          const idx = Math.floor(Math.random()*samples.length);
-          centroids[j] = samples[idx].slice();
-          counts[j] = 1;
-        } else {
-          centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
-          counts[j] = cnts[j];
-        }
-      }
-      if(!changed) break;
-    }
-    return {centroids, counts};
+/* ---------- clear ---------- */
+clearBtn.addEventListener('click', ()=> {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  canvas.width = canvas.height = 0;
+  canvasWrap.style.display = 'none';
+  imgLoaded = false;
+  lastPalette = [];
+  paletteEl.innerHTML = '';
+  // keep imageDataURL so user can re-load without re-upload
+});
+
+/* ---------- helpers ---------- */
+function getContrastColor(hex){
+  if(!hex) return '#111';
+  const c = hex.replace('#','');
+  const r = parseInt(c.substr(0,2),16)||0, g = parseInt(c.substr(2,2),16)||0, b = parseInt(c.substr(4,2),16)||0;
+  const yiq = (r*299 + g*587 + b*114)/1000;
+  return (yiq >= 150) ? '#111' : '#fff';
+}
+
+/* small k-means implementation (robust) */
+function kmeans(samples, k, opts={}){
+  const maxIter = opts.maxIter || 20;
+  // if sample pool smaller than k, reduce k
+  k = Math.min(k, Math.max(1, Math.floor(samples.length/5) || k));
+  const centroids = [];
+  const used = new Set();
+  while(centroids.length < k){
+    const idx = Math.floor(Math.random()*samples.length);
+    if(used.has(idx)) continue;
+    used.add(idx);
+    centroids.push(samples[idx].slice());
   }
-  function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
+  const counts = new Array(k).fill(0);
+  const assignments = new Array(samples.length).fill(-1);
+  for(let iter=0; iter<maxIter; iter++){
+    let changed = false;
+    // assign
+    for(let i=0;i<samples.length;i++){
+      const s = samples[i];
+      let best = 0;
+      let bestd = dist2(s, centroids[0]);
+      for(let j=1;j<k;j++){
+        const d = dist2(s, centroids[j]);
+        if(d < bestd){ bestd = d; best = j; }
+      }
+      if(assignments[i] !== best){ assignments[i] = best; changed = true; }
+    }
+    // accumulate sums
+    const sums = new Array(k).fill(0).map(()=>[0,0,0]);
+    const cnts = new Array(k).fill(0);
+    for(let i=0;i<samples.length;i++){
+      const a = assignments[i];
+      const s = samples[i];
+      sums[a][0] += s[0]; sums[a][1] += s[1]; sums[a][2] += s[2];
+      cnts[a] ++;
+    }
+    // recompute centroids
+    for(let j=0;j<k;j++){
+      if(cnts[j] === 0){
+        // re-seed empty centroid (pick a random sample)
+        const idx = Math.floor(Math.random()*samples.length);
+        centroids[j] = samples[idx].slice();
+        counts[j] = 1;
+      } else {
+        centroids[j] = [ Math.round(sums[j][0]/cnts[j]), Math.round(sums[j][1]/cnts[j]), Math.round(sums[j][2]/cnts[j]) ];
+        counts[j] = cnts[j];
+      }
+    }
+    if(!changed) break;
+  }
+  return {centroids, counts};
+}
+function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
+function componentToHex(c){ const s = Math.max(0,Math.min(255, Math.round(c))).toString(16); return s.length==1 ? '0'+s : s; }
+function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-  /* ---------- resize handling ---------- */
-  window.addEventListener('resize', ()=> {
-    if(!imgLoaded) return;
-    resizeCanvas();
-  });
-
-  /* ---------- sidebar open/close ---------- */
-  const sidebar = document.getElementById('sidebar');
-  const openSidebarBtn = document.getElementById('openSidebarBtn');
-  const closeSidebar = document.getElementById('closeSidebar');
-  function openSidebar(){ sidebar.style.transform='translateX(0)'; sidebar.setAttribute('aria-hidden','false'); }
-  function closeSB(){ sidebar.style.transform='translateX(120%)'; sidebar.setAttribute('aria-hidden','true'); }
-  openSidebarBtn.addEventListener('click', ()=> {
-    if(window.innerWidth < 980){
-      // on small screens toggle panel visibility
-      if(sidebar.style.transform === 'translateX(0)'){ closeSB(); } else openSidebar();
-    } else openSidebar();
-  });
-  closeSidebar.addEventListener('click', closeSB);
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSB(); });
-  // close when click outside
-  document.addEventListener('click', function(e){
-    if(sidebar.style.transform !== 'translateX(0)') return;
-    const inside = sidebar.contains(e.target) || openSidebarBtn.contains(e.target);
-    if(!inside) closeSB();
-  });
-
-  /* small UX: hover effects on drop zone */
-  drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
-  drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
-
+/* ---------- misc/responsive fixes ---------- */
+window.addEventListener('resize', ()=> {
+  if(!imgLoaded) return;
+  resizeCanvas();
+});
 </script>
 </body>
 </html>
