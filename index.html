@@ -4,11 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Color Finder — PirateRuler</title>
-<meta name="description" content="Color Finder — extract palettes from images in the browser. No APIs. Private & fast." />
 <meta name="theme-color" content="#f7fbff" />
 <link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect rx="14" width="64" height="64" fill="%236b7dff"/><text x="50%" y="50%" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="26" text-anchor="middle" alignment-baseline="central" fill="white">PR</text></svg>'>
 <style>
-  /* PR design tokens */
+  /* === PirateRuler tokens & themes (keeps parity with Calculator site) === */
   :root{
     --bg:#f3f7fb; --card:#ffffff; --muted:#6b7480; --text:#0b2130;
     --accent-start:#6b7dff; --accent-end:#0bb3ff;
@@ -19,11 +18,10 @@
     --content-max:1280px;
   }
 
-  /* themes */
-  html.theme-light { --bg:#f3f7fb; --card:#fff; --muted:#6b7480; --text:#0b2130; --accent-start:#6b7dff; --accent-end:#0bb3ff; --glass: rgba(11,17,28,0.04); --shadow-lg: 0 18px 50px rgba(3,12,30,0.18); --shadow-sm: 0 8px 24px rgba(3,12,30,0.08); }
-  html.theme-dark  { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --accent-start:#5ab3ff; --accent-end:#6b7dff; --glass: rgba(255,255,255,0.02); --shadow-lg: 0 18px 50px rgba(0,0,0,0.6); --shadow-sm: 0 8px 24px rgba(0,0,0,0.45); }
-  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; --glass: rgba(6,50,66,0.03); --shadow-lg: 0 18px 50px rgba(3,12,30,0.08); --shadow-sm: 0 8px 24px rgba(3,12,30,0.06); }
-  html.theme-sunset{ --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; --glass: rgba(42,16,32,0.03); --shadow-lg: 0 18px 50px rgba(50,10,20,0.06); --shadow-sm: 0 8px 24px rgba(50,10,20,0.04); }
+  html.theme-light { --bg:#f3f7fb; --card:#fff; --muted:#6b7480; --text:#0b2130; --accent-start:#6b7dff; --accent-end:#0bb3ff; --glass: rgba(11,17,28,0.04); }
+  html.theme-dark  { --bg:#071225; --card:#061028; --muted:#98a7bf; --text:#e9f1ff; --accent-start:#5ab3ff; --accent-end:#6b7dff; --glass: rgba(255,255,255,0.02); }
+  html.theme-ocean { --bg:#e8f7fb; --card:#ffffff; --muted:#4f6b75; --text:#063242; --accent-start:#00c2d1; --accent-end:#2b9fff; --glass: rgba(6,50,66,0.03); }
+  html.theme-sunset{ --bg:#fff6f8; --card:#fff; --muted:#7a6b77; --text:#2a1020; --accent-start:#ff7aa2; --accent-end:#ffb86b; --glass: rgba(42,16,32,0.03); }
 
   *{box-sizing:border-box}
   body{
@@ -36,10 +34,10 @@
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--content-max);margin:14px auto;padding:16px}
 
-  /* header - match other site */
+  /* Header */
   header.header{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:14px; border-radius:14px;
+    padding:12px; border-radius:12px;
     background:linear-gradient(90deg, rgba(107,125,255,0.06), rgba(11,179,255,0.02));
     box-shadow:var(--shadow-sm);
   }
@@ -52,17 +50,22 @@
   .controls{display:flex;gap:10px;align-items:center}
   .btn{padding:9px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:800;background:transparent}
   .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text)}
-  .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff}
+  .btn.primary{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff;box-shadow:0 8px 30px rgba(11,107,255,0.12)}
 
-  /* sidebar (slideout) like Calculator */
-  .sidebar { position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s cubic-bezier(.2,.9,.3,1); z-index:90; background:var(--card); box-shadow: -40px 0 80px rgba(2,8,20,0.25); padding:20px; border-left:1px solid rgba(0,0,0,0.04); overflow:auto; border-radius:0 0 0 14px; }
-  .sidebar.open { transform:translateX(0); }
-  .sidebar .close { display:flex; justify-content:flex-end }
-  .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
-  .nav-list a{display:block;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02)); color:var(--text); font-weight:600}
-  .backup{margin-top:18px;color:var(--muted);font-size:13px}
+  /* theme-dropdown style (glowy button like Calculator) */
+  .theme-btn {
+    padding:9px 14px;border-radius:999px;border:none;cursor:pointer;font-weight:800;
+    background:linear-gradient(90deg,var(--accent-start),var(--accent-end));
+    color:white; position:relative; box-shadow:0 8px 30px rgba(11,107,255,0.18);
+  }
+  .theme-btn.glow { box-shadow: 0 10px 40px rgba(107,125,255,0.18), 0 0 32px rgba(107,125,255,0.06) inset; }
 
-  /* main layout */
+  .theme-list{position:absolute; right:0; top:48px; background:var(--card); border-radius:10px; box-shadow:var(--shadow-sm); padding:8px; display:none; min-width:140px; z-index:1000;}
+  .theme-list.open{display:block}
+  .theme-item{padding:8px 10px; cursor:pointer; border-radius:8px; font-weight:700; color:var(--muted)}
+  .theme-item:hover{ background:linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.03)); color:var(--text) }
+
+  /* layout */
   main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;margin-top:18px;min-height:calc(100vh - 320px)}
   @media(max-width:980px){ main{grid-template-columns:1fr; } aside.right{position:relative;width:auto} }
 
@@ -70,9 +73,18 @@
   .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
   .drop{flex:1;min-height:260px;border-radius:12px;border:2px dashed rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:linear-gradient(180deg, rgba(255,255,255,0.7), transparent)}
   input[type=file]{display:none}
-  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:720px;object-fit:contain;background:transparent}
+  canvas{display:block;border-radius:12px;width:100%;height:auto;max-height:640px;object-fit:contain;background:transparent}
 
-  /* palette styles */
+  /* right panel */
+  aside.right{align-self:start}
+  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
+  .panel h3{margin:0 0 8px 0;font-weight:900}
+  .muted{color:var(--muted);font-size:13px}
+
+  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .settings .small{font-size:13px;color:var(--muted)}
+
+  /* palette grid and swatch style (Tools-like) */
   .palette{display:grid;grid-template-columns:repeat(1,1fr);gap:12px;margin-top:12px}
   @media(min-width:480px){ .palette{grid-template-columns:repeat(2,1fr)} }
   @media(min-width:720px){ .palette{grid-template-columns:repeat(2,1fr)} }
@@ -88,61 +100,28 @@
   .sw-copy{align-self:flex-end;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.06);font-weight:800;cursor:pointer;z-index:2}
   .sw-copy:active{transform:translateY(1px)}
 
-  .swatch::after{
-    content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-    mix-blend-mode: overlay;
-  }
+  .swatch::after{ content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03)); mix-blend-mode: overlay; }
 
-  /* right panel (feature + palette controls) */
-  aside.right{align-self:start}
-  .panel{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow-sm);border:1px solid rgba(0,0,0,0.04)}
-  .panel h3{margin:0 0 8px 0;font-weight:900}
-  .muted{color:var(--muted);font-size:13px}
-
-  .settings{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
-  .settings .small{font-size:13px;color:var(--muted)}
-
-  /* pr small badge */
-  .pr-badge{
-    position:fixed;left:18px;bottom:18px;width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);z-index:999;
-  }
-  @media(min-width:980px){ .pr-badge{display:none} }
-  .pr-sidebar{
-    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:0 10px 26px rgba(11,107,255,0.12);
-  }
-
-  /* features (six equal boxes) - same style as calculator */
-  .feature-panel{
-    background:var(--card); border:1px solid rgba(0,0,0,0.06); border-radius:14px; box-shadow:var(--shadow-sm); padding:12px;
-  }
-  @media(min-width:981px){
-    .feature-panel{ position:sticky; top:18px; max-height:calc(100vh - 36px); overflow:auto; }
-  }
-  .panel-title{font-weight:900; margin:6px 6px 12px 6px;}
-  .features{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  @media(max-width:700px){ .features{ grid-template-columns:1fr; } }
-
-  .feature{
-    display:flex; gap:14px; align-items:center; padding:16px; border-radius:12px; background:var(--card);
-    border:1px solid rgba(0,0,0,0.06); box-shadow:var(--shadow-sm); min-height:110px;
-  }
-  .f-icon{ width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center; font-weight:800; color:#fff; background:linear-gradient(135deg,var(--accent-start),var(--accent-end)); flex-shrink:0; }
-  .f-title{font-weight:800}
-  .f-desc{color:var(--muted); font-size:13px}
+  /* sidebar (same behaviour as tools/calculator) */
+  .sidebar { position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s cubic-bezier(.2,.9,.3,1); z-index:200; background:var(--card); box-shadow: -40px 0 80px rgba(2,8,20,0.25); padding:20px; border-left:1px solid rgba(0,0,0,0.04); overflow:auto; border-radius:0 0 0 14px; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar .close { display:flex; justify-content:flex-end }
+  .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
+  .nav-list a{display:block;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.02)); color:var(--text); font-weight:600}
+  .backup{margin-top:18px;color:var(--muted);font-size:13px}
 
   /* footer */
   footer{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.96));text-align:center;box-shadow:var(--shadow-lg)}
   footer .visit{padding:10px 18px;border-radius:999px;background:linear-gradient(90deg,#ff7aa2 0%, #6b7dff 100%);color:#fff;font-weight:800;text-decoration:none;display:inline-block}
+  html.theme-dark footer{background:linear-gradient(180deg, rgba(10,14,20,0.6), rgba(6,10,14,0.6));}
 
-  /* helpers */
+  /* small helpers */
   .row{display:flex;gap:8px;align-items:center}
   .flex-fill{flex:1}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- Header -->
     <header class="header" role="banner">
       <div class="brand">
         <a href="/" aria-label="Home" style="display:flex;align-items:center;gap:12px">
@@ -155,15 +134,16 @@
       </div>
 
       <div class="controls" role="navigation" aria-label="Header controls">
-        <div style="display:flex;gap:8px;align-items:center">
-          <select id="themeSelect" class="btn ghost" title="Theme selector" aria-label="Theme">
-            <option value="theme-light">Light</option>
-            <option value="theme-dark">Dark</option>
-            <option value="theme-ocean" selected>Ocean</option>
-            <option value="theme-sunset">Sunset</option>
-          </select>
-          <button id="openSidebarBtn" class="btn ghost" title="Open sidebar">☰</button>
+        <div style="position:relative;">
+          <button id="themeBtn" class="theme-btn glow" title="Theme selector">Ocean ▾</button>
+          <div id="themeList" class="theme-list" aria-hidden="true">
+            <div class="theme-item" data-theme="theme-light">Light</div>
+            <div class="theme-item" data-theme="theme-dark">Dark</div>
+            <div class="theme-item" data-theme="theme-ocean">Ocean</div>
+            <div class="theme-item" data-theme="theme-sunset">Sunset</div>
+          </div>
         </div>
+        <button id="openSidebarBtn" class="btn ghost" title="Open sidebar">☰</button>
       </div>
     </header>
 
@@ -182,7 +162,7 @@
         <div id="canvasWrap" style="margin-top:14px;display:none">
           <canvas id="imageCanvas" aria-label="Loaded image"></canvas>
           <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:10px">
-            <div class="muted small">Click the image to pick a pixel — it will appear at top of the palette.</div>
+            <div class="muted small">Click the image to pick a pixel — it will appear at the top of the palette.</div>
             <div class="row">
               <button id="zoomIn" class="btn ghost">Zoom +</button>
               <button id="zoomOut" class="btn ghost">Zoom -</button>
@@ -192,13 +172,14 @@
         </div>
       </section>
 
-      <!-- RIGHT: panel with palette & features -->
+      <!-- RIGHT: panel -->
       <aside class="right" id="rightPanel">
         <div class="panel" role="complementary" aria-label="Palette panel">
           <div style="display:flex;gap:12px;align-items:center">
             <h3 style="margin:0">Palette</h3>
             <div class="flex-fill"></div>
-            <div class="pr-sidebar" title="PirateRuler">PR</div>
+            <!-- small PR badge in sidebar (desktop) -->
+            <div class="pr-sidebar" title="PirateRuler" style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">PR</div>
           </div>
 
           <div class="muted" style="margin-top:8px">Extracted colors — click <strong>Copy</strong> to copy HEX.</div>
@@ -221,82 +202,23 @@
 
           <div class="muted" style="margin-top:12px;font-size:13px">Tip: use fewer colors for simpler palettes. Sampling is optimized for speed.</div>
         </div>
-
-        <div style="height:18px"></div>
-
-        <div class="feature-panel" role="complementary" aria-label="Features">
-          <div class="panel-title">Why PirateRuler tools?</div>
-          <div class="features">
-            <div class="feature">
-              <div class="f-icon">⚡</div>
-              <div>
-                <div class="f-title">Lightning fast</div>
-                <div class="f-desc">Client-side processing — instant results on mobile & desktop.</div>
-              </div>
-            </div>
-
-            <div class="feature">
-              <div class="f-icon" style="background:linear-gradient(135deg,#8ee36b,#2bbf6f)">🔒</div>
-              <div>
-                <div class="f-title">Private by design</div>
-                <div class="f-desc">No images leave your device — everything runs in your browser.</div>
-              </div>
-            </div>
-
-            <div class="feature">
-              <div class="f-icon" style="background:linear-gradient(135deg,#ffb86b,#ff6b7a)">🧰</div>
-              <div>
-                <div class="f-title">All-in-one</div>
-                <div class="f-desc">Extract, export, download and copy — no fuss.</div>
-              </div>
-            </div>
-
-            <div class="feature">
-              <div class="f-icon" style="background:linear-gradient(135deg,#c471ed,#7bffdd)">🌐</div>
-              <div>
-                <div class="f-title">Backup resources</div>
-                <div class="f-desc">If this page is offline, visit PirateRuler.com for backups.</div>
-              </div>
-            </div>
-
-            <div class="feature">
-              <div class="f-icon" style="background:linear-gradient(135deg,#7bd6ff,#6b7dff)">📱</div>
-              <div>
-                <div class="f-title">Mobile-first</div>
-                <div class="f-desc">Compact UI and sticky panel on larger screens.</div>
-              </div>
-            </div>
-
-            <div class="feature">
-              <div class="f-icon" style="background:linear-gradient(135deg,#ff7aa2,#6b7dff)">🔧</div>
-              <div>
-                <div class="f-title">Developer friendly</div>
-                <div class="f-desc">Lightweight, forkable and easy to customize.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="spacer"></div>
-
-          <div class="feature" style="min-height:unset; align-items:flex-start; padding:14px">
-            <div class="f-icon" style="background:linear-gradient(135deg,var(--accent-start),var(--accent-end))">PR</div>
-            <div>
-              <div class="f-title">PirateRuler</div>
-              <div class="f-desc" style="margin-top:6px">
-                <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About</a> ·
-                <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a> ·
-                <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
-              </div>
-            </div>
-          </div>
-        </div>
       </aside>
     </main>
 
-    <!-- mobile PR badge -->
-    <div class="pr-badge" title="PirateRuler">PR</div>
+    <!-- sidebar (same as Calculator) -->
+    <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="close"><button class="btn ghost" id="closeSidebar">Close</button></div>
+      <h3>PirateRuler Links</h3>
+      <p class="muted">Quick links & backup resources</p>
+      <nav class="nav-list" aria-label="PirateRuler quick links">
+        <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
+        <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
+        <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
+      </nav>
+      <div class="backup">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
+    </aside>
 
-    <!-- footer -->
     <footer>
       <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
       <div style="height:12px"></div>
@@ -304,32 +226,72 @@
     </footer>
   </div>
 
-  <!-- Sidebar (same as Calculator) -->
-  <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="close"><button class="ghost" id="closeSidebar">Close</button></div>
-    <h3>PirateRuler Links</h3>
-    <p class="muted">Quick links & backup resources</p>
-    <nav class="nav-list" aria-label="PirateRuler quick links">
-      <a href="https://www.pirateruler.com/post/about.html" target="_blank" rel="noopener noreferrer">About — PirateRuler</a>
-      <a href="https://www.pirateruler.com/post/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-      <a href="https://www.pirateruler.com/post/contact.html" target="_blank" rel="noopener noreferrer">Contact</a>
-      <a href="https://www.pirateruler.com/post/terms.html" target="_blank" rel="noopener noreferrer">Terms & Service</a>
-    </nav>
-    <div class="backup">If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">pirateruler.com</a></div>
-  </aside>
-
 <script>
-/* ---------- small UX + theme ---------- */
+/* ====================== Utilities / UI glue ====================== */
 document.getElementById('year').textContent = new Date().getFullYear();
-const root = document.documentElement;
-const themeSelect = document.getElementById('themeSelect');
-const saved = localStorage.getItem('pr-theme') || 'theme-ocean';
-themeSelect.value = saved;
-applyTheme(saved);
-themeSelect.addEventListener('change', (e)=> { applyTheme(e.target.value); localStorage.setItem('pr-theme', e.target.value); });
-function applyTheme(cls){ ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c)); root.classList.add(cls); }
 
-/* ---------- elements ---------- */
+/* Theme handling (persisted), matching calculator behaviour */
+const root = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+const themeList = document.getElementById('themeList');
+const themeItems = Array.from(document.querySelectorAll('.theme-item'));
+const savedTheme = localStorage.getItem('pr-theme') || 'theme-ocean';
+applyTheme(savedTheme);
+
+function applyTheme(cls){
+  ['theme-light','theme-dark','theme-ocean','theme-sunset'].forEach(c=> root.classList.remove(c));
+  root.classList.add(cls);
+  // show current on theme button
+  const pretty = cls.replace('theme-','').replace(/^./,s=>s.toUpperCase());
+  themeBtn.textContent = pretty + ' ▾';
+}
+themeBtn.addEventListener('click', (e)=> {
+  themeList.classList.toggle('open');
+  themeList.setAttribute('aria-hidden', String(!themeList.classList.contains('open')));
+});
+themeItems.forEach(it => it.addEventListener('click', (e)=>{
+  const cls = e.currentTarget.dataset.theme;
+  applyTheme(cls);
+  localStorage.setItem('pr-theme', cls);
+  themeList.classList.remove('open');
+  themeList.setAttribute('aria-hidden','true');
+}));
+document.addEventListener('click', (e)=>{
+  if(!themeBtn.contains(e.target) && !themeList.contains(e.target)) {
+    themeList.classList.remove('open');
+    themeList.setAttribute('aria-hidden','true');
+  }
+});
+
+/* Sidebar open/close (same behaviour as calculator) */
+const sidebar = document.getElementById('sidebar');
+const openSidebarBtn = document.getElementById('openSidebarBtn');
+const closeSidebar = document.getElementById('closeSidebar');
+function openSidebar(){ sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); closeSidebar.focus(); }
+function closeSB(){ sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
+openSidebarBtn.addEventListener('click', ()=> {
+  if(window.innerWidth < 980){
+    // on small screens show panel element (we reuse aside.right)
+    const right = document.getElementById('rightPanel');
+    right.style.display = right.style.display === 'none' ? 'block' : 'none';
+    if(right.style.display === 'block') right.scrollIntoView({behavior:'smooth'});
+  } else openSidebar();
+});
+closeSidebar.addEventListener('click', closeSB);
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSB(); });
+
+function updateSidebarWidth(){ if(window.innerWidth < 420) sidebar.style.width = '94vw'; else sidebar.style.width = '360px'; }
+window.addEventListener('resize', updateSidebarWidth);
+updateSidebarWidth();
+
+/* Close sidebar on outside click (desktop) */
+document.addEventListener('click', function(e){
+  if(!sidebar.classList.contains('open')) return;
+  const inside = sidebar.contains(e.target) || openSidebarBtn.contains(e.target);
+  if(!inside) closeSB();
+});
+
+/* ====================== Color Finder core ====================== */
 const drop = document.getElementById('dropZone');
 const fileIn = document.getElementById('fileInput');
 const canvas = document.getElementById('imageCanvas');
@@ -351,27 +313,29 @@ let imgLoaded = false;
 let scale = 1;
 let lastPalette = [];
 
-/* ---------- drag & choose ---------- */
+/* Drag & file handling (FileReader -> data URL to avoid CORS/taint issues) */
 drop.addEventListener('click', ()=> fileIn.click());
-drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; drop.style.boxShadow='0 8px 30px rgba(3,12,30,0.06)'; });
+drop.addEventListener('dragover', e=> { e.preventDefault(); drop.style.borderColor='rgba(0,0,0,0.12)'; drop.style.boxShadow='0 12px 30px rgba(3,12,30,0.04)'; });
 drop.addEventListener('dragleave', e=> { e.preventDefault(); drop.style.borderColor=''; drop.style.boxShadow='none'; });
 drop.addEventListener('drop', e=> { e.preventDefault(); drop.style.borderColor=''; drop.style.boxShadow='none'; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) handleFile(f); });
+
 fileIn.addEventListener('change', e=> { if(e.target.files[0]) handleFile(e.target.files[0]); });
 
 function handleFile(file){
-  if(!file.type.startsWith('image/')) return alert('Choose an image file.');
-  const url = URL.createObjectURL(file);
-  loadImage(url);
+  if(!file.type.startsWith('image/')) return alert('Choose an image file (png/jpg/webp).');
+  const reader = new FileReader();
+  reader.onload = (ev) => loadImage(ev.target.result);
+  reader.onerror = ()=> alert('Failed to read file.');
+  reader.readAsDataURL(file);
 }
 
-/* ---------- load + draw ---------- */
+/* Load & draw image (scale to fit area) */
 function loadImage(src){
   img = new Image();
-  img.crossOrigin = "anonymous";
   img.onload = ()=> {
-    // fit canvas to available area but keep resolution comfortable
+    // size calculation: fit within available width but maintain resolution
     const maxW = Math.min(1200, window.innerWidth - 420);
-    const maxH = 720;
+    const maxH = 700;
     let w = img.naturalWidth, h = img.naturalHeight;
     const ratio = Math.min(1, maxW/w, maxH/h);
     w = Math.round(w * ratio); h = Math.round(h * ratio);
@@ -381,13 +345,16 @@ function loadImage(src){
     ctx.drawImage(img, 0, 0, w, h);
     canvasWrap.style.display = 'block';
     imgLoaded = true;
-    setTimeout(()=> extractPalette(), 120);
+    lastPalette = [];
+    paletteEl.innerHTML = '';
+    // auto extract after short delay
+    setTimeout(()=> extractPalette(), 140);
   };
-  img.onerror = ()=> alert('Could not load image.');
+  img.onerror = ()=> alert('Could not load image. Try a different file.');
   img.src = src;
 }
 
-/* ---------- zoom ---------- */
+/* Zoom */
 zoomIn.addEventListener('click', ()=> {
   if(!imgLoaded) return;
   scale = Math.min(2.5, scale + 0.25);
@@ -399,6 +366,7 @@ zoomOut.addEventListener('click', ()=> {
   resizeCanvas();
 });
 function resizeCanvas(){
+  if(!img || !img.naturalWidth) return;
   const maxW = Math.min(1200, window.innerWidth - 420);
   const w = Math.round(Math.min(img.naturalWidth, maxW) * scale);
   const h = Math.round(w * (img.naturalHeight / img.naturalWidth));
@@ -407,14 +375,21 @@ function resizeCanvas(){
   ctx.drawImage(img, 0, 0, w, h);
 }
 
-/* ---------- k-means extraction ---------- */
+/* K-means palette extraction */
 kRange.addEventListener('input', ()=> kValue.textContent = kRange.value);
 extractBtn.addEventListener('click', extractPalette);
 
 function extractPalette(){
   if(!imgLoaded) return alert('Load an image first.');
+  // read pixels with sampling
   const w = canvas.width, h = canvas.height;
-  const data = ctx.getImageData(0,0,w,h).data;
+  let data;
+  try {
+    data = ctx.getImageData(0,0,w,h).data;
+  } catch (err) {
+    // fallback: try drawing to an offscreen canvas and re-read (rare)
+    return alert('Could not read image pixels (possible CORS issue). Try uploading the file directly from your device (not a remote URL).');
+  }
   const pixels = [];
   const targetSamples = 40000;
   const step = Math.max(1, Math.round(Math.sqrt((w*h)/targetSamples)));
@@ -422,11 +397,21 @@ function extractPalette(){
     for(let x=0;x<w;x+=step){
       const i = (y*w + x)*4;
       const a = data[i+3];
-      if(a < 125) continue;
+      // include any reasonably visible alpha (>=10), but prefer opaque
+      if(a < 10) continue;
       pixels.push([data[i], data[i+1], data[i+2]]);
     }
   }
-  if(pixels.length === 0) return alert('No visible pixels found (image may be transparent).');
+  // if nothing found, do a last-pass with no alpha check to be safe
+  if(pixels.length === 0){
+    for(let y=0;y<h;y+=step){
+      for(let x=0;x<w;x+=step){
+        const i = (y*w + x)*4;
+        pixels.push([data[i], data[i+1], data[i+2]]);
+      }
+    }
+  }
+  if(pixels.length === 0) return alert('No visible pixels found (image may be empty or extremely small).');
 
   const k = Math.min(12, Math.max(2, parseInt(kRange.value,10) || 6));
   const {centroids, counts} = kmeans(pixels, k, {maxIter:30});
@@ -439,7 +424,7 @@ function extractPalette(){
   renderPalette();
 }
 
-/* ---------- render palette (Tools style) ---------- */
+/* Render palette swatches */
 function renderPalette(){
   paletteEl.innerHTML = '';
   lastPalette.forEach(p => {
@@ -460,7 +445,7 @@ function renderPalette(){
     paletteEl.appendChild(sw);
   });
 
-  // hook copy buttons
+  // copy handlers
   paletteEl.querySelectorAll('.sw-copy').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const hex = e.currentTarget.dataset.hex;
@@ -468,12 +453,14 @@ function renderPalette(){
         const prev = e.currentTarget.textContent;
         e.currentTarget.textContent = 'Copied';
         setTimeout(()=> e.currentTarget.textContent = prev, 900);
+      }).catch(()=> {
+        alert('Copy failed — allow clipboard permission or copy manually: ' + hex);
       });
     });
   });
 }
 
-/* ---------- export / download ---------- */
+/* Export / Download */
 exportJSON.addEventListener('click', ()=>{
   if(!lastPalette.length) return alert('No palette to export.');
   const data = {palette: lastPalette, createdAt: new Date().toISOString()};
@@ -481,7 +468,6 @@ exportJSON.addEventListener('click', ()=>{
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'palette.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
-
 downloadPng.addEventListener('click', ()=> {
   if(!lastPalette.length) return alert('No palette to download.');
   const sw = Math.max(80, Math.floor(900 / lastPalette.length));
@@ -497,7 +483,7 @@ downloadPng.addEventListener('click', ()=> {
   const a = document.createElement('a'); a.href = url; a.download = 'palette.png'; document.body.appendChild(a); a.click(); a.remove();
 });
 
-/* copy all hexes */
+/* Copy All */
 copyAll.addEventListener('click', ()=> {
   if(!lastPalette.length) return;
   const all = lastPalette.map(p=>p.hex).join(', ');
@@ -505,36 +491,42 @@ copyAll.addEventListener('click', ()=> {
     const prev = copyAll.textContent;
     copyAll.textContent = 'Copied';
     setTimeout(()=> copyAll.textContent = prev, 1200);
-  });
+  }).catch(()=> alert('Copy failed'));
 });
 
-/* ---------- single-pixel sample on click ---------- */
+/* Single-pixel sample on canvas click */
 canvas.addEventListener('click', (e)=>{
   if(!imgLoaded) return;
   const rect = canvas.getBoundingClientRect();
   const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
   const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
-  const px = ctx.getImageData(x, y, 1, 1).data;
-  const hex = rgbToHex(px[0], px[1], px[2]);
-  lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
-  const uniq = [];
-  for(const it of lastPalette){
-    if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
-    if(uniq.length >= 12) break;
+  try {
+    const px = ctx.getImageData(x, y, 1, 1).data;
+    const hex = rgbToHex(px[0], px[1], px[2]);
+    // add to top, keep unique
+    lastPalette.unshift({hex, rgb:[px[0],px[1],px[2]], pct:1});
+    const uniq = [];
+    for(const it of lastPalette){
+      if(!uniq.some(u=>u.hex===it.hex)) uniq.push(it);
+      if(uniq.length >= 12) break;
+    }
+    lastPalette = uniq;
+    renderPalette();
+  } catch(err){
+    alert('Could not read pixel (CORS/taint issue). Try uploading the file directly.');
   }
-  lastPalette = uniq;
-  renderPalette();
 });
 
-/* ---------- clear ---------- */
+/* Clear */
 clearBtn.addEventListener('click', ()=> {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   canvas.width = canvas.height = 0;
   canvasWrap.style.display = 'none';
   imgLoaded = false; lastPalette = []; paletteEl.innerHTML = '';
+  fileIn.value = '';
 });
 
-/* ---------- helpers ---------- */
+/* Helpers */
 function getContrastColor(hex){
   const c = hex.replace('#','');
   const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
@@ -544,7 +536,7 @@ function getContrastColor(hex){
 function componentToHex(c){ const s = c.toString(16); return s.length==1 ? '0'+s : s; }
 function rgbToHex(r,g,b){ return '#'+componentToHex(r)+componentToHex(g)+componentToHex(b); }
 
-/* small & fast K-means */
+/* small fast k-means (client-side) */
 function kmeans(samples, k, opts={}){
   const maxIter = opts.maxIter || 20;
   const centroids = [];
@@ -592,41 +584,10 @@ function kmeans(samples, k, opts={}){
 }
 function dist2(a,b){ const dr=a[0]-b[0], dg=a[1]-b[1], db=a[2]-b[2]; return dr*dr+dg*dg+db*db; }
 
-/* ---------- resize and small UX ---------- */
-window.addEventListener('resize', ()=> { if(!imgLoaded) return resizeCanvas(); });
-
+/* UX niceties */
+window.addEventListener('resize', ()=> { if(imgLoaded) resizeCanvas(); });
 drop.addEventListener('mouseenter', ()=> drop.style.boxShadow = '0 8px 30px rgba(3,12,30,0.06)');
 drop.addEventListener('mouseleave', ()=> drop.style.boxShadow = 'none');
-
-/* ---------- sidebar open/close (same as calculator) ---------- */
-const sidebar = document.getElementById('sidebar');
-const openSidebarBtn = document.getElementById('openSidebarBtn');
-const closeSidebar = document.getElementById('closeSidebar');
-openSidebarBtn.addEventListener('click', ()=> {
-  if(window.innerWidth < 980){
-    // small screens: toggle the right panel visibility instead of full sidebar
-    const right = document.getElementById('rightPanel');
-    right.style.display = right.style.display === 'none' ? 'block' : 'none';
-    if(right.style.display === 'block') right.scrollIntoView({behavior:'smooth'});
-  } else {
-    sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); closeSidebar.focus();
-  }
-});
-closeSidebar.addEventListener('click', ()=> { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape') { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); } });
-document.addEventListener('click', function(e){
-  if(!sidebar.classList.contains('open')) return;
-  const inside = sidebar.contains(e.target) || openSidebarBtn.contains(e.target);
-  if(!inside) { sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
-});
-
-/* responsive sidebar width */
-function updateSidebarWidth(){
-  if(window.innerWidth < 420) sidebar.style.width = '94vw';
-  else sidebar.style.width = '360px';
-}
-window.addEventListener('resize', updateSidebarWidth);
-updateSidebarWidth();
 
 </script>
 </body>
