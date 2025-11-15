@@ -1,446 +1,425 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Speed Test — PirateRuler.com</title>
-<meta name="description" content="Speed Test by PirateRuler — quick client-side internet speed check (download / upload / ping)." />
-<meta name="theme-color" content="#071225" />
 <link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
+<meta name="description" content="Speed Test by PirateRuler — client-only demo: live download/upload throughput, ping, per-second updates." />
 <style>
-  /* Design tokens kept from your theme — small tweaks for clarity */
   :root{
-    --space: 16px;
-    --radius: 14px;
-    --text-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue";
-    --accent-a: #0A84FF; /* blue accent for this tool */
-    --accent-b: #4CC0FF;
-    --bg: linear-gradient(180deg,#f7fbfe,#f3f7fb);
-    --card-dark: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
-    --muted: #6b7480;
-    --text: #071225;
-    --shadow-soft: 0 10px 30px rgba(2,8,20,0.06);
-    --max-width: 1100px;
+    --bg:#f2f4f8; --card:#ffffff; --muted:#6b7480; --accent:#0A84FF; --accent-2:#7b4bff; --text:#071225;
+    --radius:14px; --shadow:0 10px 30px rgba(2,8,20,0.06);
   }
+  html.dark { --bg:#071225; --card:linear-gradient(180deg,#071225,#061028); --muted:#98a7bf; --text:#e9f1ff; --accent:#32d74b; --accent-2:#2fa64f; }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
-  body{
-    font-family:var(--text-sans);
-    color:var(--text);
-    background:var(--bg);
-    padding:var(--space);
-    line-height:1.45;
-  }
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:var(--max-width);margin:0 auto;padding-bottom:60px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:transparent;margin-bottom:12px}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));color:white;font-weight:900;font-size:18px;box-shadow:var(--shadow-soft);flex-shrink:0}
-  .brand .title{font-weight:800;font-size:16px;line-height:1.05}
-  .brand .sub{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:10px;align-items:center}
-  .theme-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;background:var(--card-dark);border:0;width:48px;height:48px;box-shadow:var(--shadow-soft);cursor:pointer;color:var(--text)}
-  .hamb{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--card-dark);box-shadow:var(--shadow-soft);border:0;cursor:pointer}
-  .hero{border-radius:18px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 40px rgba(3,12,30,0.06);text-align:center;position:relative}
-  .kicker{display:inline-block;padding:6px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));color:var(--muted);font-weight:700;font-size:13px;margin-bottom:12px}
-  .h1{font-size:28px;font-weight:900;margin:6px 0 8px;line-height:1.02}
-  .lead{max-width:920px;margin:0 auto;color:var(--muted);font-size:15px}
-  .hero-cta{margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .btn-primary{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:white;padding:12px 20px;border-radius:12px;font-weight:900;border:0;box-shadow:0 14px 36px rgba(10,132,255,0.12)}
-  .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 16px;border-radius:12px;color:var(--muted)}
-  .main-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:22px;align-items:start}
-  @media(max-width:980px){.main-grid{grid-template-columns:1fr} .h1{font-size:22px}}
-  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:14px;padding:18px;box-shadow:var(--shadow-soft)}
-  h2.section{margin:0 0 8px 0;font-size:18px;font-weight:900}
-  /* Speed UI */
-  .speed-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;border-radius:14px}
-  .big-num{font-size:42px;font-weight:900;color:var(--accent-a)}
-  .subsmall{font-size:13px;color:var(--muted)}
-  .meter{width:100%;max-width:680px;height:220px;border-radius:12px;background:linear-gradient(180deg,#fff,#f6f9ff);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(10,20,40,0.06)}
-  .meter-inner{display:flex;gap:36px;align-items:center}
-  .stat-block{text-align:center}
-  .stat-label{font-size:13px;color:var(--muted)}
-  .stat-value{font-weight:900;font-size:24px;color:var(--accent-a)}
-  canvas.spark {width:180px;height:40px; background:transparent}
-  .controls-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-  .btn {padding:10px 14px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
-  .btn-start{background:var(--accent-a);color:white;box-shadow:0 10px 30px rgba(10,132,255,0.12)}
-  .btn-stop{background:#eee;color:var(--text);border:1px solid rgba(0,0,0,0.06)}
-  /* sidebar/offcanvas behaves like the typing site modal on small screens */
-  .offcanvas{position:fixed;right:12px;top:12px;width:340px;max-width:92vw;background:white;border-radius:14px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,0.12);transform:translateX(120%);transition:transform .28s ease;z-index:200;color:var(--text)}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:16px;min-height:100vh}
+  .wrap{max-width:1100px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:900;box-shadow:var(--shadow)}
+  .titlebox{line-height:1}
+  .titlebox .t1{font-weight:900;font-size:18px}
+  .titlebox .t2{font-size:13px;color:var(--muted);margin-top:2px}
+  .controls{display:flex;gap:8px;align-items:center}
+  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;border:0;font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(10,132,255,0.12)}
+  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text);box-shadow:none;font-weight:700;padding:8px 12px}
+  .theme-btn{width:44px;height:44px;border-radius:999px;border:0;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+  /* main card */
+  .card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .big {flex:1;min-width:260px}
+  .stat {text-align:center;padding:18px;border-radius:12px;background:rgba(0,0,0,0.02)}
+  .stat .num{font-weight:900;font-size:40px;color:var(--accent)}
+  .stat .lbl{color:var(--muted);margin-top:8px}
+  .side {width:300px;min-width:220px}
+  .controls-row{display:flex;gap:10px;align-items:center;margin-top:14px}
+  .small {font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff;padding:10px 12px;border-radius:12px;border:0;cursor:pointer}
+  .small.stop{background:#ececec;color:var(--text)}
+  .mini {font-size:13px;color:var(--muted)}
+  .footer {margin-top:12px;color:var(--muted);font-size:13px}
+  /* offcanvas menu (right) */
+  .offcanvas{position:fixed;right:12px;top:12px;width:320px;max-width:92vw;background:var(--card);border-radius:14px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12);transform:translateX(120%);transition:transform .28s;z-index:9999}
   .offcanvas.open{transform:translateX(0)}
-  @media(max-width:720px){
-    .offcanvas{left:50%;top:auto;bottom:8px;transform:translate(-50%,120%);width:92vw;max-width:none}
-    .offcanvas.open{transform:translate(-50%,0)}
+  .offcanvas h3{margin:0 0 8px 0}
+  .menu-item{padding:12px;border-radius:10px;background:rgba(0,0,0,0.03);margin-bottom:8px;font-weight:800}
+  /* responsive */
+  @media(max-width:900px){
+    .card{flex-direction:column}
+    .side{width:100%}
+    .offcanvas{right:8px;left:8px;top:auto;bottom:12px;transform:translateY(120%);transition:transform .28s}
+    .offcanvas.open{transform:translateY(0)}
   }
-  /* footer credit */
-  .credit{position:fixed;left:16px;bottom:12px;background:rgba(0,0,0,0.6);padding:6px 10px;color:white;border-radius:8px;font-size:13px;z-index:100}
-  /* helper */
-  .row{display:flex;gap:12px;align-items:center}
-  .muted{color:var(--muted)}
-  .small{font-size:13px}
+  /* small readout styles */
+  .live-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
+  .live-box{flex:1;padding:12px;border-radius:12px;background:rgba(0,0,0,0.02);text-align:center}
+  .live-box .v{font-weight:900;font-size:20px}
+  .graph{height:84px;background:linear-gradient(180deg,rgba(10,132,255,0.04),transparent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo" aria-hidden="true">PR</div>
-        <div>
-          <!-- force wrap into two lines if needed -->
-          <div class="title">Speed Test</div>
-          <div class="sub small">Speed Test by PirateRuler.com</div>
+        <div class="logo">PR</div>
+        <div class="titlebox">
+          <div class="t1">Speed Test</div>
+          <div class="t2">by PirateRuler.com</div>
         </div>
       </div>
 
-      <div class="controls" role="navigation" aria-label="Header controls">
-        <button id="toggleTheme" class="theme-btn" title="Toggle theme">☀️</button>
-        <button id="openMenu" class="hamb" aria-controls="menu" aria-expanded="false" title="Menu">☰</button>
+      <div class="controls" role="navigation" aria-label="controls">
+        <button id="openMenu" class="btn ghost" title="Menu" aria-expanded="false">Menu</button>
+        <button id="toggleTheme" class="theme-btn" title="Toggle theme">🌓</button>
       </div>
     </header>
 
-    <section class="hero">
-      <div class="kicker">Client-side demo • Browser-only</div>
-      <h1 class="h1">Quick Internet Speed Check</h1>
-      <p class="lead">Client-only speed test using progressive downloads & uploads. Live graphs update every second. For best accuracy use your own server with large CORS-enabled files.</p>
+    <section class="card" aria-label="speed card">
+      <div class="big">
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+          <div style="min-width:220px">
+            <div style="font-size:13px;color:var(--muted);font-weight:800">Quick Internet Speed Check</div>
+            <div style="color:var(--muted);margin-top:6px">Live throughput numbers update every second. For best accuracy use your own CORS-enabled server with large files.</div>
+          </div>
 
-      <div style="margin-top:14px" class="speed-card panel">
-        <div class="meter" role="region" aria-label="Speed meter">
-          <div class="meter-inner">
-            <div class="stat-block">
-              <div class="stat-label">Download</div>
-              <div id="dlValue" class="stat-value">— Mbps</div>
-              <div class="subsmall">Live</div>
-            </div>
-
-            <div style="min-width:240px;text-align:center">
-              <div id="bigNum" class="big-num">—</div>
-              <div class="subsmall">Current throughput</div>
-              <canvas id="spark" class="spark"></canvas>
-            </div>
-
-            <div class="stat-block">
-              <div class="stat-label">Upload</div>
-              <div id="ulValue" class="stat-value">— Mbps</div>
-              <div class="subsmall">Live</div>
-            </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="startBtn" class="small">Start Test</button>
+            <button id="stopBtn" class="small stop" disabled>Stop</button>
           </div>
         </div>
 
-        <div class="controls-row">
-          <button id="startBtn" class="btn btn-start">Start Test</button>
-          <button id="stopBtn" class="btn btn-stop">Stop</button>
-          <div class="row muted small">Ping: <span id="pingVal">—</span> ms</div>
-          <div class="row muted small">Server: <span id="srvName">Public demo</span></div>
+        <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+          <div class="stat" style="flex:1;min-width:220px">
+            <div class="num" id="currentThrough">0.0 Mbps</div>
+            <div class="lbl">Current throughput</div>
+          </div>
+
+          <div class="stat" style="flex:1;min-width:220px">
+            <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+              <div style="text-align:center;margin-right:8px">
+                <div style="font-weight:900;font-size:26px;color:var(--accent)" id="dlAvg">0.0</div>
+                <div style="color:var(--muted)">Download Mbps</div>
+              </div>
+              <div style="text-align:center;margin-left:8px">
+                <div style="font-weight:900;font-size:26px;color:var(--accent-2)" id="ulAvg">0.0</div>
+                <div style="color:var(--muted)">Upload Mbps</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat" style="flex:1;min-width:220px">
+            <div style="font-weight:900;font-size:22px" id="pingVal">-- ms</div>
+            <div style="color:var(--muted)">Ping</div>
+            <div style="margin-top:10px;color:var(--muted);font-size:13px" id="serverInfo">Server: public demo</div>
+          </div>
         </div>
 
-        <div style="margin-top:10px;text-align:center" class="small muted">Results update every second. Close other network-heavy apps for best accuracy.</div>
+        <div class="live-row" aria-hidden="false">
+          <div class="live-box">
+            <div class="v" id="dlLive">DL: 0.0 Mbps</div>
+            <div class="mini">Live download throughput (per-second)</div>
+          </div>
+          <div class="live-box">
+            <div class="v" id="ulLive">UL: 0.0 Mbps</div>
+            <div class="mini">Live upload throughput (per-second)</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <div style="color:var(--muted)">Tip: close other heavy apps and prefer wired for best accuracy.</div>
+            <div style="color:var(--muted);font-size:13px" id="resultNote">Client-only demo</div>
+          </div>
+        </div>
       </div>
+
+      <aside class="side">
+        <div style="padding:12px;border-radius:12px;background:rgba(0,0,0,0.02)">
+          <div style="font-weight:900">Live graph</div>
+          <div class="graph" id="graphArea">(live graph placeholder)</div>
+
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button id="copyBtn" class="btn ghost" style="flex:1">Copy results</button>
+            <button id="resetBtn" class="btn ghost" style="flex:1">Reset</button>
+          </div>
+
+          <div style="margin-top:12px;color:var(--muted);font-size:13px">Results update every second. This is a browser-only demo — for production use your own endpoints for accurate results.</div>
+        </div>
+      </aside>
     </section>
 
-    <div class="main-grid">
-      <div>
-        <section class="panel">
-          <h2 class="section">How it works</h2>
-          <p class="muted">This performs progressive downloads from public endpoints and measures bytes received per time to compute Mbps. Upload is a POST of large binary data to a public echo endpoint. For production accuracy replace the test URLs with your own CORS-enabled files and endpoints hosted near your users.</p>
-        </section>
+    <div style="height:18px"></div>
+    <footer style="text-align:center;color:var(--muted)">© <span id="year"></span> PirateRuler — Speed Test</footer>
+  </div>
 
-        <section class="panel" style="margin-top:14px">
-          <h2 class="section">Advanced</h2>
-          <ul class="muted small">
-            <li>Parallel downloads increase accuracy on high-speed links.</li>
-            <li>Progressive streaming: the test measures continuously as data arrives.</li>
-            <li>Upload uses POST to a public echo endpoint (change to your endpoint for production).</li>
-          </ul>
-        </section>
-      </div>
-
-      <aside class="panel right-col">
-        <h3 style="margin-top:0">Latest results</h3>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-          <div class="row"><strong>Download:</strong>&nbsp;<span id="dlLive">— Mbps</span></div>
-          <div class="row"><strong>Upload:</strong>&nbsp;<span id="ulLive">— Mbps</span></div>
-          <div class="row"><strong>Ping:</strong>&nbsp;<span id="pingLive">— ms</span></div>
-          <div class="row"><strong>IP:</strong>&nbsp;<span id="ipAddr">—</span></div>
-        </div>
-
-        <div style="height:12px"></div>
-        <button id="copyBtn" class="btn btn-start" style="width:100%">Copy results</button>
-      </aside>
+  <!-- Offcanvas menu -->
+  <div id="menu" class="offcanvas" role="dialog" aria-hidden="true">
+    <h3>Menu</h3>
+    <div class="menu-item" onclick="startQuick()">Start Test</div>
+    <div class="menu-item" onclick="showAbout()">About</div>
+    <div class="menu-item" onclick="showPrivacy()">Privacy</div>
+    <div class="menu-item" onclick="showContact()">Contact</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="closeMenuBtn" class="btn ghost" style="flex:1">Close</button>
     </div>
-
-    <footer style="margin-top:22px;text-align:center">
-      <small style="color:var(--muted)">© <span id="year"></span> PirateRuler — Speed Checker</small>
-    </footer>
   </div>
-
-  <!-- offcanvas menu -->
-  <div id="menu" class="offcanvas" role="dialog" aria-hidden="true" aria-label="Site menu">
-    <h3 style="margin:0 0 8px 0">Menu</h3>
-    <p class="muted" style="margin-top:0;margin-bottom:10px">Quick links & actions</p>
-    <a href="#start" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">Start Test</a>
-    <a href="#faq" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">FAQ</a>
-    <a href="https://pirateruler.com" target="_blank" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">PirateRuler.com</a>
-    <div style="height:12px"></div>
-    <button id="closeMenu" style="padding:10px;border-radius:10px;border:0;background:linear-gradient(90deg,#fff,#ddd);width:100%;font-weight:800">Close</button>
-  </div>
-
-  <div class="credit">Powered by PirateRuler.com</div>
 
 <script>
-  // small helpers
-  const $ = (id)=>document.getElementById(id);
-  document.getElementById('year').textContent = new Date().getFullYear();
+/* ---------- small helpers ---------- */
+const u = s => document.getElementById(s);
+u('year').textContent = new Date().getFullYear();
 
-  // Offcanvas menu behavior (sidebar on desktop, bottom sheet on mobile)
-  const menu = $('menu');
-  document.getElementById('openMenu').addEventListener('click', ()=>{
-    menu.classList.add('open'); menu.setAttribute('aria-hidden','false');
-  });
-  document.getElementById('closeMenu').addEventListener('click', ()=>{
-    menu.classList.remove('open'); menu.setAttribute('aria-hidden','true');
-  });
+/* Theme toggle */
+const doc = document.documentElement;
+const saved = localStorage.getItem('pr-theme') || 'light';
+if(saved === 'dark') doc.classList.add('dark');
+else doc.classList.remove('dark');
 
-  // theme toggle simple
-  const toggle = document.getElementById('toggleTheme');
-  toggle.addEventListener('click', ()=>{
-    document.documentElement.classList.toggle('light');
-    toggle.textContent = document.documentElement.classList.contains('light') ? '🌞' : '☀️';
-  });
+u('toggleTheme').addEventListener('click', () => {
+  if(doc.classList.contains('dark')){ doc.classList.remove('dark'); localStorage.setItem('pr-theme','light'); }
+  else { doc.classList.add('dark'); localStorage.setItem('pr-theme','dark'); }
+});
 
-  // Sparkline canvas
-  const spark = $('spark');
-  const ctx = spark.getContext('2d');
-  const samples = [];
-  function drawSpark(){
-    const w = spark.width = spark.clientWidth * devicePixelRatio;
-    const h = spark.height = spark.clientHeight * devicePixelRatio;
-    ctx.clearRect(0,0,w,h);
-    ctx.lineWidth = 2 * devicePixelRatio;
-    ctx.strokeStyle = '#0A84FF';
-    ctx.beginPath();
-    const N = samples.length || 1;
-    for(let i=0;i<N;i++){
-      const x = (i/(N-1 || 1))*w;
-      const v = samples[i] || 0;
-      const y = h - (Math.min(v,100)*h/100); // cap visual to 100 Mbps
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+/* Menu open/close */
+const menu = u('menu');
+u('openMenu').addEventListener('click', () => {
+  const open = menu.classList.toggle('open');
+  u('openMenu').setAttribute('aria-expanded', String(open));
+});
+u('closeMenuBtn').addEventListener('click', ()=> menu.classList.remove('open'));
+
+/* small menu helper functions (placeholders) */
+function startQuick(){ menu.classList.remove('open'); startTest(); }
+function showAbout(){ alert('Speed Test by PirateRuler — client-only demo.'); }
+function showPrivacy(){ alert('Privacy: Runs client-side. No server storage by default.'); }
+function showContact(){ alert('Contact: PirateRuler.com'); }
+
+/* ---------- Speed test logic (client-only demo) ---------- */
+
+/*
+ Approach:
+ - Measure ping with a small HEAD fetch to https://httpbin.org/get
+ - Download test: progressive streaming of a large file (Hetzner speed test file).
+   We stream it using fetch + ReadableStream, count bytes as they arrive and compute per-second throughput.
+ - Upload test: create a blob of known size and POST to https://httpbin.org/post, measure time until upload finishes (this gives approximate upload)
+ - Live per-second stats show in UI.
+ NOTE: For production use you should host large CORS-enabled files on a server you control.
+*/
+
+let running = false;
+let dlBytes = 0, dlStart = 0, dlLast = 0;
+let ulBytes = 0, ulStart = 0;
+let dlSamples = [], ulSamples = [];
+let pingMs = null;
+let dlController = null; // abort controller
+
+const DOWNLOAD_URL = 'https://speed.hetzner.de/100MB.bin'; // public demo file (adjust as needed)
+const PARALLEL_DOWNLOADS = 2; // parallel streams for better measurement on fast links
+const UPLOAD_ECHO = 'https://httpbin.org/post'; // public demo echo endpoint (CORS-enabled)
+
+function setText(id, txt){ if(u(id)) u(id).textContent = txt; }
+function toMbps(bytes, seconds){ return (bytes * 8) / (1024*1024) / Math.max(seconds, 0.000001); }
+
+/* ping */
+async function measurePing(){
+  try{
+    const t0 = performance.now();
+    const res = await fetch('https://httpbin.org/get?nocache=' + Math.random(), {cache:'no-store', mode:'cors'});
+    const t1 = performance.now();
+    if(res.ok) pingMs = Math.round(t1 - t0);
+    else pingMs = null;
+  }catch(e){ pingMs = null; }
+  setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
+}
+
+/* download worker: streams file and counts bytes */
+async function streamDownload(signal){
+  try {
+    const res = await fetch(DOWNLOAD_URL + '?r=' + Math.random(), { method: 'GET', signal, cache:'no-store', mode:'cors' });
+    if(!res.body) return 0;
+    const reader = res.body.getReader();
+    let total = 0;
+    while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+      total += value.byteLength;
+      // update global counters for live UI
+      dlBytes += value.byteLength;
     }
-    ctx.stroke();
+    return total;
+  } catch(e){
+    // aborted or network error
+    return 0;
   }
+}
 
-  // Measurement state
-  let running = false;
-  let dlMbps = 0, ulMbps = 0, pingMs = 0;
-  let dlInterval, ulInterval, pingInterval;
-  let controller; // for aborting fetches
-
-  // Public demo endpoints (replace these with your own CORS-enabled files in production).
-  // Note: Some browsers / networks may block these endpoints; swap for your hosted test files for best accuracy.
-  const DOWNLOAD_URLS = [
-    // stream-bytes from httpbin (public demo endpoints that support streaming). If you host files, replace these.
-    'https://httpbin.org/stream-bytes/2000000?seed=1&chunk_size=1024',
-    'https://httpbin.org/stream-bytes/2000000?seed=2&chunk_size=1024'
-  ];
-  const UPLOAD_URL = 'https://httpbin.org/post'; // echo endpoint for demo (CORS-enabled)
-
-  // Ping: measure RTT by fetching a tiny resource (or a HEAD)
-  async function measurePing(){
-    try{
-      const start = performance.now();
-      // tiny request to httpbin (HEAD-like)
-      await fetch('https://httpbin.org/get?ttl=' + Math.random(), {cache:'no-store', mode:'cors'});
-      const end = performance.now();
-      pingMs = Math.round(end - start);
-      $('pingVal').textContent = pingMs;
-      $('pingLive').textContent = pingMs;
-    }catch(e){
-      $('pingVal').textContent = '—';
-      $('pingLive').textContent = '—';
-    }
+/* start download test */
+async function startDownloadTest(){
+  dlBytes = 0; dlStart = performance.now(); dlLast = dlStart; dlSamples = [];
+  dlController = new AbortController();
+  const promises = [];
+  for(let i=0;i<PARALLEL_DOWNLOADS;i++){
+    promises.push(streamDownload(dlController.signal));
   }
+  // run all parallel, but we keep reading dlBytes live in interval
+  await Promise.all(promises);
+}
 
-  // Download test: progressive read bytes and compute throughput
-  async function downloadTest(onTick, duration=12000){
-    // duration ms per URL set; we will stream sequentially across URLs and measure bytes/time
-    controller = new AbortController();
-    const signal = controller.signal;
-    let totalBytes = 0;
-    const startTime = performance.now();
-    const perSecStats = []; // samples every second
-    let lastTime = performance.now();
-    let lastBytes = 0;
-
-    // we will run readable stream and stop after duration
-    const stopAt = startTime + duration;
-    for(const url of DOWNLOAD_URLS){
-      if(performance.now() > stopAt || signal.aborted) break;
-      try{
-        const resp = await fetch(url, {cache:'no-store',signal});
-        if(!resp.ok || !resp.body) continue;
-        const reader = resp.body.getReader();
-        while(true){
-          const now = performance.now();
-          if(now > stopAt || signal.aborted){ reader.cancel(); break; }
-          const {done, value} = await reader.read();
-          if(done) break;
-          totalBytes += (value ? value.byteLength : 0);
-          const tNow = performance.now();
-          // every ~500ms call onTick to update UI
-          if(tNow - lastTime >= 500){
-            const deltaBytes = totalBytes - lastBytes;
-            const deltaS = (tNow - lastTime)/1000;
-            const mbps = (deltaBytes * 8) / (deltaS * 1000 * 1000); // Mbps
-            lastBytes = totalBytes;
-            lastTime = tNow;
-            perSecStats.push(mbps);
-            onTick({mbps, totalBytes, elapsed: (tNow-startTime)/1000});
-            // cap perSecStats to 50 samples
-            if(perSecStats.length>50) perSecStats.shift();
-          }
-        }
-      }catch(err){
-        // fetch error — ignore and continue
-        console.warn('download fetch error', err);
-      }
-    }
-    // compute average for the whole run
-    const totalTimeSec = (performance.now() - startTime)/1000 || 1;
-    const avgMbps = (totalBytes * 8) / (totalTimeSec * 1000 * 1000);
-    return {avgMbps, totalBytes, perSecStats};
+/* upload test (approx): create a large blob and POST it */
+async function startUploadTest(){
+  // create a blob ~5MB for upload demo. On fast links increase size.
+  const size = 5 * 1024 * 1024; // 5 MB
+  const chunk = new Uint8Array(1024*1024).fill(0x61); // 1MB chunk 'a's
+  const parts = [];
+  let remaining = size;
+  while(remaining > 0){
+    parts.push(chunk.slice(0, Math.min(remaining, chunk.length)));
+    remaining -= chunk.length;
   }
-
-  // Upload test: POST generated random data blob and measure bytes sent / time
-  async function uploadTest(onTick, duration=8000){
-    // generate a random Uint8Array of a certain size (repeat if needed)
-    // For demo: generate 4MB payload repeated
-    const chunkSize = 1024*1024; // 1MB
-    const totalSizeTarget = 6 * 1024 * 1024; // 6 MB total attempt
-    const blobParts = [];
-    const rng = crypto.getRandomValues.bind(crypto);
-    let generated = 0;
-    while(generated < totalSizeTarget){
-      const arr = new Uint8Array(Math.min(chunkSize, totalSizeTarget - generated));
-      rng(arr);
-      blobParts.push(arr);
-      generated += arr.byteLength;
-    }
-    const payload = new Blob(blobParts, {type:'application/octet-stream'});
-    const start = performance.now();
-    try{
-      // send and measure
-      await fetch(UPLOAD_URL, {method:'POST', mode:'cors', body: payload, cache:'no-store'});
-      const durationSec = (performance.now() - start)/1000;
-      const mbps = (generated * 8) / (durationSec * 1000 * 1000);
-      onTick({mbps, durationSec, bytes: generated});
-      return {mbps, durationSec, bytes: generated};
-    }catch(err){
-      console.warn('upload error', err);
-      return {mbps:0};
-    }
-  }
-
-  // UI wiring
-  const startBtn = $('startBtn'), stopBtn = $('stopBtn');
-  const dlValue = $('dlValue'), ulValue = $('ulValue'), bigNum = $('bigNum');
-  const dlLive = $('dlLive'), ulLive = $('ulLive'), pingLive = $('pingLive'), ipAddr = $('ipAddr');
-
-  // helper to show a numeric value nicely
-  function fmt(v){ return (Math.round(v*100)/100).toLocaleString(); }
-
-  function onDownloadTick(sample){
-    // sample.mbps is instantaneous sample
-    dlMbps = sample.mbps;
-    samples.push(dlMbps);
-    if(samples.length>40) samples.shift();
-    // update UI
-    dlValue.textContent = fmt(dlMbps) + ' Mbps';
-    dlLive.textContent = fmt(dlMbps) + ' Mbps';
-    bigNum.textContent = fmt(dlMbps) + ' Mbps';
-    // update sparkline samples array (capped)
-    drawSpark();
-  }
-
-  async function runTestSequence(){
-    running = true;
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    // measure ping repeatedly
-    measurePing(); // one immediately
-    pingInterval = setInterval(measurePing, 4000);
-
-    // fetch ip (for display)
-    try{
-      const r = await fetch('https://httpbin.org/ip');
-      const j = await r.json();
-      ipAddr.textContent = j.origin || j.ip || '—';
-    }catch(e){ ipAddr.textContent = '—'; }
-
-    // download phase
-    $('srvName').textContent = 'Public demo (httpbin)';
-
-    // perform progressive download for ~12s
-    const dlRes = await downloadTest(onDownloadTick, 12000);
-
-    // small pause
-    await new Promise(r=>setTimeout(r,350));
-
-    // upload phase
-    const ulSample = await uploadTest((s)=>{
-      ulMbps = s.mbps || 0;
-      ulValue.textContent = fmt(ulMbps) + ' Mbps';
-      ulLive.textContent = fmt(ulMbps) + ' Mbps';
-    }, 8000);
-
-    // finalize
-    running = false;
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    clearInterval(pingInterval);
-
-    // show averages
-    if(dlRes && dlRes.avgMbps){
-      dlValue.textContent = fmt(dlRes.avgMbps) + ' Mbps';
-      dlLive.textContent = fmt(dlRes.avgMbps) + ' Mbps';
-      bigNum.textContent = fmt(dlRes.avgMbps) + ' Mbps';
-    }
-    if(ulSample && ulSample.mbps){
-      ulValue.textContent = fmt(ulSample.mbps) + ' Mbps';
-      ulLive.textContent = fmt(ulSample.mbps) + ' Mbps';
-    }
-    // push final spark draw
-    drawSpark();
-  }
-
-  startBtn.addEventListener('click', async ()=>{
-    if(running) return;
-    samples.length = 0;
-    drawSpark();
-    runTestSequence().catch(err=>{
-      console.error(err);
-      running = false;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
+  const blob = new Blob(parts, { type: 'application/octet-stream' });
+  const start = performance.now();
+  try{
+    const res = await fetch(UPLOAD_ECHO + '?r=' + Math.random(), {
+      method: 'POST',
+      body: blob,
+      mode: 'cors',
+      cache:'no-store',
     });
-  });
+    const end = performance.now();
+    const elapsed = (end - start) / 1000;
+    // bytes uploaded = blob.size
+    ulBytes += blob.size;
+    // record sample
+    const mbps = toMbps(blob.size, elapsed);
+    ulSamples.push(mbps);
+  } catch(e){
+    // ignore
+  }
+}
 
-  stopBtn.addEventListener('click', ()=>{
-    if(controller) controller.abort();
-    running = false;
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    clearInterval(pingInterval);
-  });
+/* UI update loop */
+let uiInterval = null;
+function startUiLoop(){
+  if(uiInterval) clearInterval(uiInterval);
+  uiInterval = setInterval(()=>{
+    // compute per-second download throughput since last tick
+    const now = performance.now();
+    const secondsTotal = (now - dlStart)/1000;
+    const bytesSinceStart = dlBytes;
+    const dlMbps = toMbps(bytesSinceStart, Math.max(secondsTotal, 0.000001));
+    // approximate current per-second by taking delta since last sample
+    const lastDeltaBytes = bytesSinceStart - (dlLastBytes || 0);
+    const deltaSeconds = (now - (dlLast || now))/1000;
+    const currentMbps = toMbps(lastDeltaBytes, Math.max(deltaSeconds, 0.000001));
+    dlLast = now; dlLastBytes = bytesSinceStart;
+    setText('currentThrough', currentMbps.toFixed(2) + ' Mbps');
+    setText('dlLive', 'DL: ' + dlMbps.toFixed(2) + ' Mbps');
+    setText('dlAvg', dlSamples.length ? ( (dlSamples.reduce((a,b)=>a+b,0))/dlSamples.length ).toFixed(2) : dlMbps.toFixed(2));
 
-  // copy results
-  $('copyBtn').addEventListener('click', ()=>{
-    const txt = `Download: ${dlLive.textContent}\nUpload: ${ulLive.textContent}\nPing: ${pingLive.textContent}\nIP: ${ipAddr.textContent}`;
-    navigator.clipboard?.writeText(txt).then(()=>alert('Results copied')).catch(()=>alert('Copy failed'));
-  });
+    // upload live (we update ulLive from ulSamples)
+    const ulAvgVal = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : 0;
+    setText('ulLive', 'UL: ' + ulAvgVal.toFixed(2) + ' Mbps');
+    setText('ulAvg', ulAvgVal.toFixed(2));
 
-  // keep spark alive even before test
-  for(let i=0;i<10;i++) samples.push(0);
-  drawSpark();
+    setText('serverInfo', 'Server: public demo (httpbin / hetzner)');
+    setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
+
+    // optional: simple graph text placeholder
+    const graph = u('graphArea');
+    if(graph) graph.textContent = `${Math.round(currentMbps)} Mbps`;
+  }, 1000);
+}
+
+function stopUiLoop(){
+  if(uiInterval) { clearInterval(uiInterval); uiInterval = null; }
+}
+
+/* driver */
+async function startTest(){
+  if(running) return;
+  running = true;
+  u('startBtn').disabled = true;
+  u('stopBtn').disabled = false;
+  setText('currentThrough','0.0 Mbps');
+  setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps');
+  dlSamples=[]; ulSamples=[]; ulBytes=0; dlBytes=0; dlStart=performance.now(); dlLast = dlStart; dlLastBytes = 0;
+  await measurePing();
+  startUiLoop();
+
+  // start downloads in background - run for up to X seconds or until stopped
+  const DL_DURATION = 12 * 1000; // 12s
+  const startTime = performance.now();
+  try{
+    // run downloads (parallel) for duration but read continuously
+    dlController = new AbortController();
+    const streams = [];
+    for(let i=0;i<PARALLEL_DOWNLOADS;i++){
+      streams.push((async ()=>{
+        // repeated fetches until DL_DURATION
+        while(running && (performance.now() - startTime) < DL_DURATION){
+          await streamDownload(dlController.signal);
+          // record sample every iteration roughly
+          const sec = (performance.now() - dlStart) / 1000;
+          const mbps = toMbps(dlBytes, sec);
+          dlSamples.push(mbps);
+          // small delay to avoid hammering in very fast loops
+          await new Promise(r=>setTimeout(r, 200));
+        }
+      })());
+    }
+    await Promise.all(streams);
+  } catch(e){
+    // ignore
+  }
+
+  // after downloads, do a couple of upload tests
+  if(running){
+    for(let i=0;i<2;i++){
+      await startUploadTest();
+    }
+  }
+
+  // finalize
+  running = false;
+  if(dlController) { try{ dlController.abort(); }catch(e){} dlController = null; }
+  stopUiLoop();
+  // compute averages:
+  const dlAvg = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : toMbps(dlBytes, Math.max((performance.now()-dlStart)/1000,0.000001));
+  const ulAvg = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : 0;
+  setText('dlAvg', dlAvg.toFixed(2));
+  setText('ulAvg', ulAvg.toFixed(2));
+  setText('currentThrough', '0.0 Mbps');
+  u('startBtn').disabled = false;
+  u('stopBtn').disabled = true;
+  u('resultNote').textContent = 'Demo complete — results are approximate (client-only)';
+}
+
+/* stop */
+function stopTest(){
+  running = false;
+  if(dlController){ try{ dlController.abort(); }catch(e){} dlController = null; }
+  stopUiLoop();
+  u('startBtn').disabled = false;
+  u('stopBtn').disabled = true;
+}
+
+/* copy results (simple summary) */
+u('copyBtn').addEventListener('click', ()=>{
+  const txt = `Speed Test results:\nDownload (avg): ${u('dlAvg').textContent} Mbps\nUpload (avg): ${u('ulAvg').textContent} Mbps\nPing: ${u('pingVal').textContent}\nSource: PirateRuler client-only demo`;
+  navigator.clipboard?.writeText(txt).then(()=> alert('Results copied')).catch(()=> alert('Copy failed'));
+});
+
+/* start/stop buttons */
+u('startBtn').addEventListener('click', ()=> startTest());
+u('stopBtn').addEventListener('click', ()=> stopTest());
+u('resetBtn').addEventListener('click', ()=>{
+  dlBytes=0; ulBytes=0; dlSamples=[]; ulSamples=[]; setText('dlAvg','0.0'); setText('ulAvg','0.0'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('currentThrough','0.0 Mbps'); setText('pingVal','-- ms');
+});
+
+/* small keyboard shortcut: S = start */
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase() === 's') startTest();
+  if(e.key.toLowerCase() === 'x') stopTest();
+});
 </script>
 </body>
 </html>
