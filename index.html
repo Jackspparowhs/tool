@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PirateRuler Maps</title>
 
-<!-- MapLibre (open source Apple Maps-style engine) -->
+<!-- MapLibre -->
 <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 
@@ -26,7 +26,7 @@ html, body {
   position: absolute;
 }
 
-/* Top Controls (Search + Logo + Locate button) */
+/* Top bar */
 .controls {
   position: absolute;
   top: 10px;
@@ -52,7 +52,7 @@ html, body {
 .logoCircle {
   width: 42px;
   height: 42px;
-  background: #32d74b; /* Apple-style green */
+  background: #32d74b;
   color: white;
   font-size: 20px;
   font-weight: 900;
@@ -68,49 +68,7 @@ html, body {
   color: #111;
 }
 
-/* Search Box */
-.searchBox {
-  position: absolute;
-  top: 75px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 420px;
-  background: white;
-  padding: 10px;
-  border-radius: 16px;
-  display: flex;
-  gap: 8px;
-  box-shadow: 0 6px 22px rgba(0,0,0,0.15);
-}
-
-.searchBox input {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: #f1f1f1;
-  font-size: 16px;
-  outline: none;
-}
-
-.searchBtn {
-  padding: 12px 20px;
-  background: #32d74b;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,150,50,0.4);
-}
-
-.searchBtn:hover {
-  background: #28c442;
-}
-
-/* Locate Button */
+/* Locate button */
 .locateBtn {
   background: #32d74b;
   color: white;
@@ -123,12 +81,47 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,150,50,0.35);
 }
 
-/* Remove unwanted X button */
-.clearBtn {
-  display: none !important;
+/* Search Box — MOVED UNDER Locate button */
+.searchBox {
+  position: absolute;
+  top: 75px; /* stays same */
+  right: 10px; /* position under locate */
+  width: 180px; /* smaller */
+  background: white;
+  padding: 10px;
+  border-radius: 16px;
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.15);
 }
 
-/* Small credit */
+/* Search input */
+.searchBox input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  background: #f1f1f1;
+  font-size: 15px;
+  outline: none;
+}
+
+/* SMALL Search button */
+.searchBtn {
+  padding: 10px 12px;
+  background: #32d74b;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,150,50,0.4);
+}
+
 .credit {
   position: absolute;
   bottom: 10px;
@@ -140,13 +133,13 @@ html, body {
   color: white;
   z-index: 999;
 }
-
 </style>
 </head>
 <body>
 
 <div id="map"></div>
 
+<!-- Top bar -->
 <div class="controls">
   <div class="logoBox">
     <div class="logoCircle">PR</div>
@@ -156,15 +149,16 @@ html, body {
   <button class="locateBtn" id="locateBtn">Locate</button>
 </div>
 
+<!-- Search (now under Locate button, smaller) -->
 <div class="searchBox">
-  <input type="text" id="searchInput" placeholder="Search place…" />
+  <input type="text" id="searchInput" placeholder="Search…" />
   <button class="searchBtn" id="searchBtn">Search</button>
 </div>
 
 <div class="credit">Powered by PirateRuler.com</div>
 
 <script>
-// Initialise MapLibre Map (No API key needed)
+// Map init
 const map = new maplibregl.Map({
   container: "map",
   style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
@@ -172,17 +166,17 @@ const map = new maplibregl.Map({
   zoom: 10
 });
 
-// Add zoom buttons
+// Zoom controls
 map.addControl(new maplibregl.NavigationControl(), "bottom-right");
 
-// Search Function
+// Search
 async function searchPlace() {
   const query = document.getElementById("searchInput").value.trim();
   if (!query) return;
 
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
-
-  const res = await fetch(url);
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+  );
   const data = await res.json();
   if (data.length === 0) return;
 
@@ -191,10 +185,9 @@ async function searchPlace() {
 
   map.flyTo({ center: [lon, lat], zoom: 14 });
 }
-
 document.getElementById("searchBtn").onclick = searchPlace;
 
-// Locate Me Button
+// Locate Me
 document.getElementById("locateBtn").onclick = () => {
   navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude;
@@ -208,5 +201,6 @@ document.getElementById("locateBtn").onclick = () => {
   });
 };
 </script>
+
 </body>
 </html>
