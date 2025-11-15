@@ -3,245 +3,201 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Map — PirateRuler.com</title>
-<meta name="description" content="Simple full-screen map by PirateRuler — search, locate, click to drop marker. No API keys." />
+<title>Map — PirateRuler</title>
+<meta name="description" content="Clean full-screen map by PirateRuler — Apple-like look (no API key)." />
 <meta name="theme-color" content="#0a1b3a" />
 <link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
 
-<!-- Leaflet CSS -->
+<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
+  /* ----- Tokens ----- */
   :root{
-    --space:12px;
-    --text-sans:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    --blue-a:#0b63d6; /* primary blue */
-    --blue-b:#0a49b3;
-    --bg:#071225;
-    --muted:#9fb3d9;
-    --text:#e9f1ff;
+    --bg: #071225;
+    --ui-blue: #0077ff;   /* Apple-like blue */
+    --ui-blue-2: #005ecc;
+    --muted: #9bb1cf;
+    --glass: rgba(255,255,255,0.06);
   }
-  html,body{height:100%;margin:0;font-family:var(--text-sans);-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--text)}
-  a{color:inherit;text-decoration:none}
-  /* header (keeps your look) */
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:transparent;position:fixed;top:0;left:0;right:0;z-index:1200}
-  .wrap{max-width:1100px;margin:0 auto;width:100%;padding-left:var(--space);padding-right:var(--space);box-sizing:border-box}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--blue-a),var(--blue-b));display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:18px;box-shadow:0 8px 20px rgba(2,8,20,0.4)}
-  .title{font-weight:800;font-size:16px}
-  .sub{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:10px;align-items:center}
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:var(--bg);color:#fff}
+  a{color:inherit}
+  /* ----- header: very small and unobtrusive ----- */
+  header{
+    position:fixed; top:10px; left:12px; z-index:1400;
+    display:flex; align-items:center; gap:10px;
+    padding:6px 8px; border-radius:12px; background:rgba(255,255,255,0.03);
+    backdrop-filter: blur(6px);
+    box-shadow:0 8px 30px rgba(2,8,20,0.45);
+    pointer-events:none; /* overall header not clickable except buttons */
+  }
+  .logo {
+    width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,var(--ui-blue),var(--ui-blue-2));
+    display:flex; align-items:center; justify-content:center; font-weight:900; color:white; font-size:16px;
+    pointer-events:auto;
+  }
+  .hdr-text {display:flex; flex-direction:column; line-height:1; transform: translateY(2px); pointer-events:none;}
+  .hdr-title{font-weight:800;font-size:14px; color: rgba(255,255,255,0.95)}
+  .hdr-sub{font-size:11px;color:var(--muted); margin-top:2px; display:block}
 
-  /* top floating map controls container (overlay) */
-  .map-controls {
-    position: fixed;
-    top:82px; /* leave header visible */
-    left: 16px;
-    right: 16px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    z-index:1200;
-    pointer-events:none; /* only inner controls clickable */
+  /* ----- control overlay ----- */
+  .controls {
+    position:fixed; top:16px; right:16px; z-index:1400; display:flex; gap:10px; flex-direction:column; pointer-events:auto;
   }
-  .map-controls .left, .map-controls .right { pointer-events:auto; display:flex; gap:10px; align-items:center; }
-  .search {
-    display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.98);padding:8px;border-radius:12px;
-    box-shadow:0 8px 30px rgba(2,8,20,0.35); width: min(720px, calc(100% - 160px));
+  .btn {
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    min-width:84px; padding:10px 12px; border-radius:12px; background:linear-gradient(180deg,var(--ui-blue),var(--ui-blue-2));
+    color:white; font-weight:800; border:0; box-shadow: 0 8px 24px rgba(9,30,66,0.35);
+    cursor:pointer;
   }
-  input#searchInput{border:0;outline:0;padding:6px;font-size:15px;width:100%;color:#06203a;background:transparent}
-  button.btn {background:linear-gradient(90deg,var(--blue-a),var(--blue-b));color:white;border:0;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
-  button.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text)}
+  .btn.ghost {
+    background: rgba(255,255,255,0.06); color: #dfefff; border: 0; box-shadow:none; font-weight:700;
+  }
 
-  /* full-screen map area under header */
-  #map {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 0;
+  /* compact icon style like Apple Maps */
+  .icon-btn {
+    width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;border:0;color:#fff;cursor:pointer;
   }
-  /* we keep header and floating controls above map; provide spacing so header doesn't cover map content visually */
-  .content-spacer { height: 140px; } /* header + controls space so map features don't hide under them */
 
-  /* floating footer attribution */
+  /* ----- map fills screen ----- */
+  #map { position:fixed; inset:0; z-index:0; }
+
+  /* ----- small attribution (very small) ----- */
   .attribution {
-    position: fixed;
-    left: 16px;
-    bottom: 16px;
-    z-index:1200;
-    background: rgba(6, 18, 40, 0.8);
-    color: #dfeeff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 13px;
+    position:fixed; left:12px; bottom:12px; z-index:1400;
+    background: rgba(0,0,0,0.45); color:#d7e6ff; font-size:12px; padding:6px 8px; border-radius:8px;
   }
 
-  /* small popup style override for leaflet popups on dark bg */
-  .leaflet-popup-content-wrapper { background: #fff; color: #06203a }
-  .leaflet-popup-tip { background: #fff }
+  /* Leaflet popup light on dark bg */
+  .leaflet-popup-content-wrapper { background:#fff; color:#06203a; border-radius:10px; }
+  .leaflet-popup-tip { background:#fff; }
 
+  /* adjust mobile */
   @media(max-width:720px){
-    .map-controls { top:74px; left:10px; right:10px; }
-    .search { width: calc(100% - 90px); }
+    .controls{ right:10px; gap:8px }
+    .btn{ min-width:72px; padding:8px 10px; font-size:14px }
+    header{ top:8px; left:8px }
   }
 </style>
 </head>
 <body>
-  <!-- Header (keeps design) -->
-  <header>
-    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="logo" aria-hidden="true">PR</div>
-        <div>
-          <div class="title">Map</div>
-          <div class="sub">by PirateRuler.com</div>
-        </div>
-      </div>
 
-      <div class="controls" role="navigation" aria-label="Header controls">
-        <button id="themeToggle" class="btn ghost" aria-pressed="false">Theme</button>
-      </div>
+  <!-- tiny header -->
+  <header aria-hidden="true">
+    <div class="logo" title="PirateRuler">PR</div>
+    <div class="hdr-text">
+      <div class="hdr-title">Map</div>
+      <div class="hdr-sub">by PirateRuler</div>
     </div>
   </header>
 
-  <!-- floating map controls (search, locate, clear) -->
-  <div class="map-controls">
-    <div class="left">
-      <div class="search" role="search" aria-label="Place search">
-        <input id="searchInput" type="search" placeholder="Search place, address, airport..." aria-label="Search">
-        <button id="searchBtn" class="btn">Search</button>
-      </div>
-    </div>
-
-    <div class="right">
-      <button id="locateBtn" class="btn">Locate me</button>
-      <button id="clearBtn" class="btn ghost">Clear</button>
-    </div>
+  <!-- minimal controls -->
+  <div class="controls" role="toolbar" aria-label="Map controls">
+    <button id="locateBtn" class="btn" title="Locate me">Locate</button>
+    <button id="searchOpen" class="btn ghost" title="Search">Search</button>
+    <button id="clearBtn" class="icon-btn" title="Clear" aria-label="Clear markers">✖</button>
   </div>
 
-  <!-- Map container -->
+  <!-- the map -->
   <div id="map" aria-label="Map"></div>
 
-  <!-- small spacer element for layout (optional) -->
-  <div class="content-spacer" aria-hidden="true"></div>
+  <!-- tiny attribution -->
+  <div class="attribution" id="attr">PirateRuler.com</div>
 
-  <!-- attribution text per your request -->
-  <div class="attribution">Powered by PirateRuler.com</div>
-
-  <!-- Leaflet JS -->
+  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-  // Simple full-screen Leaflet map, blue accents, Nominatim search, no API key required.
+  /* ===== Apple-like full-screen map (Leaflet) =====
+     - Uses smooth pastel tiles similar to Apple Maps look (Carto/Stadia)
+     - Minimal header, Apple-like blue buttons, tiny attribution
+     - Click to drop marker; locate button centers user
+     - No external API keys required
+     - If you want real Apple Maps (MapKit JS) I can provide that code but you need an Apple key + enable domain
+  */
 
-  // Create map and set a friendly default view
-  const map = L.map('map', { zoomControl: true }).setView([20.0, 0.0], 3);
+  // Create map (world view)
+  const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([22.0, 78.0], 4);
 
-  // Clean CartoDB Positron tiles (light and human-friendly)
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 19
+  // Use a soft, pastel tile set — Stadia/Carto "alidade_smooth" / positron-style
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // Single marker layer for search/click
+  // Add subtle scale control on top-left (Apple-like)
+  L.control.scale({ position: 'bottomleft', imperial: false }).addTo(map);
+
+  // marker layer
   const markerLayer = L.layerGroup().addTo(map);
 
-  // UI elements
-  const searchInput = document.getElementById('searchInput');
-  const searchBtn = document.getElementById('searchBtn');
+  // locate button
   const locateBtn = document.getElementById('locateBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const themeToggle = document.getElementById('themeToggle');
-
-  // Place marker and popup helper
-  function placeMarker(lat, lon, label){
-    markerLayer.clearLayers();
-    const m = L.marker([lat, lon]).addTo(markerLayer);
-    const content = `<div style="font-weight:900">${sanitize(label || 'Pinned location')}</div>
-                     <div style="font-size:13px;color:#444">Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}</div>`;
-    m.bindPopup(content).openPopup();
-    map.setView([lat, lon], 13);
-  }
-
-  // Click on map places marker
-  map.on('click', (e) => {
-    placeMarker(e.latlng.lat, e.latlng.lng, 'Pinned location');
-  });
-
-  // Locate me
   locateBtn.addEventListener('click', () => {
-    if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
-    locateBtn.disabled = true;
-    locateBtn.textContent = 'Locating…';
-    navigator.geolocation.getCurrentPosition(pos => {
-      locateBtn.disabled = false;
-      locateBtn.textContent = 'Locate me';
-      placeMarker(pos.coords.latitude, pos.coords.longitude, 'You are here');
-    }, err => {
-      locateBtn.disabled = false;
-      locateBtn.textContent = 'Locate me';
+    if(!navigator.geolocation) { alert('Geolocation not supported'); return; }
+    locateBtn.disabled = true; locateBtn.textContent = 'Locating…';
+    navigator.geolocation.getCurrentPosition((pos) => {
+      locateBtn.disabled = false; locateBtn.textContent = 'Locate';
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      placeMarker(lat, lon, 'You are here');
+      map.setView([lat, lon], 13);
+    }, (err) => {
+      locateBtn.disabled = false; locateBtn.textContent = 'Locate';
       alert('Location error: ' + (err.message || err.code));
     }, { enableHighAccuracy: true, timeout: 10000 });
   });
 
-  // Clear
-  clearBtn.addEventListener('click', () => {
-    markerLayer.clearLayers();
+  // simple search overlay (modal-style small prompt) — minimal UI to keep page clean
+  document.getElementById('searchOpen').addEventListener('click', async () => {
+    const q = prompt('Search place, address, or airport (type and press OK):');
+    if(!q) return;
+    // Nominatim public search
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`;
+    try {
+      const r = await fetch(url, {headers:{'Accept-Language':'en'}});
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if(!j || j.length === 0) { alert('No results'); return; }
+      const first = j[0];
+      const lat = parseFloat(first.lat), lon = parseFloat(first.lon);
+      placeMarker(lat, lon, first.display_name || q);
+      map.setView([lat, lon], 13);
+    } catch(e) {
+      console.warn('Search failed', e);
+      alert('Search failed');
+    }
   });
 
-  // Nominatim search (public)
-  async function nominatimSearch(q){
-    if(!q) return null;
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=6`;
-    try{
-      const resp = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      return await resp.json();
-    }catch(e){
-      console.warn('Search failed', e);
-      return null;
-    }
+  // click to add marker
+  map.on('click', (e) => {
+    placeMarker(e.latlng.lat, e.latlng.lng, 'Pinned location');
+  });
+
+  // place marker helper
+  function placeMarker(lat, lon, label){
+    markerLayer.clearLayers();
+    const m = L.marker([lat, lon], {
+      riseOnHover: true
+    }).addTo(markerLayer);
+    const content = `<div style="font-weight:900">${escapeHtml(label || 'Location')}</div>
+                     <div style="font-size:13px;color:#334">${lat.toFixed(6)}, ${lon.toFixed(6)}</div>`;
+    m.bindPopup(content).openPopup();
   }
 
-  // Search button handler
-  searchBtn.addEventListener('click', async () => {
-    const q = searchInput.value.trim();
-    if(!q) return;
-    searchBtn.disabled = true;
-    searchBtn.textContent = 'Searching…';
-    const res = await nominatimSearch(q);
-    searchBtn.disabled = false;
-    searchBtn.textContent = 'Search';
-    if(!res || res.length === 0){ alert('No results'); return; }
-    const first = res[0];
-    const lat = parseFloat(first.lat), lon = parseFloat(first.lon);
-    const label = first.display_name || q;
-    placeMarker(lat, lon, label);
-  });
+  // clear
+  document.getElementById('clearBtn').addEventListener('click', () => markerLayer.clearLayers());
 
-  // Press Enter to search
-  searchInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') searchBtn.click(); });
+  // tiny helper
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
-  // Theme toggle (just toggles background for now)
-  themeToggle.addEventListener('click', () => {
-    const body = document.body;
-    if(body.style.background === 'white'){
-      body.style.background = 'var(--bg)';
-      themeToggle.textContent = 'Theme';
-    } else {
-      body.style.background = 'white';
-      themeToggle.textContent = 'Theme';
-    }
-  });
+  // make sure map fills correctly on mobile (fix rendering glitch)
+  setTimeout(()=> map.invalidateSize(), 100);
 
-  // small sanitize helper for popup text
-  function sanitize(s){ return String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  // optional: add globe-like view on small zooms (simulate by setting minZoom)
+  map.setMinZoom(2);
 
-  // Ensure map invalidation after page load so it fills correctly on mobile
-  window.requestAnimationFrame(()=>{ setTimeout(()=>{ map.invalidateSize(); }, 50); });
-
+  // Remove default big leaflet attribution UI so the page looks minimal
+  // We still use a tiny custom attribution per your request (PirateRuler.com)
   </script>
 </body>
 </html>
