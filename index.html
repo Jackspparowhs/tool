@@ -25,7 +25,6 @@
   .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;border:0;font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(10,132,255,0.12)}
   .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text);box-shadow:none;font-weight:700;padding:8px 12px}
   .theme-btn{width:44px;height:44px;border-radius:999px;border:0;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
-  /* main card */
   .card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;gap:20px;align-items:center;flex-wrap:wrap}
   .big {flex:1;min-width:260px}
   .stat {text-align:center;padding:18px;border-radius:12px;background:rgba(0,0,0,0.02)}
@@ -37,19 +36,16 @@
   .small.stop{background:#ececec;color:var(--text)}
   .mini {font-size:13px;color:var(--muted)}
   .footer {margin-top:12px;color:var(--muted);font-size:13px}
-  /* offcanvas menu (right) */
   .offcanvas{position:fixed;right:12px;top:12px;width:320px;max-width:92vw;background:var(--card);border-radius:14px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12);transform:translateX(120%);transition:transform .28s;z-index:9999}
   .offcanvas.open{transform:translateX(0)}
   .offcanvas h3{margin:0 0 8px 0}
   .menu-item{padding:12px;border-radius:10px;background:rgba(0,0,0,0.03);margin-bottom:8px;font-weight:800}
-  /* responsive */
   @media(max-width:900px){
     .card{flex-direction:column}
     .side{width:100%}
     .offcanvas{right:8px;left:8px;top:auto;bottom:12px;transform:translateY(120%);transition:transform .28s}
     .offcanvas.open{transform:translateY(0)}
   }
-  /* small readout styles */
   .live-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
   .live-box{flex:1;padding:12px;border-radius:12px;background:rgba(0,0,0,0.02);text-align:center}
   .live-box .v{font-weight:900;font-size:20px}
@@ -151,7 +147,6 @@
     <footer style="text-align:center;color:var(--muted)">© <span id="year"></span> PirateRuler — Speed Test</footer>
   </div>
 
-  <!-- Offcanvas menu -->
   <div id="menu" class="offcanvas" role="dialog" aria-hidden="true">
     <h3>Menu</h3>
     <div class="menu-item" onclick="startQuick()">Start Test</div>
@@ -164,258 +159,309 @@
   </div>
 
 <script>
-/* ---------- small helpers ---------- */
-const u = s => document.getElementById(s);
-u('year').textContent = new Date().getFullYear();
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+$('year').textContent = new Date().getFullYear();
 
-/* Theme toggle */
+/* theme */
 const doc = document.documentElement;
 const saved = localStorage.getItem('pr-theme') || 'light';
 if(saved === 'dark') doc.classList.add('dark');
-else doc.classList.remove('dark');
-
-u('toggleTheme').addEventListener('click', () => {
+$('toggleTheme').addEventListener('click', ()=>{
   if(doc.classList.contains('dark')){ doc.classList.remove('dark'); localStorage.setItem('pr-theme','light'); }
   else { doc.classList.add('dark'); localStorage.setItem('pr-theme','dark'); }
 });
 
-/* Menu open/close */
-const menu = u('menu');
-u('openMenu').addEventListener('click', () => {
+/* menu */
+const menu = $('menu');
+$('openMenu').addEventListener('click', ()=> {
   const open = menu.classList.toggle('open');
-  u('openMenu').setAttribute('aria-expanded', String(open));
+  $('openMenu').setAttribute('aria-expanded', String(open));
 });
-u('closeMenuBtn').addEventListener('click', ()=> menu.classList.remove('open'));
-
-/* small menu helper functions (placeholders) */
+$('closeMenuBtn').addEventListener('click', ()=> menu.classList.remove('open'));
 function startQuick(){ menu.classList.remove('open'); startTest(); }
 function showAbout(){ alert('Speed Test by PirateRuler — client-only demo.'); }
 function showPrivacy(){ alert('Privacy: Runs client-side. No server storage by default.'); }
 function showContact(){ alert('Contact: PirateRuler.com'); }
 
-/* ---------- Speed test logic (client-only demo) ---------- */
+/* ---------- improved speed test logic ---------- */
 
 /*
- Approach:
- - Measure ping with a small HEAD fetch to https://httpbin.org/get
- - Download test: progressive streaming of a large file (Hetzner speed test file).
-   We stream it using fetch + ReadableStream, count bytes as they arrive and compute per-second throughput.
- - Upload test: create a blob of known size and POST to https://httpbin.org/post, measure time until upload finishes (this gives approximate upload)
- - Live per-second stats show in UI.
- NOTE: For production use you should host large CORS-enabled files on a server you control.
+  Changes made:
+  - Immediate small probe to produce a fast initial estimate
+  - Parallel progressive download streams (4) to saturate better
+  - Upload measured with XMLHttpRequest + progress events to show live upload
+  - UI updates every 500ms for snappy feel
+  - Smoothing via simple moving average for stable numbers
 */
 
 let running = false;
-let dlBytes = 0, dlStart = 0, dlLast = 0;
-let ulBytes = 0, ulStart = 0;
+let dlBytes = 0, dlStart = 0;
 let dlSamples = [], ulSamples = [];
 let pingMs = null;
-let dlController = null; // abort controller
+let abortControllers = [];
+let uiTimer = null;
+let dlLastBytes = 0;
+let UI_INTERVAL = 500; // 500ms updates for snappier UI
 
-const DOWNLOAD_URL = 'https://speed.hetzner.de/100MB.bin'; // public demo file (adjust as needed)
-const PARALLEL_DOWNLOADS = 2; // parallel streams for better measurement on fast links
-const UPLOAD_ECHO = 'https://httpbin.org/post'; // public demo echo endpoint (CORS-enabled)
+// public demo files (these are CORS-enabled public hosts; for production host your own)
+const DOWNLOAD_URLS = [
+  'https://speed.hetzner.de/100MB.bin',  // big
+  'https://speed.hetzner.de/10MB.bin'    // fallback smaller
+];
+const PARALLEL_DOWNLOADS = 4;
+const DL_RUN_MS = 12000; // 12s of downloads
+const UPLOAD_SIZE_MB = 8; // upload blob ~8MB for measurable upload streaming
+const UPLOAD_URL = 'https://httpbin.org/post'; // public echo (CORS)
 
-function setText(id, txt){ if(u(id)) u(id).textContent = txt; }
-function toMbps(bytes, seconds){ return (bytes * 8) / (1024*1024) / Math.max(seconds, 0.000001); }
+/* helper conversions */
+function bytesToMbps(bytes, seconds){ return (bytes * 8) / (1024*1024) / Math.max(seconds, 0.000001); }
+function setText(id, txt){ if($(id)) $(id).textContent = txt; }
 
-/* ping */
+/* ping first quickly (small fetch) */
 async function measurePing(){
-  try{
+  try {
     const t0 = performance.now();
-    const res = await fetch('https://httpbin.org/get?nocache=' + Math.random(), {cache:'no-store', mode:'cors'});
+    await fetch('https://httpbin.org/get?cachebust=' + Math.random(), {cache:'no-store', mode:'cors'});
     const t1 = performance.now();
-    if(res.ok) pingMs = Math.round(t1 - t0);
-    else pingMs = null;
-  }catch(e){ pingMs = null; }
+    pingMs = Math.round(t1 - t0);
+  } catch(e){ pingMs = null; }
   setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
 }
 
-/* download worker: streams file and counts bytes */
-async function streamDownload(signal){
+/* small fast probe: fetch a small byte-range to get immediate throughput */
+async function smallProbe(url){
   try {
-    const res = await fetch(DOWNLOAD_URL + '?r=' + Math.random(), { method: 'GET', signal, cache:'no-store', mode:'cors' });
-    if(!res.body) return 0;
+    const controller = new AbortController();
+    abortControllers.push(controller);
+    // try requesting a small range (first ~200KB) to get a fast initial delta
+    const headers = new Headers();
+    headers.set('Range','bytes=0-200000');
+    const res = await fetch(url + '?r=' + Math.random(), { method:'GET', headers, signal: controller.signal, cache:'no-store', mode:'cors' });
+    if(!res.ok) return 0;
     const reader = res.body.getReader();
-    let total = 0;
+    let probeBytes = 0;
     while(true){
-      const { done, value } = await reader.read();
+      const {done, value} = await reader.read();
       if(done) break;
-      total += value.byteLength;
-      // update global counters for live UI
+      probeBytes += value.byteLength;
       dlBytes += value.byteLength;
+      // return early after some bytes so UI can update
+      if(probeBytes >= 180000) break;
     }
-    return total;
+    try{ controller.abort(); }catch(e){}
+    return probeBytes;
   } catch(e){
-    // aborted or network error
     return 0;
   }
 }
 
-/* start download test */
-async function startDownloadTest(){
-  dlBytes = 0; dlStart = performance.now(); dlLast = dlStart; dlSamples = [];
-  dlController = new AbortController();
-  const promises = [];
-  for(let i=0;i<PARALLEL_DOWNLOADS;i++){
-    promises.push(streamDownload(dlController.signal));
-  }
-  // run all parallel, but we keep reading dlBytes live in interval
-  await Promise.all(promises);
-}
-
-/* upload test (approx): create a large blob and POST it */
-async function startUploadTest(){
-  // create a blob ~5MB for upload demo. On fast links increase size.
-  const size = 5 * 1024 * 1024; // 5 MB
-  const chunk = new Uint8Array(1024*1024).fill(0x61); // 1MB chunk 'a's
-  const parts = [];
-  let remaining = size;
-  while(remaining > 0){
-    parts.push(chunk.slice(0, Math.min(remaining, chunk.length)));
-    remaining -= chunk.length;
-  }
-  const blob = new Blob(parts, { type: 'application/octet-stream' });
-  const start = performance.now();
-  try{
-    const res = await fetch(UPLOAD_ECHO + '?r=' + Math.random(), {
-      method: 'POST',
-      body: blob,
-      mode: 'cors',
-      cache:'no-store',
-    });
-    const end = performance.now();
-    const elapsed = (end - start) / 1000;
-    // bytes uploaded = blob.size
-    ulBytes += blob.size;
-    // record sample
-    const mbps = toMbps(blob.size, elapsed);
-    ulSamples.push(mbps);
+/* stream download: progressive fetch + reader */
+async function streamDownload(url){
+  const controller = new AbortController();
+  abortControllers.push(controller);
+  try {
+    const res = await fetch(url + '?r=' + Math.random(), { method:'GET', signal: controller.signal, cache:'no-store', mode:'cors' });
+    if(!res.ok || !res.body) return;
+    const reader = res.body.getReader();
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      dlBytes += value.byteLength;
+      // slight yielding
+      // (we don't await here so loop continues quickly)
+    }
   } catch(e){
-    // ignore
+    // ignore errors (CORS, abort)
   }
 }
 
-/* UI update loop */
-let uiInterval = null;
-function startUiLoop(){
-  if(uiInterval) clearInterval(uiInterval);
-  uiInterval = setInterval(()=>{
-    // compute per-second download throughput since last tick
-    const now = performance.now();
-    const secondsTotal = (now - dlStart)/1000;
-    const bytesSinceStart = dlBytes;
-    const dlMbps = toMbps(bytesSinceStart, Math.max(secondsTotal, 0.000001));
-    // approximate current per-second by taking delta since last sample
-    const lastDeltaBytes = bytesSinceStart - (dlLastBytes || 0);
-    const deltaSeconds = (now - (dlLast || now))/1000;
-    const currentMbps = toMbps(lastDeltaBytes, Math.max(deltaSeconds, 0.000001));
-    dlLast = now; dlLastBytes = bytesSinceStart;
-    setText('currentThrough', currentMbps.toFixed(2) + ' Mbps');
-    setText('dlLive', 'DL: ' + dlMbps.toFixed(2) + ' Mbps');
-    setText('dlAvg', dlSamples.length ? ( (dlSamples.reduce((a,b)=>a+b,0))/dlSamples.length ).toFixed(2) : dlMbps.toFixed(2));
+/* upload measured via XMLHttpRequest to get onprogress events */
+function startUploadWithProgress(){
+  return new Promise((resolve) => {
+    try {
+      // build blob of size UPLOAD_SIZE_MB
+      const chunk = new Uint8Array(1024*1024).fill(0x61);
+      const parts = [];
+      for(let i=0;i<UPLOAD_SIZE_MB;i++) parts.push(chunk);
+      const blob = new Blob(parts, {type: 'application/octet-stream'});
 
-    // upload live (we update ulLive from ulSamples)
-    const ulAvgVal = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : 0;
-    setText('ulLive', 'UL: ' + ulAvgVal.toFixed(2) + ' Mbps');
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', UPLOAD_URL + '?r=' + Math.random());
+      xhr.timeout = 30000;
+      let lastLoaded = 0;
+      let lastTime = performance.now();
+      const samples = [];
+
+      xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){
+          const now = performance.now();
+          const deltaBytes = e.loaded - lastLoaded;
+          const deltaSeconds = (now - lastTime)/1000;
+          if(deltaSeconds > 0){
+            const mbps = bytesToMbps(deltaBytes, deltaSeconds);
+            samples.push(mbps);
+            // update live UL speed immediately
+            setText('ulLive', 'UL: ' + mbps.toFixed(2) + ' Mbps');
+          }
+          lastLoaded = e.loaded;
+          lastTime = now;
+        }
+      };
+      xhr.onload = function(){
+        // compute average from samples
+        const avg = samples.length ? (samples.reduce((a,b)=>a+b,0)/samples.length) : 0;
+        resolve(avg);
+      };
+      xhr.onerror = function(){ resolve(0); };
+      xhr.ontimeout = function(){ resolve(0); };
+      xhr.send(blob);
+    } catch(e){ resolve(0); }
+  });
+}
+
+/* start UI updater (smoother, 500ms) */
+function startUiLoop(){
+  if(uiTimer) clearInterval(uiTimer);
+  let smoothingWindow = 6; // keep last N samples for smoothing
+  let dlMoving = [];
+  uiTimer = setInterval(()=>{
+    // compute overall elapsed seconds since dlStart
+    const now = performance.now();
+    const elapsed = (now - dlStart)/1000;
+    const totalDl = dlBytes;
+    const overallMbps = bytesToMbps(totalDl, Math.max(elapsed,0.000001));
+    // compute per-interval speed using delta bytes since last tick
+    const deltaBytes = totalDl - (dlLastBytes || 0);
+    const msInterval = UI_INTERVAL;
+    const instantMbps = bytesToMbps(deltaBytes, Math.max(msInterval/1000, 0.000001));
+    dlLastBytes = totalDl;
+
+    // smoothing
+    dlMoving.push(instantMbps);
+    if(dlMoving.length > smoothingWindow) dlMoving.shift();
+    const smooth = dlMoving.reduce((a,b)=>a+b,0)/dlMoving.length;
+
+    // push sample into dlSamples every second (approx)
+    dlSamples.push(overallMbps);
+
+    setText('currentThrough', smooth.toFixed(2) + ' Mbps');
+    setText('dlLive', 'DL: ' + overallMbps.toFixed(2) + ' Mbps');
+    const dlAvgVal = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : overallMbps;
+    setText('dlAvg', dlAvgVal.toFixed(2));
+
+    // UL: we use ulSamples populated by upload function
+    const ulAvgVal = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : parseFloat($('ulLive').textContent.replace(/[^\d.]/g,'')) || 0;
     setText('ulAvg', ulAvgVal.toFixed(2));
 
-    setText('serverInfo', 'Server: public demo (httpbin / hetzner)');
     setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
-
-    // optional: simple graph text placeholder
-    const graph = u('graphArea');
-    if(graph) graph.textContent = `${Math.round(currentMbps)} Mbps`;
-  }, 1000);
+    // graph placeholder
+    $('graphArea').textContent = Math.round(smooth) + ' Mbps';
+  }, UI_INTERVAL);
 }
+function stopUiLoop(){ if(uiTimer){ clearInterval(uiTimer); uiTimer=null; } }
 
-function stopUiLoop(){
-  if(uiInterval) { clearInterval(uiInterval); uiInterval = null; }
-}
-
-/* driver */
+/* start test driver */
 async function startTest(){
   if(running) return;
   running = true;
-  u('startBtn').disabled = true;
-  u('stopBtn').disabled = false;
-  setText('currentThrough','0.0 Mbps');
-  setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps');
-  dlSamples=[]; ulSamples=[]; ulBytes=0; dlBytes=0; dlStart=performance.now(); dlLast = dlStart; dlLastBytes = 0;
+  $('startBtn').disabled = true;
+  $('stopBtn').disabled = false;
+  dlBytes = 0; dlSamples=[]; ulSamples=[]; dlStart = performance.now(); dlLastBytes = 0;
+  setText('currentThrough','0.0 Mbps'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('dlAvg','0.0'); setText('ulAvg','0.0');
+  setText('resultNote','Running test — client-only demo');
+
+  // initial quick ping and small probe to show a fast number
   await measurePing();
+  // small probe try each download URL until one works
+  let probeSuccess = false;
+  for(const url of DOWNLOAD_URLS){
+    const p = await smallProbe(url);
+    if(p > 0){ probeSuccess = true; break; }
+  }
+  // start UI loop (immediate)
   startUiLoop();
 
-  // start downloads in background - run for up to X seconds or until stopped
-  const DL_DURATION = 12 * 1000; // 12s
+  // start parallel streaming downloads for DL_RUN_MS
   const startTime = performance.now();
-  try{
-    // run downloads (parallel) for duration but read continuously
-    dlController = new AbortController();
-    const streams = [];
-    for(let i=0;i<PARALLEL_DOWNLOADS;i++){
-      streams.push((async ()=>{
-        // repeated fetches until DL_DURATION
-        while(running && (performance.now() - startTime) < DL_DURATION){
-          await streamDownload(dlController.signal);
-          // record sample every iteration roughly
-          const sec = (performance.now() - dlStart) / 1000;
-          const mbps = toMbps(dlBytes, sec);
-          dlSamples.push(mbps);
-          // small delay to avoid hammering in very fast loops
-          await new Promise(r=>setTimeout(r, 200));
-        }
-      })());
-    }
-    await Promise.all(streams);
-  } catch(e){
-    // ignore
+  abortControllers = [];
+  const dlPromises = [];
+  for(let i=0;i<PARALLEL_DOWNLOADS;i++){
+    // pick first url (big) and stream until time window ends
+    dlPromises.push((async ()=>{
+      while(running && (performance.now() - startTime) < DL_RUN_MS){
+        await streamDownload(DOWNLOAD_URLS[0]);
+        // small delay to allow other tasks and avoid tight loop
+        await new Promise(r=>setTimeout(r, 80));
+      }
+    })());
   }
 
-  // after downloads, do a couple of upload tests
-  if(running){
-    for(let i=0;i<2;i++){
-      await startUploadTest();
+  // in parallel, schedule upload tests halfway through
+  const uploader = (async ()=>{
+    // wait a short bit so download has started
+    await new Promise(r=>setTimeout(r, 1200));
+    // attempt two upload runs, recording averages
+    for(let i=0;i<2 && running;i++){
+      const avg = await startUploadWithProgress();
+      if(avg) ulSamples.push(avg);
+      // short wait between uploads
+      await new Promise(r=>setTimeout(r, 300));
     }
-  }
+  })();
 
-  // finalize
+  // wait for downloads to finish or stop
+  await Promise.race([
+    Promise.all(dlPromises),
+    new Promise(r=> setTimeout(r, DL_RUN_MS + 2000))
+  ]).catch(()=>{});
+
+  // ensure uploader completes
+  await uploader.catch(()=>{});
+
+  // done
   running = false;
-  if(dlController) { try{ dlController.abort(); }catch(e){} dlController = null; }
+  // abort any outstanding controllers
+  try{ abortControllers.forEach(c=>c.abort()); }catch(e){}
   stopUiLoop();
-  // compute averages:
-  const dlAvg = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : toMbps(dlBytes, Math.max((performance.now()-dlStart)/1000,0.000001));
+
+  // compute final averages
+  const dlAvg = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : bytesToMbps(dlBytes, Math.max((performance.now()-dlStart)/1000, 0.000001));
   const ulAvg = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : 0;
   setText('dlAvg', dlAvg.toFixed(2));
   setText('ulAvg', ulAvg.toFixed(2));
   setText('currentThrough', '0.0 Mbps');
-  u('startBtn').disabled = false;
-  u('stopBtn').disabled = true;
-  u('resultNote').textContent = 'Demo complete — results are approximate (client-only)';
+  setText('resultNote', 'Demo complete — results are approximate (client-only)');
+  $('startBtn').disabled = false;
+  $('stopBtn').disabled = true;
 }
 
 /* stop */
 function stopTest(){
   running = false;
-  if(dlController){ try{ dlController.abort(); }catch(e){} dlController = null; }
+  try{ abortControllers.forEach(c=>c.abort()); }catch(e){}
   stopUiLoop();
-  u('startBtn').disabled = false;
-  u('stopBtn').disabled = true;
+  $('startBtn').disabled = false;
+  $('stopBtn').disabled = true;
+  setText('resultNote','Test stopped');
 }
 
-/* copy results (simple summary) */
-u('copyBtn').addEventListener('click', ()=>{
-  const txt = `Speed Test results:\nDownload (avg): ${u('dlAvg').textContent} Mbps\nUpload (avg): ${u('ulAvg').textContent} Mbps\nPing: ${u('pingVal').textContent}\nSource: PirateRuler client-only demo`;
+/* UI interactions */
+$('startBtn').addEventListener('click', ()=> startTest());
+$('stopBtn').addEventListener('click', ()=> stopTest());
+$('resetBtn').addEventListener('click', ()=>{
+  dlBytes = 0; dlSamples=[]; ulSamples=[]; setText('dlAvg','0.0'); setText('ulAvg','0.0'); setText('currentThrough','0.0 Mbps'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('pingVal','-- ms'); $('graphArea').textContent='(live graph placeholder)';
+});
+$('copyBtn').addEventListener('click', ()=>{
+  const txt = `Speed Test results:
+  Download (avg): ${$('dlAvg').textContent} Mbps
+  Upload (avg): ${$('ulAvg').textContent} Mbps
+  Ping: ${$('pingVal').textContent}
+  Source: PirateRuler client-only demo`;
   navigator.clipboard?.writeText(txt).then(()=> alert('Results copied')).catch(()=> alert('Copy failed'));
 });
 
-/* start/stop buttons */
-u('startBtn').addEventListener('click', ()=> startTest());
-u('stopBtn').addEventListener('click', ()=> stopTest());
-u('resetBtn').addEventListener('click', ()=>{
-  dlBytes=0; ulBytes=0; dlSamples=[]; ulSamples=[]; setText('dlAvg','0.0'); setText('ulAvg','0.0'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('currentThrough','0.0 Mbps'); setText('pingVal','-- ms');
-});
-
-/* small keyboard shortcut: S = start */
+/* keyboard shortcuts */
 document.addEventListener('keydown', (e)=>{
   if(e.key.toLowerCase() === 's') startTest();
   if(e.key.toLowerCase() === 'x') stopTest();
