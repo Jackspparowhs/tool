@@ -4,237 +4,270 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Map — PirateRuler.com</title>
-<meta name="description" content="Simple map — PirateRuler. Clean map interface, search places, locate me. No tracking." />
+<meta name="description" content="Simple full-screen map — PirateRuler. Google Maps style with Places Autocomplete & locate." />
 <meta name="theme-color" content="#071225" />
 <link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
-<link rel="apple-touch-icon" href="https://pirateruler.com/static/pr-logo.png">
 
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-  /* keep your site's design tokens & layout */
+  /* Keep your header look, but map will be full-screen under it */
   :root{
-    --space: 16px;
-    --text-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue";
+    --space: 12px;
+    --text-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
     --accent-a: #6bbf4a;
     --accent-b: #2fa64f;
-    --bg: linear-gradient(180deg,#061028 0%, #071225 50%);
-    --card-dark: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    --bg: #071225;
     --muted: #98a7bf;
     --text: #e9f1ff;
-    --shadow-soft: 0 10px 30px rgba(2,8,20,0.35);
-    --max-width: 1100px;
   }
-  html.light { --bg: linear-gradient(180deg,#f7fbfe,#f3f7fb); --muted:#6b7480; --text:#071225; }
-
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;padding:var(--space);font-family:var(--text-sans);-webkit-font-smoothing:antialiased;color:var(--text);background:var(--bg)}
+  html,body{height:100%;margin:0;font-family:var(--text-sans);-webkit-font-smoothing:antialiased;color:var(--text);background:var(--bg)}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:var(--max-width);margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;margin-bottom:12px;background:transparent}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:transparent;gap:12px}
   .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));color:white;font-weight:900;font-size:18px;box-shadow:var(--shadow-soft)}
+  .logo{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));color:#06221a;font-weight:900;font-size:18px}
   .title{font-weight:800;font-size:16px}
   .sub{font-size:12px;color:var(--muted)}
-  .controls{display:flex;gap:10px;align-items:center}
-  .theme-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;background:var(--card-dark);width:48px;height:48px;border:0;cursor:pointer;color:var(--text)}
-  .hamb{width:48px;height:48px;border-radius:12px;background:var(--card-dark);display:flex;align-items:center;justify-content:center;border:0;cursor:pointer;color:var(--text)}
-  .hamb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+  .controls{display:flex;gap:8px;align-items:center}
 
-  /* map area */
-  .map-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border-radius:12px;background:var(--card-dark);margin-bottom:8px}
-  .map-controls{display:flex;gap:8px;align-items:center}
-  .search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px}
-  input[type="search"]{background:transparent;border:0;color:var(--text);outline:0;padding:6px 8px;font-size:14px;width:260px}
-  button.btn{cursor:pointer;border:0;padding:8px 10px;border-radius:8px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:#06221a;font-weight:800}
+  /* Top controls (search + buttons) — overlay on map */
+  .map-controls {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    z-index: 1000;
+    pointer-events: none; /* allow only inner controls to be clickable */
+  }
+  .map-controls .left, .map-controls .right { pointer-events: auto; display:flex; gap:8px; align-items:center; }
+  .search-box {
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.95);
+    box-shadow: 0 6px 18px rgba(2,8,20,0.35);
+    width: min(720px, calc(100% - 160px));
+  }
+  input#autocomplete {
+    border:0; outline:0; font-size:15px; padding:6px; width:100%;
+  }
+  .btn {
+    background:linear-gradient(90deg,var(--accent-a),var(--accent-b)); color:#06221a; font-weight:800; padding:8px 12px; border-radius:10px; border:0; cursor:pointer;
+  }
+  .btn.ghost {
+    background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.08);
+  }
 
-  /* full map container */
-  #map{height:calc(100vh - 220px);border-radius:12px;border:1px solid rgba(255,255,255,0.03);overflow:hidden}
-  @media(max-width:720px){ #map{height:calc(100vh - 260px)} input[type="search"]{width:140px} }
+  /* Map fills viewport below header (header is small) */
+  #map {
+    position:fixed;
+    top:72px; /* header height (approx) */
+    left:0; right:0; bottom:0;
+    z-index: 0;
+  }
 
-  .status{position:fixed;right:18px;bottom:18px;background:rgba(0,0,0,0.5);color:#fff;padding:8px 10px;border-radius:8px;z-index:9999;font-size:13px}
-  .legend{position:fixed;left:18px;bottom:18px;background:rgba(0,0,0,0.35);color:#fff;padding:6px 8px;border-radius:8px;z-index:9999;font-size:13px}
+  /* small floating info */
+  .floating-info {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
 
-  .popup-title{font-weight:900}
-  .small-muted{font-size:13px;color:#ddd}
+  /* mobile tweaks */
+  @media(max-width:720px){
+    header{padding:10px}
+    .map-controls{top:12px;left:10px;right:10px}
+    .search-box{width:calc(100% - 120px)}
+    #map { top: 64px; }
+  }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- header -->
-    <header>
-      <div class="brand">
-        <div class="logo" aria-hidden="true">PR</div>
-        <div>
-          <div class="title">Map</div>
-          <div class="sub">by PirateRuler.com</div>
-        </div>
-      </div>
-
-      <div class="controls" role="navigation" aria-label="Header controls">
-        <button id="toggleTheme" class="theme-btn" title="Toggle theme" aria-pressed="false">☀️</button>
-        <button id="openMenu" class="hamb" aria-controls="menu" aria-expanded="false" title="Open menu">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- map controls -->
-    <div class="map-topbar" role="region" aria-label="Map controls">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));display:flex;align-items:center;justify-content:center;font-weight:900;color:#06221a">PR</div>
-        <div>
-          <div style="font-weight:900">Simple map</div>
-          <div style="font-size:12px;color:var(--muted)">Pan, zoom, search, and locate</div>
-        </div>
-      </div>
-
-      <div class="map-controls" role="search" aria-label="Map search">
-        <div class="search">
-          <input id="searchInput" type="search" placeholder="Search place, address, airport..." aria-label="Search">
-          <button id="searchBtn" class="btn">Search</button>
-        </div>
-        <button id="locateBtn" class="btn" title="Center on my location">Locate me</button>
-        <a href="/" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px 10px;border-radius:8px;margin-left:6px">Home</a>
+  <!-- header (keeps your look) -->
+  <header>
+    <div class="brand">
+      <div class="logo">PR</div>
+      <div>
+        <div class="title">Map</div>
+        <div class="sub">by PirateRuler.com</div>
       </div>
     </div>
+    <div class="controls" aria-hidden="true">
+      <!-- keep small header controls but main search is on map -->
+      <button id="themeBtn" class="btn ghost" title="Toggle theme">Theme</button>
+    </div>
+  </header>
 
-    <!-- map -->
-    <div id="map" aria-label="Map"></div>
-
-    <div class="legend">Map • OSM tiles</div>
-    <div id="status" class="status" aria-live="polite">Ready</div>
-
-    <div style="margin-top:12px;color:var(--muted);font-size:14px">
-      Tip: Click anywhere on the map to drop a marker and see coordinates.
+  <!-- map controls overlay (search + actions) -->
+  <div class="map-controls" role="region" aria-label="Map controls">
+    <div class="left">
+      <div class="search-box" role="search" aria-label="Place search">
+        <input id="autocomplete" type="text" placeholder="Search place, address, or airport (powered by Google)" aria-label="Search">
+        <button id="searchBtn" class="btn">Go</button>
+      </div>
+    </div>
+    <div class="right">
+      <button id="locateBtn" class="btn">Locate me</button>
+      <button id="clearBtn" class="btn ghost">Clear</button>
     </div>
   </div>
 
-  <!-- offcanvas menu (kept minimal) -->
-  <div id="menu" class="offcanvas" role="dialog" aria-hidden="true" aria-label="Site menu" style="display:none">
-    <h3>Menu</h3>
-    <p class="muted" style="margin-top:0;margin-bottom:10px">Quick links & actions</p>
-    <a href="/index.html">Home</a>
-    <a href="https://pirateruler.com/post/about.html" target="_blank">About</a>
-    <a href="https://pirateruler.com/post/privacy.html" target="_blank">Privacy</a>
-    <a href="https://pirateruler.com/post/contact.html" target="_blank">Contact</a>
-    <a href="https://pirateruler.com/post/terms.html" target="_blank">Terms</a>
-    <div style="height:12px"></div>
-    <button id="closeMenu" style="padding:10px;border-radius:10px;border:0;background:linear-gradient(90deg,#fff, #ddd);width:100%;font-weight:800">Close</button>
-  </div>
+  <!-- Google map -->
+  <div id="map" aria-label="Map"></div>
 
-<!-- Leaflet -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-/* Simple human-friendly map page
-   - Clean tiles (CartoDB Positron) to look like "normal" map
-   - Search uses Nominatim (public OSM geocoding)
-   - Click to place temporary marker
-   - "Locate me" uses browser geolocation
-   - No storage, no backend required
-*/
+  <div class="floating-info" id="floatingInfo">Powered by Google Maps</div>
 
-const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
+  <!-- Load Google Maps JS (replace YOUR_GOOGLE_MAPS_API_KEY) -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap"
+    async defer>
+  </script>
 
-// Use CartoDB Positron tiles — clean, human-friendly (no API key)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-  maxZoom: 19
-}).addTo(map);
+  <script>
+    // Replace YOUR_GOOGLE_MAPS_API_KEY with your key before loading this page.
+    // Make sure Maps JavaScript API + Places API are enabled in Google Cloud Console.
 
-// simple marker layer
-const markerLayer = L.layerGroup().addTo(map);
-const statusEl = document.getElementById('status');
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const locateBtn = document.getElementById('locateBtn');
+    let map, marker, infoWindow, autocomplete, placesService;
 
-function setStatus(t){ statusEl.textContent = t; }
+    function initMap(){
+      // Start centered at world-ish view (user can search or locate)
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 20.0, lng: 0.0 },
+        zoom: 3,
+        mapTypeControl: false,
+        fullscreenControl: true,
+        streetViewControl: false,
+        gestureHandling: 'greedy'
+      });
 
-// click to add marker and popup
-map.on('click', (e) => {
-  markerLayer.clearLayers();
-  const m = L.marker(e.latlng).addTo(markerLayer);
-  m.bindPopup(`<div class="popup-title">Coordinates</div><div class="small-muted">Lat: ${e.latlng.lat.toFixed(6)}<br>Lon: ${e.latlng.lng.toFixed(6)}</div>`).openPopup();
-});
+      // single marker used for search / clicks
+      marker = new google.maps.Marker({ map, visible: false, clickable: true });
 
-// locate me
-locateBtn.addEventListener('click', () => {
-  if (!navigator.geolocation) { setStatus('Geolocation not supported'); return; }
-  setStatus('Locating…');
-  navigator.geolocation.getCurrentPosition((pos) => {
-    const lat = pos.coords.latitude, lon = pos.coords.longitude;
-    markerLayer.clearLayers();
-    const m = L.marker([lat, lon]).addTo(markerLayer);
-    m.bindPopup(`<div class="popup-title">You are here</div><div class="small-muted">Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}</div>`).openPopup();
-    map.setView([lat, lon], 13);
-    setStatus('Location found');
-  }, (err) => {
-    setStatus('Location error: ' + (err.message || err.code));
-  }, { enableHighAccuracy: true, timeout: 10000 });
-});
+      // infoWindow for marker
+      infoWindow = new google.maps.InfoWindow();
 
-// search (Nominatim)
-async function nominatimSearch(q){
-  if(!q) return null;
-  setStatus('Searching…');
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1`;
-  try {
-    const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    return j;
-  } catch(err){
-    console.warn('Search failed', err);
-    return null;
-  }
-}
+      // click map to place marker and show lat/lng
+      map.addListener('click', (e) => {
+        placeMarker(e.latLng);
+      });
 
-searchBtn.addEventListener('click', async () => {
-  const q = searchInput.value.trim();
-  if(!q) return;
-  const res = await nominatimSearch(q);
-  if(!res || res.length === 0){
-    setStatus('No results');
-    return;
-  }
-  // pick first result
-  const first = res[0];
-  const lat = parseFloat(first.lat), lon = parseFloat(first.lon);
-  markerLayer.clearLayers();
-  const m = L.marker([lat, lon]).addTo(markerLayer);
-  const display = first.display_name || (first.type ? first.type : q);
-  m.bindPopup(`<div class="popup-title">${display}</div><div class="small-muted">Lat: ${lat.toFixed(6)}<br>Lon: ${lon.toFixed(6)}</div>`).openPopup();
-  map.setView([lat, lon], 13);
-  setStatus(`Found: ${display}`);
-});
+      // Places Autocomplete for the search input
+      const input = document.getElementById('autocomplete');
+      autocomplete = new google.maps.places.Autocomplete(input, {
+        fields: ["geometry","formatted_address","name","place_id"],
+        types: ["geocode", "establishment"]
+      });
+      autocomplete.bindTo('bounds', map);
 
-// allow Enter key on search
-searchInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') searchBtn.click(); });
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if(!place.geometry){
+          // fallback: user typed but place not returned
+          return;
+        }
+        const loc = place.geometry.location;
+        map.panTo(loc);
+        map.setZoom(13);
+        placeMarker(loc, place.formatted_address || place.name);
+      });
 
-// initial tip
-setStatus('Ready — search a place or click the map');
+      // also support pressing the "Go" button to search the input value using Places TextSearch
+      document.getElementById('searchBtn').addEventListener('click', async () => {
+        const q = input.value.trim();
+        if(!q) return;
+        // Use PlacesService textSearch for general queries
+        if(!placesService) placesService = new google.maps.places.PlacesService(map);
+        placesService.textSearch({ query: q, type: ['establishment','airport','point_of_interest'] }, (results, status) => {
+          if(status === google.maps.places.PlacesServiceStatus.OK && results && results.length){
+            const r = results[0];
+            const loc = r.geometry.location;
+            map.panTo(loc);
+            map.setZoom(13);
+            placeMarker(loc, r.formatted_address || r.name);
+          } else {
+            // fallback: use geocoder
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: q }, (res, gs) => {
+              if(gs === 'OK' && res && res.length){
+                const p = res[0];
+                map.panTo(p.geometry.location);
+                map.setZoom(13);
+                placeMarker(p.geometry.location, p.formatted_address);
+              } else {
+                alert('No results found');
+              }
+            });
+          }
+        });
+      });
 
-// theme toggle + menu reuse (keeps behaviour like your main site)
-const docEl = document.documentElement;
-const toggle = document.getElementById('toggleTheme');
-const saved = localStorage.getItem('pr-theme') || 'light';
-if (saved === 'light') { docEl.classList.remove('dark'); docEl.classList.add('light'); } else { docEl.classList.remove('light'); docEl.classList.add('dark'); }
-updateThemeIcon();
-toggle.addEventListener('click', () => {
-  if(docEl.classList.contains('light')){ docEl.classList.remove('light'); docEl.classList.add('dark'); localStorage.setItem('pr-theme','dark'); }
-  else { docEl.classList.remove('dark'); docEl.classList.add('light'); localStorage.setItem('pr-theme','light'); }
-  updateThemeIcon();
-});
-function updateThemeIcon(){ toggle.textContent = docEl.classList.contains('light') ? '☀️' : '🌙'; toggle.setAttribute('aria-pressed', docEl.classList.contains('light') ? 'false' : 'true'); }
+      // locate me button
+      document.getElementById('locateBtn').addEventListener('click', () => {
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition((pos) => {
+            const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            map.panTo(latLng);
+            map.setZoom(14);
+            placeMarker(latLng, 'You are here');
+          }, (err) => {
+            alert('Location error: ' + (err.message || err.code));
+          }, { enableHighAccuracy: true, timeout: 10000 });
+        } else {
+          alert('Geolocation not supported by your browser.');
+        }
+      });
 
-// offcanvas menu
-const menu = document.getElementById('menu');
-const openMenuBtn = document.getElementById('openMenu');
-const closeMenu = document.getElementById('closeMenu');
-openMenuBtn.addEventListener('click', () => { menu.style.display = 'block'; menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); openMenuBtn.setAttribute('aria-expanded','true'); });
-closeMenu.addEventListener('click', () => { menu.style.display = 'none'; menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); openMenuBtn.setAttribute('aria-expanded','false'); });
+      // clear button
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        marker.setVisible(false);
+        infoWindow.close();
+      });
 
-</script>
+      // marker click show info
+      marker.addListener('click', () => {
+        if(marker.getPosition()){
+          infoWindow.open({ anchor: marker, map, shouldFocus: false });
+        }
+      });
+
+      // theme button just toggles document background (keeps it simple)
+      document.getElementById('themeBtn').addEventListener('click', () => {
+        document.body.style.background = document.body.style.background === 'white' ? '#071225' : 'white';
+        // tweak control colors for readability
+        const floating = document.getElementById('floatingInfo');
+        floating.style.background = document.body.style.background === 'white' ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.55)';
+      });
+    }
+
+    // place marker helper: accepts LatLng or {lat,lng}
+    function placeMarker(latLng, title){
+      if(latLng.lat !== undefined) {
+        // plain object
+        marker.setPosition(new google.maps.LatLng(latLng.lat, latLng.lng));
+      } else {
+        marker.setPosition(latLng);
+      }
+      marker.setVisible(true);
+
+      // build popup content
+      const pos = marker.getPosition();
+      const content = `<div style="font-weight:900">${title ? escapeHtml(title) : 'Location'}</div>
+        <div style="font-size:13px;color:#444">Lat: ${pos.lat().toFixed(6)}<br>Lng: ${pos.lng().toFixed(6)}</div>`;
+      infoWindow.setContent(content);
+      infoWindow.open({ anchor: marker, map, shouldFocus: false });
+    }
+
+    // small utility to escape HTML in titles
+    function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+    // Expose reload function to console (if needed)
+    window.placeAt = function(lat, lng, label){ placeMarker({lat:lat, lng:lng}, label || 'Pinned'); map.setZoom(13); map.panTo({lat, lng}); };
+
+    // Google will call initMap after API loads (callback param)
+  </script>
 </body>
 </html>
