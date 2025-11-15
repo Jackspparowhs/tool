@@ -3,49 +3,29 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Internet Speed Checker — PirateRuler.com</title>
-<meta name="description" content="Internet Speed Checker — PirateRuler.com — quick, browser-only speed checks with live readouts." />
+<title>Speed Test — PirateRuler.com</title>
+<meta name="description" content="Speed Test by PirateRuler — quick client-side internet speed check (download / upload / ping)." />
 <meta name="theme-color" content="#071225" />
 <link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
-<link rel="apple-touch-icon" href="https://pirateruler.com/static/pr-logo.png">
-
 <style>
-  /* kept original design tokens and layout but content changed to Speed Test */
+  /* Design tokens kept from your theme — small tweaks for clarity */
   :root{
     --space: 16px;
     --radius: 14px;
     --text-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Helvetica Neue";
-    --accent-a: #6b7dff;
-    --accent-b: #7b4bff;
-    --accent-c: #ff5aa4;
-    --bg: linear-gradient(180deg,#061028 0%, #071225 50%);
-    --card-dark: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    --glass: rgba(255,255,255,0.03);
-    --muted: #98a7bf;
-    --muted-2: rgba(233,241,255,0.14);
-    --text: #e9f1ff;
-    --radius-lg: 22px;
-    --shadow-lg: 0 20px 50px rgba(2,8,20,0.6);
-    --shadow-soft: 0 10px 30px rgba(2,8,20,0.35);
-    --max-width: 1100px;
-  }
-  html.light {
+    --accent-a: #0A84FF; /* blue accent for this tool */
+    --accent-b: #4CC0FF;
     --bg: linear-gradient(180deg,#f7fbfe,#f3f7fb);
     --card-dark: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
-    --glass: rgba(11,17,28,0.03);
     --muted: #6b7480;
-    --muted-2: rgba(11,17,36,0.06);
     --text: #071225;
-    --shadow-lg: 0 18px 50px rgba(3,12,30,0.06);
-    --shadow-soft: 0 8px 24px rgba(3,12,30,0.06);
+    --shadow-soft: 0 10px 30px rgba(2,8,20,0.06);
+    --max-width: 1100px;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
+  html,body{height:100%;margin:0}
   body{
-    margin:0;
     font-family:var(--text-sans);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
     color:var(--text);
     background:var(--bg);
     padding:var(--space);
@@ -53,47 +33,63 @@
   }
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--max-width);margin:0 auto;padding-bottom:60px}
-  header {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:transparent;margin-bottom:12px;}
-  .brand {display:flex; gap:12px; align-items:center}
-  .logo {width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-b)); color:white; font-weight:900; font-size:18px; box-shadow:var(--shadow-soft); flex-shrink:0;}
-  .brand .title {font-weight:800; font-size:16px; margin-bottom:2px}
-  .brand .sub {font-size:12px;color:var(--muted)}
-  .controls {display:flex;gap:10px;align-items:center}
-  .theme-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;background:var(--card-dark);border:0;width:48px;height:48px;box-shadow:var(--shadow-soft);cursor:pointer;color:var(--text);}
-  .hamb {width:48px;height:48px;border-radius:12px; display:flex; align-items:center; justify-content:center;background:var(--card-dark); box-shadow:var(--shadow-soft); border:0; cursor:pointer; color:var(--text);}
-  .hero {border-radius:18px;padding:18px 22px;background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:var(--shadow-lg);text-align:center;position:relative;overflow:visible;}
-  .kicker {display:inline-block;padding:6px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:var(--muted); font-weight:700;font-size:13px;margin-bottom:12px;}
-  .h1 {font-size:28px;font-weight:900; margin:6px 0 8px; line-height:1.03; letter-spacing:-0.02em}
-  .lead {max-width:920px;margin:0 auto;color:var(--muted); font-size:15px}
-  .main-grid {display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px;align-items:start}
-  @media(max-width:980px){ .main-grid{ grid-template-columns: 1fr } .h1{font-size:24px} }
-  .panel {background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow:var(--shadow-soft)}
-  .stat-row {display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
-  .big-m {font-size:44px;font-weight:900}
-  .lbl {color:var(--muted);font-size:13px}
-  .btn {background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:white;padding:12px 20px;border-radius:12px;border:0;font-weight:900;cursor:pointer}
-  .btn-ghost {background:transparent;border:1px solid var(--muted-2); padding:10px 14px;border-radius:12px;color:var(--muted);font-weight:800}
-  .right-col {position:relative}
-  .mini-cta {display:block;margin-top:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));text-align:center;color:white;font-weight:900}
-  footer {margin-top:18px;text-align:center}
-  .meter {height:100px;width:100%;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column}
-  canvas#graph {width:100%;height:80px;background:transparent}
-  .controls-row {display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
-  .small {font-size:12px;color:var(--muted)}
-  .credit {position:relative;margin-top:10px;display:inline-block;padding:6px 12px;border-radius:10px;background:rgba(0,0,0,0.4);color:white}
-  /* peak/arrow */
-  .meta {display:flex;gap:10px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
-  .meta .item {background:var(--card-dark);padding:8px 12px;border-radius:10px;font-weight:800;color:var(--muted)}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:transparent;margin-bottom:12px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));color:white;font-weight:900;font-size:18px;box-shadow:var(--shadow-soft);flex-shrink:0}
+  .brand .title{font-weight:800;font-size:16px;line-height:1.05}
+  .brand .sub{font-size:12px;color:var(--muted)}
+  .controls{display:flex;gap:10px;align-items:center}
+  .theme-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px;border-radius:999px;background:var(--card-dark);border:0;width:48px;height:48px;box-shadow:var(--shadow-soft);cursor:pointer;color:var(--text)}
+  .hamb{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--card-dark);box-shadow:var(--shadow-soft);border:0;cursor:pointer}
+  .hero{border-radius:18px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 18px 40px rgba(3,12,30,0.06);text-align:center;position:relative}
+  .kicker{display:inline-block;padding:6px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));color:var(--muted);font-weight:700;font-size:13px;margin-bottom:12px}
+  .h1{font-size:28px;font-weight:900;margin:6px 0 8px;line-height:1.02}
+  .lead{max-width:920px;margin:0 auto;color:var(--muted);font-size:15px}
+  .hero-cta{margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn-primary{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:white;padding:12px 20px;border-radius:12px;font-weight:900;border:0;box-shadow:0 14px 36px rgba(10,132,255,0.12)}
+  .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 16px;border-radius:12px;color:var(--muted)}
+  .main-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:22px;align-items:start}
+  @media(max-width:980px){.main-grid{grid-template-columns:1fr} .h1{font-size:22px}}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:14px;padding:18px;box-shadow:var(--shadow-soft)}
+  h2.section{margin:0 0 8px 0;font-size:18px;font-weight:900}
+  /* Speed UI */
+  .speed-card{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;border-radius:14px}
+  .big-num{font-size:42px;font-weight:900;color:var(--accent-a)}
+  .subsmall{font-size:13px;color:var(--muted)}
+  .meter{width:100%;max-width:680px;height:220px;border-radius:12px;background:linear-gradient(180deg,#fff,#f6f9ff);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(10,20,40,0.06)}
+  .meter-inner{display:flex;gap:36px;align-items:center}
+  .stat-block{text-align:center}
+  .stat-label{font-size:13px;color:var(--muted)}
+  .stat-value{font-weight:900;font-size:24px;color:var(--accent-a)}
+  canvas.spark {width:180px;height:40px; background:transparent}
+  .controls-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .btn {padding:10px 14px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
+  .btn-start{background:var(--accent-a);color:white;box-shadow:0 10px 30px rgba(10,132,255,0.12)}
+  .btn-stop{background:#eee;color:var(--text);border:1px solid rgba(0,0,0,0.06)}
+  /* sidebar/offcanvas behaves like the typing site modal on small screens */
+  .offcanvas{position:fixed;right:12px;top:12px;width:340px;max-width:92vw;background:white;border-radius:14px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,0.12);transform:translateX(120%);transition:transform .28s ease;z-index:200;color:var(--text)}
+  .offcanvas.open{transform:translateX(0)}
+  @media(max-width:720px){
+    .offcanvas{left:50%;top:auto;bottom:8px;transform:translate(-50%,120%);width:92vw;max-width:none}
+    .offcanvas.open{transform:translate(-50%,0)}
+  }
+  /* footer credit */
+  .credit{position:fixed;left:16px;bottom:12px;background:rgba(0,0,0,0.6);padding:6px 10px;color:white;border-radius:8px;font-size:13px;z-index:100}
+  /* helper */
+  .row{display:flex;gap:12px;align-items:center}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">PR</div>
+        <div class="logo" aria-hidden="true">PR</div>
         <div>
-          <div class="title">Internet Speed Checker</div>
-          <div class="sub">by PirateRuler.com — browser-first</div>
+          <!-- force wrap into two lines if needed -->
+          <div class="title">Speed Test</div>
+          <div class="sub small">Speed Test by PirateRuler.com</div>
         </div>
       </div>
 
@@ -104,431 +100,347 @@
     </header>
 
     <section class="hero">
-      <div class="kicker">Fast, privacy-first • Live readout</div>
-      <div class="h1">Check your internet speed</div>
-      <div class="lead">A lightweight client-side speed test. Measures download & upload throughput in your browser and updates live. For best results run on desktop and close other apps.</div>
+      <div class="kicker">Client-side demo • Browser-only</div>
+      <h1 class="h1">Quick Internet Speed Check</h1>
+      <p class="lead">Client-only speed test using progressive downloads & uploads. Live graphs update every second. For best accuracy use your own server with large CORS-enabled files.</p>
 
-      <div class="stat-row" style="margin-top:16px">
-        <div class="panel" style="min-width:260px;flex:1">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div class="small lbl">Download</div>
-              <div id="downloadValue" class="big-m">—</div>
-              <div class="small lbl">Mbps</div>
+      <div style="margin-top:14px" class="speed-card panel">
+        <div class="meter" role="region" aria-label="Speed meter">
+          <div class="meter-inner">
+            <div class="stat-block">
+              <div class="stat-label">Download</div>
+              <div id="dlValue" class="stat-value">— Mbps</div>
+              <div class="subsmall">Live</div>
             </div>
-            <div style="width:48%;text-align:right">
-              <div class="small lbl">Ping (est)</div>
-              <div id="pingValue" style="font-weight:800;font-size:18px">— ms</div>
+
+            <div style="min-width:240px;text-align:center">
+              <div id="bigNum" class="big-num">—</div>
+              <div class="subsmall">Current throughput</div>
+              <canvas id="spark" class="spark"></canvas>
             </div>
-          </div>
-          <div style="margin-top:10px">
-            <canvas id="downloadGraph" height="80"></canvas>
-          </div>
-          <div class="meta" id="downloadMeta">
-            <div class="item small">avg: — Mbps</div>
-            <div class="item small">curr: — Mbps</div>
+
+            <div class="stat-block">
+              <div class="stat-label">Upload</div>
+              <div id="ulValue" class="stat-value">— Mbps</div>
+              <div class="subsmall">Live</div>
+            </div>
           </div>
         </div>
 
-        <div class="panel" style="min-width:260px;flex:1">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div class="small lbl">Upload</div>
-              <div id="uploadValue" class="big-m">—</div>
-              <div class="small lbl">Mbps</div>
-            </div>
-            <div style="width:48%;text-align:right">
-              <div class="small lbl">Status</div>
-              <div id="statusValue" style="font-weight:800;font-size:18px">Idle</div>
-            </div>
-          </div>
-          <div style="margin-top:10px">
-            <canvas id="uploadGraph" height="80"></canvas>
-          </div>
-          <div class="meta" id="uploadMeta">
-            <div class="item small">avg: — Mbps</div>
-            <div class="item small">curr: — Mbps</div>
-          </div>
+        <div class="controls-row">
+          <button id="startBtn" class="btn btn-start">Start Test</button>
+          <button id="stopBtn" class="btn btn-stop">Stop</button>
+          <div class="row muted small">Ping: <span id="pingVal">—</span> ms</div>
+          <div class="row muted small">Server: <span id="srvName">Public demo</span></div>
         </div>
-      </div>
 
-      <div class="controls-row">
-        <button id="startBtn" class="btn">Start test</button>
-        <button id="stopBtn" class="btn-ghost">Reset</button>
+        <div style="margin-top:10px;text-align:center" class="small muted">Results update every second. Close other network-heavy apps for best accuracy.</div>
       </div>
-
-      <div style="margin-top:12px" class="small">Note: this runs multiple downloads/uploads to estimate bandwidth. Results may vary slightly from third-party sites.</div>
     </section>
 
-    <div class="main-grid" style="margin-top:12px">
+    <div class="main-grid">
       <div>
         <section class="panel">
-          <h2 class="section">How this works</h2>
-          <p class="small">The page downloads data from public test files and measures bytes/second using streaming APIs, then posts a large blob to an echo endpoint to measure upload throughput. Live graphs update every second. For best accuracy, close other network-heavy apps and test on wired connections where possible.</p>
+          <h2 class="section">How it works</h2>
+          <p class="muted">This performs progressive downloads from public endpoints and measures bytes received per time to compute Mbps. Upload is a POST of large binary data to a public echo endpoint. For production accuracy replace the test URLs with your own CORS-enabled files and endpoints hosted near your users.</p>
+        </section>
 
-          <div style="margin-top:12px">
-            <h3 style="margin:6px 0">Advanced</h3>
-            <ul class="small">
-              <li>Parallel downloads: increases accuracy on high-speed links</li>
-              <li>Progressive streaming: the test doesn't wait for entire file — it measures continuously</li>
-              <li>Upload uses a POST to a public echo server (httpbin) — change to your own endpoint for better accuracy</li>
-            </ul>
-          </div>
+        <section class="panel" style="margin-top:14px">
+          <h2 class="section">Advanced</h2>
+          <ul class="muted small">
+            <li>Parallel downloads increase accuracy on high-speed links.</li>
+            <li>Progressive streaming: the test measures continuously as data arrives.</li>
+            <li>Upload uses POST to a public echo endpoint (change to your endpoint for production).</li>
+          </ul>
         </section>
       </div>
 
-      <aside class="right-col">
-        <div class="panel">
-          <h3 style="margin-top:0">Quick tips</h3>
-          <ol class="small">
-            <li>Run the test a few times — network conditions change.</li>
-            <li>Prefer wired ethernet for accurate results.</li>
-            <li>Use your own server for the best results (host CORS-enabled large files).</li>
-          </ol>
-
-          <div style="margin-top:10px">
-            <div class="mini-cta" id="shareBtn">Copy results</div>
-            <div style="height:8px"></div>
-            <div class="small">Powered by PirateRuler.com — client-only demo</div>
-          </div>
+      <aside class="panel right-col">
+        <h3 style="margin-top:0">Latest results</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+          <div class="row"><strong>Download:</strong>&nbsp;<span id="dlLive">— Mbps</span></div>
+          <div class="row"><strong>Upload:</strong>&nbsp;<span id="ulLive">— Mbps</span></div>
+          <div class="row"><strong>Ping:</strong>&nbsp;<span id="pingLive">— ms</span></div>
+          <div class="row"><strong>IP:</strong>&nbsp;<span id="ipAddr">—</span></div>
         </div>
+
+        <div style="height:12px"></div>
+        <button id="copyBtn" class="btn btn-start" style="width:100%">Copy results</button>
       </aside>
     </div>
 
-    <footer>
-      <small class="credit" id="copyright">© <span id="year"></span> PirateRuler — Speed Checker</small>
+    <footer style="margin-top:22px;text-align:center">
+      <small style="color:var(--muted)">© <span id="year"></span> PirateRuler — Speed Checker</small>
     </footer>
   </div>
 
-  <!-- menu -->
-  <div id="menu" class="offcanvas" style="display:none;">
-    <h3>Menu</h3>
-    <a href="#">Home</a>
-    <a href="#">Privacy</a>
-    <a href="#">Contact</a>
+  <!-- offcanvas menu -->
+  <div id="menu" class="offcanvas" role="dialog" aria-hidden="true" aria-label="Site menu">
+    <h3 style="margin:0 0 8px 0">Menu</h3>
+    <p class="muted" style="margin-top:0;margin-bottom:10px">Quick links & actions</p>
+    <a href="#start" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">Start Test</a>
+    <a href="#faq" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">FAQ</a>
+    <a href="https://pirateruler.com" target="_blank" style="display:block;padding:10px;border-radius:10px;background:#f7f9fb;margin-bottom:6px">PirateRuler.com</a>
     <div style="height:12px"></div>
     <button id="closeMenu" style="padding:10px;border-radius:10px;border:0;background:linear-gradient(90deg,#fff,#ddd);width:100%;font-weight:800">Close</button>
   </div>
 
+  <div class="credit">Powered by PirateRuler.com</div>
+
 <script>
-/* ------------------------------
-   Simple client-side speed test
-   - Download: streaming approach using fetch + reader
-   - Upload: XHR with generated blob and upload progress
-   - Live per-second updates (Mbps)
-   ------------------------------ */
+  // small helpers
+  const $ = (id)=>document.getElementById(id);
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-document.getElementById('year').textContent = new Date().getFullYear();
+  // Offcanvas menu behavior (sidebar on desktop, bottom sheet on mobile)
+  const menu = $('menu');
+  document.getElementById('openMenu').addEventListener('click', ()=>{
+    menu.classList.add('open'); menu.setAttribute('aria-hidden','false');
+  });
+  document.getElementById('closeMenu').addEventListener('click', ()=>{
+    menu.classList.remove('open'); menu.setAttribute('aria-hidden','true');
+  });
 
-// Theme/menu toggles (kept from original)
-const docEl = document.documentElement;
-const toggle = document.getElementById('toggleTheme');
-const openMenu = document.getElementById('openMenu');
-const menu = document.getElementById('menu');
-const closeMenu = document.getElementById('closeMenu');
-toggle.addEventListener('click', () => {
-  if (docEl.classList.contains('light')) { docEl.classList.remove('light'); } else { docEl.classList.add('light'); }
-});
-openMenu.addEventListener('click', () => { menu.style.display='block'; menu.classList.add('open'); });
-closeMenu && closeMenu.addEventListener('click', ()=>{ menu.style.display='none'; menu.classList.remove('open'); });
+  // theme toggle simple
+  const toggle = document.getElementById('toggleTheme');
+  toggle.addEventListener('click', ()=>{
+    document.documentElement.classList.toggle('light');
+    toggle.textContent = document.documentElement.classList.contains('light') ? '🌞' : '☀️';
+  });
 
-// DOM refs
-const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
-const downloadValue = document.getElementById('downloadValue');
-const uploadValue = document.getElementById('uploadValue');
-const statusValue = document.getElementById('statusValue');
-const pingValue = document.getElementById('pingValue');
-const downloadMeta = document.getElementById('downloadMeta');
-const uploadMeta = document.getElementById('uploadMeta');
-const shareBtn = document.getElementById('shareBtn');
-
-// Graph canvases
-const dcanvas = document.getElementById('downloadGraph');
-const ucanvas = document.getElementById('uploadGraph');
-const dctx = dcanvas.getContext('2d');
-const uctx = ucanvas.getContext('2d');
-
-function clearCanvas(ctx) {
-  ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
-}
-function drawGraph(ctx, points, color) {
-  const w = ctx.canvas.width = ctx.canvas.clientWidth;
-  const h = ctx.canvas.height = ctx.canvas.clientHeight;
-  ctx.clearRect(0,0,w,h);
-  if (!points.length) return;
-  const max = Math.max(...points, 1);
-  ctx.beginPath();
-  for (let i=0;i<points.length;i++){
-    const x = (i/(points.length-1||1))*w;
-    const y = h - (points[i]/max)*h;
-    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  // Sparkline canvas
+  const spark = $('spark');
+  const ctx = spark.getContext('2d');
+  const samples = [];
+  function drawSpark(){
+    const w = spark.width = spark.clientWidth * devicePixelRatio;
+    const h = spark.height = spark.clientHeight * devicePixelRatio;
+    ctx.clearRect(0,0,w,h);
+    ctx.lineWidth = 2 * devicePixelRatio;
+    ctx.strokeStyle = '#0A84FF';
+    ctx.beginPath();
+    const N = samples.length || 1;
+    for(let i=0;i<N;i++){
+      const x = (i/(N-1 || 1))*w;
+      const v = samples[i] || 0;
+      const y = h - (Math.min(v,100)*h/100); // cap visual to 100 Mbps
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
   }
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = color;
-  ctx.stroke();
-}
 
-// Helpers: format Mbps
-function toMbps(bytesPerSec) {
-  return (bytesPerSec * 8) / (1024*1024);
-}
-function round2(v){ return Math.round(v*100)/100; }
+  // Measurement state
+  let running = false;
+  let dlMbps = 0, ulMbps = 0, pingMs = 0;
+  let dlInterval, ulInterval, pingInterval;
+  let controller; // for aborting fetches
 
-// TEST CONFIG - tweakable
-const DOWNLOAD_URLS = [
-  // public test files — if CORS blocked swap to your own CORS-enabled files
-  'https://speed.hetzner.de/100MB.bin',
-  'https://speed.hetzner.de/100MB.bin'
-];
-const DOWNLOAD_PARALLEL = 2; // number of parallel fetches (<= DOWNLOAD_URLS.length)
-const DOWNLOAD_WINDOW_SEC = 6; // measure for this many seconds
-const UPLOAD_SIZE_MB = 8; // size of generated upload blob (MB)
-const UPLOAD_URL = 'https://httpbin.org/post'; // public echo endpoint (CORS friendly usually)
-let abortController = null;
-let running = false;
+  // Public demo endpoints (replace these with your own CORS-enabled files in production).
+  // Note: Some browsers / networks may block these endpoints; swap for your hosted test files for best accuracy.
+  const DOWNLOAD_URLS = [
+    // stream-bytes from httpbin (public demo endpoints that support streaming). If you host files, replace these.
+    'https://httpbin.org/stream-bytes/2000000?seed=1&chunk_size=1024',
+    'https://httpbin.org/stream-bytes/2000000?seed=2&chunk_size=1024'
+  ];
+  const UPLOAD_URL = 'https://httpbin.org/post'; // echo endpoint for demo (CORS-enabled)
 
-// State arrays for graphs
-let dPoints = [];
-let uPoints = [];
-let dSamples = []; // per-second bytes/sec samples (download)
-let uSamples = []; // per-second bytes/sec samples (upload)
-let downloadAvg = 0, uploadAvg = 0, lastPing = 0;
-
-// measure ping via small fetch to google/dns; fallback to Date.now roundtrip
-async function measurePing() {
-  try {
-    const t0 = performance.now();
-    // try tiny file
-    await fetch('https://www.google.com/generate_204', {method:'GET', cache:'no-store', mode:'no-cors'});
-    const t1 = performance.now();
-    return Math.round(t1 - t0);
-  } catch(e){
-    // fallback ping estimate using a small CORS endpoint (httpbin)
-    try {
-      const t0 = performance.now();
-      await fetch('https://httpbin.org/get?rand='+Math.random(), {cache:'no-store'});
-      const t1 = performance.now();
-      return Math.round(t1 - t0);
-    } catch(err) {
-      return 999;
+  // Ping: measure RTT by fetching a tiny resource (or a HEAD)
+  async function measurePing(){
+    try{
+      const start = performance.now();
+      // tiny request to httpbin (HEAD-like)
+      await fetch('https://httpbin.org/get?ttl=' + Math.random(), {cache:'no-store', mode:'cors'});
+      const end = performance.now();
+      pingMs = Math.round(end - start);
+      $('pingVal').textContent = pingMs;
+      $('pingLive').textContent = pingMs;
+    }catch(e){
+      $('pingVal').textContent = '—';
+      $('pingLive').textContent = '—';
     }
   }
-}
 
-// DOWNLOAD: streaming reader that reports bytes per second
-async function runDownloadTest() {
-  const readerTasks = [];
-  abortController = new AbortController();
-  const signal = abortController.signal;
+  // Download test: progressive read bytes and compute throughput
+  async function downloadTest(onTick, duration=12000){
+    // duration ms per URL set; we will stream sequentially across URLs and measure bytes/time
+    controller = new AbortController();
+    const signal = controller.signal;
+    let totalBytes = 0;
+    const startTime = performance.now();
+    const perSecStats = []; // samples every second
+    let lastTime = performance.now();
+    let lastBytes = 0;
 
-  dSamples = [];
-  dPoints = [];
-  downloadAvg = 0;
-  downloadValue.textContent = '—';
-  statusValue.textContent = 'Downloading...';
-  statusValue.style.color = '';
-
-  const perStreamProgress = Array(DOWNLOAD_PARALLEL).fill(0);
-
-  // Start time
-  const start = performance.now();
-
-  // We'll track bytes read in the last second for live display
-  let lastTotalBytes = 0;
-  let totalBytes = 0;
-  let lastTick = performance.now();
-
-  // spawn parallel readers (limit by DOWNLOAD_PARALLEL)
-  for (let i=0;i<DOWNLOAD_PARALLEL;i++){
-    const url = DOWNLOAD_URLS[i % DOWNLOAD_URLS.length] + (i===0 ? '' : '?r='+Math.random());
-    // Use fetch + reader
-    const task = (async () => {
-      try {
-        const resp = await fetch(url, {cache:'no-store', signal});
-        if (!resp.body) return;
+    // we will run readable stream and stop after duration
+    const stopAt = startTime + duration;
+    for(const url of DOWNLOAD_URLS){
+      if(performance.now() > stopAt || signal.aborted) break;
+      try{
+        const resp = await fetch(url, {cache:'no-store',signal});
+        if(!resp.ok || !resp.body) continue;
         const reader = resp.body.getReader();
-        while (true) {
-          const {done, value} = await reader.read();
-          if (done) break;
-          totalBytes += value.byteLength;
-          perStreamProgress[i] += value.byteLength;
-          // Check window time — update per-second samples
+        while(true){
           const now = performance.now();
-          if (now - lastTick >= 1000) {
-            const bytesThisSec = totalBytes - lastTotalBytes;
-            lastTotalBytes = totalBytes;
-            lastTick = now;
-            dSamples.push(bytesThisSec);
-            // limit samples to DOWNLOAD_WINDOW_SEC
-            if (dSamples.length > DOWNLOAD_WINDOW_SEC) dSamples.shift();
-            // compute current Mbps
-            const currBps = bytesThisSec;
-            const currMbps = toMbps(currBps);
-            dPoints.push(currMbps);
-            if (dPoints.length > 60) dPoints.shift();
-            drawGraph(dctx,dPoints,'#6b7dff');
-            downloadValue.textContent = round2(currMbps);
-            // update meta
-            const avg = toMbps( dSamples.reduce((a,b)=>a+b,0) / dSamples.length );
-            downloadMeta.querySelector('.item') && (downloadMeta.querySelector('.item').textContent = 'avg: ' + round2(avg) + ' Mbps');
-            downloadMeta.querySelectorAll('.item')[1] && (downloadMeta.querySelectorAll('.item')[1].textContent = 'curr: ' + round2(currMbps) + ' Mbps');
+          if(now > stopAt || signal.aborted){ reader.cancel(); break; }
+          const {done, value} = await reader.read();
+          if(done) break;
+          totalBytes += (value ? value.byteLength : 0);
+          const tNow = performance.now();
+          // every ~500ms call onTick to update UI
+          if(tNow - lastTime >= 500){
+            const deltaBytes = totalBytes - lastBytes;
+            const deltaS = (tNow - lastTime)/1000;
+            const mbps = (deltaBytes * 8) / (deltaS * 1000 * 1000); // Mbps
+            lastBytes = totalBytes;
+            lastTime = tNow;
+            perSecStats.push(mbps);
+            onTick({mbps, totalBytes, elapsed: (tNow-startTime)/1000});
+            // cap perSecStats to 50 samples
+            if(perSecStats.length>50) perSecStats.shift();
           }
         }
-      } catch(err) {
-        // aborted or network error
+      }catch(err){
+        // fetch error — ignore and continue
+        console.warn('download fetch error', err);
       }
-    })();
-    readerTasks.push(task);
+    }
+    // compute average for the whole run
+    const totalTimeSec = (performance.now() - startTime)/1000 || 1;
+    const avgMbps = (totalBytes * 8) / (totalTimeSec * 1000 * 1000);
+    return {avgMbps, totalBytes, perSecStats};
   }
 
-  // measure for DOWNLOAD_WINDOW_SEC seconds then stop
-  const measureTimeout = new Promise(resolve => setTimeout(resolve, DOWNLOAD_WINDOW_SEC*1000));
-  await Promise.race([ Promise.all(readerTasks), measureTimeout ]);
-  // stop all fetches
-  abortController && abortController.abort();
-  // compute final average from samples
-  const avgBps = dSamples.length ? (dSamples.reduce((a,b)=>a+b,0)/dSamples.length) : 0;
-  downloadAvg = toMbps(avgBps);
-  downloadValue.textContent = downloadAvg ? round2(downloadAvg) : '—';
-  drawGraph(dctx,dPoints,'#6b7dff');
-  downloadMeta.querySelector('.item') && (downloadMeta.querySelector('.item').textContent = 'avg: ' + (downloadAvg ? round2(downloadAvg) + ' Mbps' : '—'));
-  statusValue.textContent = 'Download complete';
-  return downloadAvg;
-}
+  // Upload test: POST generated random data blob and measure bytes sent / time
+  async function uploadTest(onTick, duration=8000){
+    // generate a random Uint8Array of a certain size (repeat if needed)
+    // For demo: generate 4MB payload repeated
+    const chunkSize = 1024*1024; // 1MB
+    const totalSizeTarget = 6 * 1024 * 1024; // 6 MB total attempt
+    const blobParts = [];
+    const rng = crypto.getRandomValues.bind(crypto);
+    let generated = 0;
+    while(generated < totalSizeTarget){
+      const arr = new Uint8Array(Math.min(chunkSize, totalSizeTarget - generated));
+      rng(arr);
+      blobParts.push(arr);
+      generated += arr.byteLength;
+    }
+    const payload = new Blob(blobParts, {type:'application/octet-stream'});
+    const start = performance.now();
+    try{
+      // send and measure
+      await fetch(UPLOAD_URL, {method:'POST', mode:'cors', body: payload, cache:'no-store'});
+      const durationSec = (performance.now() - start)/1000;
+      const mbps = (generated * 8) / (durationSec * 1000 * 1000);
+      onTick({mbps, durationSec, bytes: generated});
+      return {mbps, durationSec, bytes: generated};
+    }catch(err){
+      console.warn('upload error', err);
+      return {mbps:0};
+    }
+  }
 
-// UPLOAD: create a Blob and POST via XHR so we get progress events
-function runUploadTest() {
-  return new Promise((resolve, reject) => {
-    // generate random blob of size UPLOAD_SIZE_MB
-    const size = UPLOAD_SIZE_MB * 1024 * 1024;
-    // It's faster to create a repeated pattern rather than truly random bytes
-    const chunk = new Uint8Array(1024*1024).fill(0x61); // 1MB of 'a'
-    const parts = [];
-    for (let i=0;i<UPLOAD_SIZE_MB;i++) parts.push(chunk);
-    const blob = new Blob(parts, {type:'application/octet-stream'});
+  // UI wiring
+  const startBtn = $('startBtn'), stopBtn = $('stopBtn');
+  const dlValue = $('dlValue'), ulValue = $('ulValue'), bigNum = $('bigNum');
+  const dlLive = $('dlLive'), ulLive = $('ulLive'), pingLive = $('pingLive'), ipAddr = $('ipAddr');
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', UPLOAD_URL + '?r=' + Math.random(), true);
-    xhr.responseType = 'json';
+  // helper to show a numeric value nicely
+  function fmt(v){ return (Math.round(v*100)/100).toLocaleString(); }
 
-    let lastUploaded = 0;
-    let lastTime = performance.now();
-    uSamples = [];
-    uPoints = [];
+  function onDownloadTick(sample){
+    // sample.mbps is instantaneous sample
+    dlMbps = sample.mbps;
+    samples.push(dlMbps);
+    if(samples.length>40) samples.shift();
+    // update UI
+    dlValue.textContent = fmt(dlMbps) + ' Mbps';
+    dlLive.textContent = fmt(dlMbps) + ' Mbps';
+    bigNum.textContent = fmt(dlMbps) + ' Mbps';
+    // update sparkline samples array (capped)
+    drawSpark();
+  }
 
-    xhr.upload.onprogress = function(e) {
-      if (e.lengthComputable) {
-        const uploaded = e.loaded;
-        const now = performance.now();
-        const dt = (now - lastTime) / 1000;
-        if (dt >= 0.9) {
-          const bytesThisSec = uploaded - lastUploaded;
-          lastUploaded = uploaded;
-          lastTime = now;
-          uSamples.push(bytesThisSec);
-          if (uSamples.length > 60) uSamples.shift();
-          const currMbps = toMbps(bytesThisSec);
-          uPoints.push(currMbps);
-          if (uPoints.length > 60) uPoints.shift();
-          drawGraph(uctx,uPoints,'#7b4bff');
-          uploadValue.textContent = round2(currMbps);
-          uploadMeta.querySelector('.item') && (uploadMeta.querySelector('.item').textContent = 'avg: ' + round2( toMbps(uSamples.reduce((a,b)=>a+b,0) / uSamples.length ) ) + ' Mbps');
-          uploadMeta.querySelectorAll('.item')[1] && (uploadMeta.querySelectorAll('.item')[1].textContent = 'curr: ' + round2(currMbps) + ' Mbps');
-        }
-      }
-    };
-    xhr.onload = function() {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        // final average
-        const avgBps = uSamples.length ? (uSamples.reduce((a,b)=>a+b,0)/uSamples.length) : 0;
-        uploadAvg = toMbps(avgBps);
-        uploadValue.textContent = uploadAvg ? round2(uploadAvg) : '—';
-        drawGraph(uctx,uPoints,'#7b4bff');
-        statusValue.textContent = 'Upload complete';
-        resolve(uploadAvg);
-      } else {
-        statusValue.textContent = 'Upload error';
-        reject(new Error('upload failed ' + xhr.status));
-      }
-    };
-    xhr.onerror = function() {
-      statusValue.textContent = 'Upload error';
-      reject(new Error('upload error'));
-    };
-    statusValue.textContent = 'Uploading...';
-    xhr.send(blob);
-  });
-}
+  async function runTestSequence(){
+    running = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    // measure ping repeatedly
+    measurePing(); // one immediately
+    pingInterval = setInterval(measurePing, 4000);
 
-// full test orchestration
-async function runFullTest() {
-  if (running) return;
-  running = true;
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-  dPoints = []; uPoints = []; dSamples = []; uSamples = [];
-  clearCanvas(dctx); clearCanvas(uctx);
-  downloadValue.textContent = '—';
-  uploadValue.textContent = '—';
-  downloadMeta.querySelector('.item') && (downloadMeta.querySelector('.item').textContent = 'avg: — Mbps');
-  uploadMeta.querySelector('.item') && (uploadMeta.querySelector('.item').textContent = 'avg: — Mbps');
+    // fetch ip (for display)
+    try{
+      const r = await fetch('https://httpbin.org/ip');
+      const j = await r.json();
+      ipAddr.textContent = j.origin || j.ip || '—';
+    }catch(e){ ipAddr.textContent = '—'; }
 
-  // Ping
-  pingValue.textContent = '–';
-  const ping = await measurePing();
-  pingValue.textContent = ping + ' ms';
-  lastPing = ping;
+    // download phase
+    $('srvName').textContent = 'Public demo (httpbin)';
 
-  try {
-    const dAvg = await runDownloadTest();
+    // perform progressive download for ~12s
+    const dlRes = await downloadTest(onDownloadTick, 12000);
+
     // small pause
-    await new Promise(r=>setTimeout(r,600));
-    const uAvg = await runUploadTest();
-    statusValue.textContent = 'Complete';
-    // done
-  } catch(err) {
-    console.error('test error', err);
-    statusValue.textContent = 'Error';
-  } finally {
+    await new Promise(r=>setTimeout(r,350));
+
+    // upload phase
+    const ulSample = await uploadTest((s)=>{
+      ulMbps = s.mbps || 0;
+      ulValue.textContent = fmt(ulMbps) + ' Mbps';
+      ulLive.textContent = fmt(ulMbps) + ' Mbps';
+    }, 8000);
+
+    // finalize
     running = false;
     startBtn.disabled = false;
+    stopBtn.disabled = true;
+    clearInterval(pingInterval);
+
+    // show averages
+    if(dlRes && dlRes.avgMbps){
+      dlValue.textContent = fmt(dlRes.avgMbps) + ' Mbps';
+      dlLive.textContent = fmt(dlRes.avgMbps) + ' Mbps';
+      bigNum.textContent = fmt(dlRes.avgMbps) + ' Mbps';
+    }
+    if(ulSample && ulSample.mbps){
+      ulValue.textContent = fmt(ulSample.mbps) + ' Mbps';
+      ulLive.textContent = fmt(ulSample.mbps) + ' Mbps';
+    }
+    // push final spark draw
+    drawSpark();
   }
-}
 
-function resetTest() {
-  abortController && abortController.abort();
-  running = false;
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  downloadValue.textContent = '—';
-  uploadValue.textContent = '—';
-  statusValue.textContent = 'Idle';
-  pingValue.textContent = '— ms';
-  dPoints = []; uPoints = [];
-  dSamples = []; uSamples = [];
-  downloadMeta.querySelector('.item') && (downloadMeta.querySelector('.item').textContent = 'avg: — Mbps');
-  uploadMeta.querySelector('.item') && (uploadMeta.querySelector('.item').textContent = 'avg: — Mbps');
-  clearCanvas(dctx); clearCanvas(uctx);
-}
+  startBtn.addEventListener('click', async ()=>{
+    if(running) return;
+    samples.length = 0;
+    drawSpark();
+    runTestSequence().catch(err=>{
+      console.error(err);
+      running = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    });
+  });
 
-// UI bindings
-startBtn.addEventListener('click', runFullTest);
-stopBtn.addEventListener('click', resetTest);
-stopBtn.disabled = true;
-shareBtn.addEventListener('click', async () => {
-  const out = `Download: ${downloadValue.textContent} Mbps\nUpload: ${uploadValue.textContent} Mbps\nPing: ${pingValue.textContent}`;
-  try {
-    await navigator.clipboard.writeText(out);
-    alert('Results copied to clipboard:\n' + out);
-  } catch {
-    prompt('Copy results:', out);
-  }
-});
+  stopBtn.addEventListener('click', ()=>{
+    if(controller) controller.abort();
+    running = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    clearInterval(pingInterval);
+  });
 
-// responsive: redraw graphs on resize
-window.addEventListener('resize', ()=>{ drawGraph(dctx,dPoints,'#6b7dff'); drawGraph(uctx,uPoints,'#7b4bff'); });
+  // copy results
+  $('copyBtn').addEventListener('click', ()=>{
+    const txt = `Download: ${dlLive.textContent}\nUpload: ${ulLive.textContent}\nPing: ${pingLive.textContent}\nIP: ${ipAddr.textContent}`;
+    navigator.clipboard?.writeText(txt).then(()=>alert('Results copied')).catch(()=>alert('Copy failed'));
+  });
 
+  // keep spark alive even before test
+  for(let i=0;i<10;i++) samples.push(0);
+  drawSpark();
 </script>
 </body>
 </html>
