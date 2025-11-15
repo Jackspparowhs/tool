@@ -4,200 +4,185 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Map — PirateRuler</title>
-<meta name="description" content="Clean full-screen map by PirateRuler — Apple-like look (no API key)." />
-<meta name="theme-color" content="#0a1b3a" />
+<meta name="description" content="Clean full-screen map by PirateRuler — no API keys required." />
+<meta name="theme-color" content="#0b2b20" />
 <link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
 
-<!-- Leaflet -->
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
-  /* ----- Tokens ----- */
   :root{
     --bg: #071225;
-    --ui-blue: #0077ff;   /* Apple-like blue */
-    --ui-blue-2: #005ecc;
-    --muted: #9bb1cf;
-    --glass: rgba(255,255,255,0.06);
+    --green-a: #2fa64f;   /* primary green */
+    --green-b: #0f8f3f;
+    --muted: #9fb3a6;
+    --ui-text: #e9f1ff;
   }
-  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:var(--bg);color:#fff}
+
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:var(--bg);color:var(--ui-text)}
   a{color:inherit}
-  /* ----- header: very small and unobtrusive ----- */
+
+  /* tiny unobtrusive header (fixed) */
   header{
     position:fixed; top:10px; left:12px; z-index:1400;
-    display:flex; align-items:center; gap:10px;
-    padding:6px 8px; border-radius:12px; background:rgba(255,255,255,0.03);
-    backdrop-filter: blur(6px);
-    box-shadow:0 8px 30px rgba(2,8,20,0.45);
-    pointer-events:none; /* overall header not clickable except buttons */
+    display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:12px;
+    background:rgba(255,255,255,0.03); backdrop-filter: blur(6px);
+    box-shadow:0 10px 30px rgba(2,8,20,0.45);
   }
-  .logo {
-    width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,var(--ui-blue),var(--ui-blue-2));
-    display:flex; align-items:center; justify-content:center; font-weight:900; color:white; font-size:16px;
-    pointer-events:auto;
-  }
-  .hdr-text {display:flex; flex-direction:column; line-height:1; transform: translateY(2px); pointer-events:none;}
-  .hdr-title{font-weight:800;font-size:14px; color: rgba(255,255,255,0.95)}
-  .hdr-sub{font-size:11px;color:var(--muted); margin-top:2px; display:block}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--green-a),var(--green-b));display:flex;align-items:center;justify-content:center;font-weight:900;color:white}
+  .hdr-text{display:flex;flex-direction:column;line-height:1}
+  .hdr-title{font-weight:800;font-size:14px;color:rgba(255,255,255,0.96)}
+  .hdr-sub{font-size:11px;color:var(--muted);margin-top:2px}
 
-  /* ----- control overlay ----- */
+  /* control column on top-right */
   .controls {
-    position:fixed; top:16px; right:16px; z-index:1400; display:flex; gap:10px; flex-direction:column; pointer-events:auto;
+    position:fixed; top:14px; right:14px; z-index:1400; display:flex; flex-direction:column; gap:10px;
   }
   .btn {
-    display:inline-flex; align-items:center; gap:8px; justify-content:center;
-    min-width:84px; padding:10px 12px; border-radius:12px; background:linear-gradient(180deg,var(--ui-blue),var(--ui-blue-2));
-    color:white; font-weight:800; border:0; box-shadow: 0 8px 24px rgba(9,30,66,0.35);
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:84px; padding:10px 12px; border-radius:12px;
+    background:linear-gradient(90deg,var(--green-a),var(--green-b));
+    color:white; font-weight:800; border:0; box-shadow: 0 8px 24px rgba(9,30,66,0.18);
     cursor:pointer;
   }
-  .btn.ghost {
-    background: rgba(255,255,255,0.06); color: #dfefff; border: 0; box-shadow:none; font-weight:700;
-  }
+  .btn.ghost { background: rgba(255,255,255,0.06); color:var(--ui-text); border:0; box-shadow:none; font-weight:700; }
 
-  /* compact icon style like Apple Maps */
   .icon-btn {
-    width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;border:0;color:#fff;cursor:pointer;
+    width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.04);
+    display:flex; align-items:center; justify-content:center; color:white; border:0; cursor:pointer;
   }
 
-  /* ----- map fills screen ----- */
+  /* map fills viewport */
   #map { position:fixed; inset:0; z-index:0; }
 
-  /* ----- small attribution (very small) ----- */
+  /* small attribution bottom-left */
   .attribution {
     position:fixed; left:12px; bottom:12px; z-index:1400;
-    background: rgba(0,0,0,0.45); color:#d7e6ff; font-size:12px; padding:6px 8px; border-radius:8px;
+    background: rgba(0,0,0,0.45); color:#dfeef0; font-size:12px; padding:6px 8px; border-radius:8px;
   }
 
-  /* Leaflet popup light on dark bg */
+  /* Leaflet popup style for readability */
   .leaflet-popup-content-wrapper { background:#fff; color:#06203a; border-radius:10px; }
   .leaflet-popup-tip { background:#fff; }
 
-  /* adjust mobile */
+  /* responsiveness */
   @media(max-width:720px){
-    .controls{ right:10px; gap:8px }
-    .btn{ min-width:72px; padding:8px 10px; font-size:14px }
     header{ top:8px; left:8px }
+    .controls{ top:10px; right:8px }
+    .btn { min-width:68px; padding:8px 10px }
   }
 </style>
 </head>
 <body>
-
   <!-- tiny header -->
   <header aria-hidden="true">
-    <div class="logo" title="PirateRuler">PR</div>
+    <div class="logo">PR</div>
     <div class="hdr-text">
       <div class="hdr-title">Map</div>
-      <div class="hdr-sub">by PirateRuler</div>
+      <div class="hdr-sub">PirateRuler</div>
     </div>
   </header>
 
-  <!-- minimal controls -->
+  <!-- controls -->
   <div class="controls" role="toolbar" aria-label="Map controls">
     <button id="locateBtn" class="btn" title="Locate me">Locate</button>
-    <button id="searchOpen" class="btn ghost" title="Search">Search</button>
-    <button id="clearBtn" class="icon-btn" title="Clear" aria-label="Clear markers">✖</button>
+    <button id="searchBtn" class="btn ghost" title="Search">Search</button>
+    <button id="clearBtn" class="icon-btn" title="Clear markers">✖</button>
   </div>
 
   <!-- the map -->
   <div id="map" aria-label="Map"></div>
 
-  <!-- tiny attribution -->
-  <div class="attribution" id="attr">PirateRuler.com</div>
+  <!-- small attribution -->
+  <div class="attribution">PirateRuler.com</div>
 
-  <!-- Leaflet -->
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-  /* ===== Apple-like full-screen map (Leaflet) =====
-     - Uses smooth pastel tiles similar to Apple Maps look (Carto/Stadia)
-     - Minimal header, Apple-like blue buttons, tiny attribution
-     - Click to drop marker; locate button centers user
-     - No external API keys required
-     - If you want real Apple Maps (MapKit JS) I can provide that code but you need an Apple key + enable domain
-  */
+    // Create the map with a friendly default view
+    const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([22.0, 78.0], 4);
 
-  // Create map (world view)
-  const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([22.0, 78.0], 4);
+    // Use CartoDB Positron tiles (no auth required) — clean, human-friendly
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      maxZoom: 19
+    }).addTo(map);
 
-  // Use a soft, pastel tile set — Stadia/Carto "alidade_smooth" / positron-style
-  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+    // subtle scale control bottom-left
+    L.control.scale({ position: 'bottomleft', imperial: false }).addTo(map);
 
-  // Add subtle scale control on top-left (Apple-like)
-  L.control.scale({ position: 'bottomleft', imperial: false }).addTo(map);
+    // marker layer for pins
+    const markerLayer = L.layerGroup().addTo(map);
 
-  // marker layer
-  const markerLayer = L.layerGroup().addTo(map);
+    // UI elements
+    const locateBtn = document.getElementById('locateBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-  // locate button
-  const locateBtn = document.getElementById('locateBtn');
-  locateBtn.addEventListener('click', () => {
-    if(!navigator.geolocation) { alert('Geolocation not supported'); return; }
-    locateBtn.disabled = true; locateBtn.textContent = 'Locating…';
-    navigator.geolocation.getCurrentPosition((pos) => {
-      locateBtn.disabled = false; locateBtn.textContent = 'Locate';
-      const lat = pos.coords.latitude, lon = pos.coords.longitude;
-      placeMarker(lat, lon, 'You are here');
-      map.setView([lat, lon], 13);
-    }, (err) => {
-      locateBtn.disabled = false; locateBtn.textContent = 'Locate';
-      alert('Location error: ' + (err.message || err.code));
-    }, { enableHighAccuracy: true, timeout: 10000 });
-  });
-
-  // simple search overlay (modal-style small prompt) — minimal UI to keep page clean
-  document.getElementById('searchOpen').addEventListener('click', async () => {
-    const q = prompt('Search place, address, or airport (type and press OK):');
-    if(!q) return;
-    // Nominatim public search
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`;
-    try {
-      const r = await fetch(url, {headers:{'Accept-Language':'en'}});
-      if(!r.ok) throw new Error('HTTP ' + r.status);
-      const j = await r.json();
-      if(!j || j.length === 0) { alert('No results'); return; }
-      const first = j[0];
-      const lat = parseFloat(first.lat), lon = parseFloat(first.lon);
-      placeMarker(lat, lon, first.display_name || q);
-      map.setView([lat, lon], 13);
-    } catch(e) {
-      console.warn('Search failed', e);
-      alert('Search failed');
+    // place marker helper
+    function placeMarker(lat, lon, label){
+      markerLayer.clearLayers();
+      const m = L.marker([lat, lon], { riseOnHover: true }).addTo(markerLayer);
+      const content = `<div style="font-weight:900">${escapeHtml(label || 'Pinned location')}</div>
+                       <div style="font-size:13px;color:#334">${lat.toFixed(6)}, ${lon.toFixed(6)}</div>`;
+      m.bindPopup(content).openPopup();
     }
-  });
 
-  // click to add marker
-  map.on('click', (e) => {
-    placeMarker(e.latlng.lat, e.latlng.lng, 'Pinned location');
-  });
+    // click on map to pin
+    map.on('click', (e) => {
+      placeMarker(e.latlng.lat, e.latlng.lng, 'Pinned location');
+    });
 
-  // place marker helper
-  function placeMarker(lat, lon, label){
-    markerLayer.clearLayers();
-    const m = L.marker([lat, lon], {
-      riseOnHover: true
-    }).addTo(markerLayer);
-    const content = `<div style="font-weight:900">${escapeHtml(label || 'Location')}</div>
-                     <div style="font-size:13px;color:#334">${lat.toFixed(6)}, ${lon.toFixed(6)}</div>`;
-    m.bindPopup(content).openPopup();
-  }
+    // locate me button
+    locateBtn.addEventListener('click', () => {
+      if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
+      locateBtn.disabled = true; locateBtn.textContent = 'Locating…';
+      navigator.geolocation.getCurrentPosition(pos => {
+        locateBtn.disabled = false; locateBtn.textContent = 'Locate';
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        placeMarker(lat, lon, 'You are here');
+        map.setView([lat, lon], 13);
+      }, err => {
+        locateBtn.disabled = false; locateBtn.textContent = 'Locate';
+        alert('Location error: ' + (err.message || err.code));
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    });
 
-  // clear
-  document.getElementById('clearBtn').addEventListener('click', () => markerLayer.clearLayers());
+    // search button opens a lightweight prompt (minimal UI to keep page clean)
+    searchBtn.addEventListener('click', async () => {
+      const q = prompt('Search place, address, or airport: (type and press OK)');
+      if(!q) return;
+      try {
+        const results = await nominatimSearch(q);
+        if(!results || results.length === 0){ alert('No results'); return; }
+        const first = results[0];
+        const lat = parseFloat(first.lat), lon = parseFloat(first.lon);
+        placeMarker(lat, lon, first.display_name || q);
+        map.setView([lat, lon], 13);
+      } catch(e) {
+        console.warn('Search error', e);
+        alert('Search failed');
+      }
+    });
 
-  // tiny helper
-  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+    // clear markers
+    clearBtn.addEventListener('click', () => markerLayer.clearLayers());
 
-  // make sure map fills correctly on mobile (fix rendering glitch)
-  setTimeout(()=> map.invalidateSize(), 100);
+    // Nominatim search helper (public)
+    async function nominatimSearch(q){
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=6`;
+      const r = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    }
 
-  // optional: add globe-like view on small zooms (simulate by setting minZoom)
-  map.setMinZoom(2);
+    // small escape helper
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
-  // Remove default big leaflet attribution UI so the page looks minimal
-  // We still use a tiny custom attribution per your request (PirateRuler.com)
+    // ensure correct rendering on mobile
+    window.requestAnimationFrame(()=> setTimeout(()=> map.invalidateSize(), 60));
   </script>
 </body>
 </html>
