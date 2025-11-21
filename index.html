@@ -1,471 +1,520 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Speed Test — PirateRuler.com</title>
-<link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
-<meta name="description" content="Speed Test by PirateRuler — client-only demo: live download/upload throughput, ping, per-second updates." />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calculator By PirateRuler.com — Modern Calculator Suite</title>
+<meta name="description" content="Calculator By PirateRuler.com — modern suite of calculators: basic math, BMI, age, GST, SIP, mortgage, tip and discount. Private and fast." />
+<meta property="og:title" content="Calculator by PirateRuler.com" />
+<meta property="og:description" content="All-in-one modern calculator suite. Private, fast, and works offline." />
+<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-family='Inter' font-weight='800' font-size='200' text-anchor='middle' dominant-baseline='middle' fill='white'%3EPR%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect rx='14' width='64' height='64' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-family='Inter,Arial,sans-serif' font-weight='800' font-size='26' text-anchor='middle' alignment-baseline='central' fill='white'%3EPR%3C/text%3E%3C/svg%3E">
 <style>
   :root{
-    --bg:#f2f4f8; --card:#ffffff; --muted:#6b7480; --accent:#0A84FF; --accent-2:#7b4bff; --text:#071225;
-    --radius:14px; --shadow:0 10px 30px rgba(2,8,20,0.06);
+    --bg:#ffffff; --card:#ffffff; --muted:#555555; --text:#000000;
+    --border:#000000; --accent:#000000; --key-bg:#f5f5f5;
   }
-  html.dark { --bg:#071225; --card:linear-gradient(180deg,#071225,#061028); --muted:#98a7bf; --text:#e9f1ff; --accent:#32d74b; --accent-2:#2fa64f; }
+  html.dark {
+    --bg:#121212; --card:#1e1e1e; --muted:#aaaaaa; --text:#ffffff;
+    --border:#ffffff; --accent:#ffffff; --key-bg:#2a2a2a;
+  }
+  
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:16px;min-height:100vh}
-  .wrap{max-width:1100px;margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:900;box-shadow:var(--shadow)}
-  .titlebox{line-height:1}
-  .titlebox .t1{font-weight:900;font-size:18px}
-  .titlebox .t2{font-size:13px;color:var(--muted);margin-top:2px}
-  .controls{display:flex;gap:8px;align-items:center}
-  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;border:0;font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(10,132,255,0.12)}
-  .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--text);box-shadow:none;font-weight:700;padding:8px 12px}
-  .theme-btn{width:44px;height:44px;border-radius:999px;border:0;background:var(--card);box-shadow:var(--shadow);cursor:pointer}
-  .card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-  .big {flex:1;min-width:260px}
-  .stat {text-align:center;padding:18px;border-radius:12px;background:rgba(0,0,0,0.02)}
-  .stat .num{font-weight:900;font-size:40px;color:var(--accent)}
-  .stat .lbl{color:var(--muted);margin-top:8px}
-  .side {width:300px;min-width:220px}
-  .controls-row{display:flex;gap:10px;align-items:center;margin-top:14px}
-  .small {font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff;padding:10px 12px;border-radius:12px;border:0;cursor:pointer}
-  .small.stop{background:#ececec;color:var(--text)}
-  .mini {font-size:13px;color:var(--muted)}
-  .footer {margin-top:12px;color:var(--muted);font-size:13px}
-  .offcanvas{position:fixed;right:12px;top:12px;width:320px;max-width:92vw;background:var(--card);border-radius:14px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12);transform:translateX(120%);transition:transform .28s;z-index:9999}
-  .offcanvas.open{transform:translateX(0)}
-  .offcanvas h3{margin:0 0 8px 0}
-  .menu-item{padding:12px;border-radius:10px;background:rgba(0,0,0,0.03);margin-bottom:8px;font-weight:800}
-  @media(max-width:900px){
-    .card{flex-direction:column}
-    .side{width:100%}
-    .offcanvas{right:8px;left:8px;top:auto;bottom:12px;transform:translateY(120%);transition:transform .28s}
-    .offcanvas.open{transform:translateY(0)}
-  }
-  .live-row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
-  .live-box{flex:1;padding:12px;border-radius:12px;background:rgba(0,0,0,0.02);text-align:center}
-  .live-box .v{font-weight:900;font-size:20px}
-  .graph{height:84px;background:linear-gradient(180deg,rgba(10,132,255,0.04),transparent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+  body{background:var(--bg); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:var(--text); margin:0; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; transition:background 0.3s, color 0.3s;}
+  a{color:inherit;text-decoration:none}
+  .container{max-width:1280px;margin:14px auto;padding:18px;}
+  
+  header.header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border-radius:0; background:var(--card); border-bottom:2px solid var(--border);}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .logo{width:60px;height:60px;border-radius:0;display:flex;align-items:center;justify-content:center;font-weight:800; background:var(--accent); color:var(--bg); font-size:20px; flex-shrink:0;}
+  .brand-title .title-strong{font-size:22px;font-weight:900;margin:0}
+  .brand-title .by{font-size:12px;color:var(--muted); margin-top:3px}
+  .header-actions{display:flex; gap:10px; align-items:center;}
+  .btn{padding:9px 12px;border-radius:0;border:2px solid var(--border); cursor:pointer; font-weight:700; background:var(--bg); color:var(--text); transition:all 0.2s;}
+  .btn:hover{background:var(--accent); color:var(--bg);}
+  .hamb{width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer; border:2px solid var(--border); font-weight:bold;}
+  
+  .hero{margin-top:18px; padding:28px; border:2px solid var(--border); background:var(--card); transition:background 0.3s;}
+  @media(min-width:1100px){.hero{padding:36px 48px;}.hero .big{font-size:42px;}.brand-title .title-strong{font-size:24px;}}
+  .hero .big{font-size:34px;font-weight:900;margin:0;text-align:center}
+  .hero .small{text-align:center;color:var(--muted);margin-top:8px; max-width:960px;margin-left:auto;margin-right:auto}
+  .tabs{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:18px}
+  .tab{padding:10px 16px; border:2px solid var(--border); cursor:pointer; color:var(--muted); font-weight:700; background:var(--bg); transition:all 0.2s;}
+  .tab.active{background:var(--accent); color:var(--bg); font-weight:900;}
+  
+  .grid{display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-top:12px; align-items:start;}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card); border:2px solid var(--border); padding:18px; animation:cardIn .42s both}
+  @keyframes cardIn{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .card h2{margin:0 0 8px 0;font-size:18px; font-weight:900;}
+  .hint{color:var(--muted); font-size:13px; margin-bottom:10px}
+  
+  input[type="text"], input[type="number"], input[type="date"], select{width:100%; padding:12px; border:2px solid var(--border); font-size:15px; background:var(--bg); color:var(--text); transition:background 0.3s, color 0.3s;}
+  .row{display:flex; gap:10px}
+  .primary{background:var(--accent); color:var(--bg); padding:9px 14px; border:2px solid var(--border); font-weight:800; cursor:pointer; transition:all 0.2s;}
+  .ghost{background:var(--bg); color:var(--text); border:2px solid var(--border); padding:9px 12px; cursor:pointer; transition:all 0.2s;}
+  .ghost:hover{background:var(--accent); color:var(--bg);}
+  .result{margin-top:12px; font-weight:900; color:var(--text); border-top:2px solid var(--border); padding-top:8px;}
+  
+  .key-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-top:12px;}
+  .key{padding:14px; border:2px solid var(--border); font-weight:700; cursor:pointer; text-align:center; background:var(--key-bg); color:var(--text); transition:all 0.2s;}
+  .key:hover{background:var(--accent); color:var(--bg);}
+  .key.op{font-weight:900;}
+  .key.eq{background:var(--accent); color:var(--bg); font-weight:900;}
+  
+  aside{align-self:start; position:relative;}
+  .feature-panel{background:var(--card); border:2px solid var(--border); padding:12px;}
+  @media(min-width:981px){.feature-panel{position:sticky; top:18px; max-height:calc(100vh - 36px); overflow:auto;}}
+  .panel-title{font-weight:900; margin:6px 6px 12px 6px;}
+  .features{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:700px){.features{grid-template-columns:1fr;}}
+  .feature{display:flex; gap:14px; align-items:center; padding:16px; border:2px solid var(--border); background:var(--card); min-height:110px;}
+  .f-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center; font-weight:800; color:var(--bg); background:var(--accent); flex-shrink:0;}
+  .f-title{font-weight:800}
+  .f-desc{color:var(--muted); font-size:13px}
+  
+  .useful-tips{margin-top:20px; padding:16px; border:2px solid var(--border); background:var(--card);}
+  .useful-tips h3{margin:0 0 10px 0; font-weight:900;}
+  .useful-tips ul{margin:0; padding-left:20px;}
+  .useful-tips li{margin:6px 0; color:var(--muted);}
+  
+  footer{margin-top:16px; padding:16px; border:2px solid var(--border); background:var(--card); text-align:center;}
+  .visit{padding:12px 20px; display:inline-block; background:var(--accent); color:var(--bg); font-weight:800; text-decoration:none; border:2px solid var(--border);}
+  .muted{color:var(--muted)}
+  .spacer{height:8px}
+  
+  /* Sidebar */
+  .sidebar{position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s cubic-bezier(.2,.9,.3,1); z-index:90; background:var(--card); border-left:2px solid var(--border); padding:20px; overflow:auto;}
+  .sidebar.open{transform:translateX(0);}
+  .close{display:flex; justify-content:flex-end;}
+  .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
+  .nav-list a{display:block; padding:14px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; transition:all 0.2s;}
+  .nav-list a:hover{background:var(--accent); color:var(--bg);}
+  .backup{margin-top:18px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:12px;}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">PR</div>
-        <div class="titlebox">
-          <div class="t1">Speed Test</div>
-          <div class="t2">by PirateRuler.com</div>
+<div class="container">
+
+  <!-- Header -->
+  <header class="header" role="banner" aria-label="Site header">
+    <div class="brand">
+      <a href="index.html" aria-label="Home" style="display:flex; align-items:center; gap:12px">
+        <div class="logo" aria-hidden="true">PR</div>
+        <div class="brand-title">
+          <div class="title-strong">Calculator</div>
+          <div class="by">by PirateRuler.com</div>
         </div>
-      </div>
+      </a>
+    </div>
 
-      <div class="controls" role="navigation" aria-label="controls">
-        <button id="openMenu" class="btn ghost" title="Menu" aria-expanded="false">Menu</button>
-        <button id="toggleTheme" class="theme-btn" title="Toggle theme">🌓</button>
-      </div>
-    </header>
+    <!-- REMOVED: navigation links from header -->
 
-    <section class="card" aria-label="speed card">
-      <div class="big">
-        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-          <div style="min-width:220px">
-            <div style="font-size:13px;color:var(--muted);font-weight:800">Quick Internet Speed Check</div>
-            <div style="color:var(--muted);margin-top:6px">Live throughput numbers update every second. For best accuracy use your own CORS-enabled server with large files.</div>
-          </div>
+    <div class="header-actions" role="navigation" aria-label="Header controls">
+      <button class="btn ghost" id="themeBtn" title="Toggle dark mode">🌙 Dark</button>
+      <div class="hamb" id="hambBtn" title="Open menu" aria-haspopup="true" aria-controls="sidebar">☰</div>
+    </div>
+  </header>
 
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="startBtn" class="small">Start Test</button>
-            <button id="stopBtn" class="small stop" disabled>Stop</button>
-          </div>
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <h1 id="heroTitle" class="big">All-in-one Modern Calculator Suite</h1>
+    <p class="small">Fast, privacy-first calculators: basic math, BMI, age, GST, SIP, mortgage, tip and discount — simple and reliable. (Currency tools live separately on PirateRuler currency site.)</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-target="basic" role="tab">Basic</button>
+      <button class="tab" data-target="age" role="tab">Age</button>
+      <button class="tab" data-target="bmi" role="tab">BMI</button>
+      <button class="tab" data-target="gst" role="tab">GST</button>
+      <button class="tab" data-target="sip" role="tab">SIP</button>
+      <button class="tab" data-target="mortgage" role="tab">Mortgage</button>
+      <button class="tab" data-target="tip" role="tab">Tip</button>
+      <button class="tab" data-target="discount" role="tab">Discount</button>
+    </div>
+  </section>
+
+  <!-- MAIN GRID -->
+  <main class="grid" role="main">
+    <div>
+      <!-- All calculator sections remain unchanged -->
+      <section id="basic" class="card">
+        <h2>Basic Calculator</h2>
+        <div class="hint">Use keypad or type on your keyboard. Supports + - × ÷ ( ) and decimals.</div>
+        <input id="basicDisplay" type="text" value="0" />
+        <div class="key-grid">
+          <div class="key" onclick="basicAdd('7')">7</div>
+          <div class="key" onclick="basicAdd('8')">8</div>
+          <div class="key" onclick="basicAdd('9')">9</div>
+          <div class="key op" onclick="basicAdd('/')">÷</div>
+          <div class="key" onclick="basicAdd('4')">4</div>
+          <div class="key" onclick="basicAdd('5')">5</div>
+          <div class="key" onclick="basicAdd('6')">6</div>
+          <div class="key op" onclick="basicAdd('*')">×</div>
+          <div class="key" onclick="basicAdd('1')">1</div>
+          <div class="key" onclick="basicAdd('2')">2</div>
+          <div class="key" onclick="basicAdd('3')">3</div>
+          <div class="key op" onclick="basicAdd('-')">−</div>
+          <div class="key" onclick="basicAdd('0')">0</div>
+          <div class="key" onclick="basicAdd('.')">.</div>
+          <div class="key eq" onclick="basicEval()">=</div>
+          <div class="key op" onclick="basicAdd('+')">+</div>
+          <div class="key" style="grid-column:span 2" onclick="basicClear()">Clear</div>
+          <div class="key" style="grid-column:span 2" onclick="basicBack()">Back</div>
         </div>
+        <div id="basicRes" class="result" aria-live="polite"></div>
+      </section>
 
-        <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
-          <div class="stat" style="flex:1;min-width:220px">
-            <div class="num" id="currentThrough">0.0 Mbps</div>
-            <div class="lbl">Current throughput</div>
-          </div>
+      <section id="age" class="card" hidden>
+        <h2>Age Calculator</h2>
+        <div class="hint">Calculate years, months and days from birthday.</div>
+        <input id="dob" type="date" />
+        <div class="row">
+          <button class="primary" onclick="computeAge()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('dob').value=''; setText('ageRes','')">Clear</button>
+        </div>
+        <div id="ageRes" class="result"></div>
+      </section>
 
-          <div class="stat" style="flex:1;min-width:220px">
-            <div style="display:flex;gap:10px;align-items:center;justify-content:center">
-              <div style="text-align:center;margin-right:8px">
-                <div style="font-weight:900;font-size:26px;color:var(--accent)" id="dlAvg">0.0</div>
-                <div style="color:var(--muted)">Download Mbps</div>
-              </div>
-              <div style="text-align:center;margin-left:8px">
-                <div style="font-weight:900;font-size:26px;color:var(--accent-2)" id="ulAvg">0.0</div>
-                <div style="color:var(--muted)">Upload Mbps</div>
-              </div>
+      <section id="bmi" class="card" hidden>
+        <h2>BMI Calculator</h2>
+        <div class="hint">Enter weight (kg) and height (m).</div>
+        <div class="row">
+          <input id="bmiW" type="number" placeholder="Weight (kg)" />
+          <input id="bmiH" type="number" placeholder="Height (m)" step="0.01" />
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeBMI()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('bmiW').value=''; document.getElementById('bmiH').value=''; setText('bmiRes','')">Clear</button>
+        </div>
+        <div id="bmiRes" class="result"></div>
+      </section>
+
+      <section id="gst" class="card" hidden>
+        <h2>GST Calculator</h2>
+        <div class="hint">Compute total with GST percent.</div>
+        <div class="row">
+          <input id="gstAmt" type="number" placeholder="Amount" />
+          <input id="gstRate" type="number" placeholder="GST %" />
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeGST()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('gstAmt').value='';document.getElementById('gstRate').value=''; setText('gstRes','')">Clear</button>
+        </div>
+        <div id="gstRes" class="result"></div>
+      </section>
+
+      <section id="sip" class="card" hidden>
+        <h2>SIP Calculator</h2>
+        <div class="hint">Monthly invest, annual rate (%), years.</div>
+        <div class="row">
+          <input id="sipM" type="number" placeholder="Monthly invest" />
+          <input id="sipR" type="number" placeholder="Rate (%)" />
+        </div>
+        <div class="row">
+          <input id="sipY" type="number" placeholder="Years" /><div></div>
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeSIP()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('sipM').value='';document.getElementById('sipR').value='';document.getElementById('sipY').value=''; setText('sipRes','')">Clear</button>
+        </div>
+        <div id="sipRes" class="result"></div>
+      </section>
+
+      <section id="mortgage" class="card" hidden>
+        <h2>Mortgage Calculator</h2>
+        <div class="hint">Loan amount, annual interest (%) and years.</div>
+        <div class="row">
+          <input id="mortA" type="number" placeholder="Loan amount" />
+          <input id="mortR" type="number" placeholder="Annual rate (%)" />
+        </div>
+        <div class="row">
+          <input id="mortY" type="number" placeholder="Years" /><div></div>
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeMort()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('mortA').value='';document.getElementById('mortR').value='';document.getElementById('mortY').value=''; setText('mortRes','')">Clear</button>
+        </div>
+        <div id="mortRes" class="result"></div>
+      </section>
+
+      <section id="tip" class="card" hidden>
+        <h2>Tip Calculator</h2>
+        <div class="hint">Add tip percentage to bill.</div>
+        <div class="row">
+          <input id="tipBill" type="number" placeholder="Bill amount" />
+          <input id="tipPct" type="number" placeholder="Tip %" />
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeTip()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('tipBill').value='';document.getElementById('tipPct').value=''; setText('tipRes','')">Clear</button>
+        </div>
+        <div id="tipRes" class="result"></div>
+      </section>
+
+      <section id="discount" class="card" hidden>
+        <h2>Discount Calculator</h2>
+        <div class="hint">Final price after percentage discount.</div>
+        <div class="row">
+          <input id="discPrice" type="number" placeholder="Original price" />
+          <input id="discPct" type="number" placeholder="Discount %" />
+        </div>
+        <div class="row">
+          <button class="primary" onclick="computeDisc()">Calculate</button>
+          <button class="ghost" onclick="document.getElementById('discPrice').value='';document.getElementById('discPct').value=''; setText('discRes','')">Clear</button>
+        </div>
+        <div id="discRes" class="result"></div>
+      </section>
+    </div>
+
+    <aside>
+      <div class="feature-panel">
+        <div class="panel-title">Why PirateRuler tools?</div>
+        <div class="features">
+          <div class="feature">
+            <div class="f-icon">⚡</div>
+            <div>
+              <div class="f-title">Lightning fast</div>
+              <div class="f-desc">Optimized code, minimal dependencies — instant results on mobile & desktop.</div>
             </div>
           </div>
-
-          <div class="stat" style="flex:1;min-width:220px">
-            <div style="font-weight:900;font-size:22px" id="pingVal">-- ms</div>
-            <div style="color:var(--muted)">Ping</div>
-            <div style="margin-top:10px;color:var(--muted);font-size:13px" id="serverInfo">Server: public demo</div>
+          <div class="feature">
+            <div class="f-icon">🔒</div>
+            <div>
+              <div class="f-title">Private by design</div>
+              <div class="f-desc">No personal data is stored — everything runs in your browser.</div>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="f-icon">🧰</div>
+            <div>
+              <div class="f-title">All tools in one</div>
+              <div class="f-desc">Basic math, BMI, age, GST, SIP, mortgage, tip, discount — ready to use.</div>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="f-icon">🌐</div>
+            <div>
+              <div class="f-title">Backup resources</div>
+              <div class="f-desc">If this site is offline, visit PirateRuler.com for backups & resources.</div>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="f-icon">📱</div>
+            <div>
+              <div class="f-title">Mobile-first</div>
+              <div class="f-desc">Looks great on phones and adapts cleanly to desktops.</div>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="f-icon">🔧</div>
+            <div>
+              <div class="f-title">Developer friendly</div>
+              <div class="f-desc">Lightweight, forkable, transparent — easy to customize.</div>
+            </div>
           </div>
         </div>
-
-        <div class="live-row" aria-hidden="false">
-          <div class="live-box">
-            <div class="v" id="dlLive">DL: 0.0 Mbps</div>
-            <div class="mini">Live download throughput (per-second)</div>
-          </div>
-          <div class="live-box">
-            <div class="v" id="ulLive">UL: 0.0 Mbps</div>
-            <div class="mini">Live upload throughput (per-second)</div>
-          </div>
+        
+        <!-- USEFUL TIPS -->
+        <div class="useful-tips">
+          <h3>💡 Pro Tips</h3>
+          <ul>
+            <li><strong>Basic:</strong> Use keyboard shortcuts - numbers, +, -, *, /, Enter to calculate</li>
+            <li><strong>Age:</strong> Calculate exact age for legal documents or milestones</li>
+            <li><strong>BMI:</strong> Divide height in cm by 100 to convert to meters</li>
+            <li><strong>GST:</strong> Enter negative percentage to remove GST from total</li>
+            <li><strong>SIP:</strong> Results show compound returns with monthly contributions</li>
+            <li><strong>Mortgage:</strong> Compare EMIs by adjusting loan years</li>
+            <li><strong>Tip:</strong> 15-20% is standard for good service</li>
+            <li><strong>Discount:</strong> Stack discounts by running multiple calculations</li>
+          </ul>
         </div>
-
-        <div class="footer">
-          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-            <div style="color:var(--muted)">Tip: close other heavy apps and prefer wired for best accuracy.</div>
-            <div style="color:var(--muted);font-size:13px" id="resultNote">Client-only demo</div>
+        
+        <div class="spacer"></div>
+        <div class="feature" style="min-height:unset; align-items:flex-start; padding:14px">
+          <div class="f-icon">PR</div>
+          <div>
+            <div class="f-title">Calculator By PirateRuler.com</div>
+            <div class="f-desc" style="margin-top:6px">
+              <a href="about.html">About</a> ·
+              <a href="privacy.html">Privacy</a> ·
+              <a href="contact.html">Contact</a> ·
+              <a href="terms.html">Terms</a>
+            </div>
           </div>
         </div>
       </div>
+    </aside>
+  </main>
 
-      <aside class="side">
-        <div style="padding:12px;border-radius:12px;background:rgba(0,0,0,0.02)">
-          <div style="font-weight:900">Live graph</div>
-          <div class="graph" id="graphArea">(live graph placeholder)</div>
+  <!-- Footer -->
+  <footer>
+    <a class="visit" href="https://pirateruler.com" target="_blank" rel="noopener noreferrer">Visit PirateRuler.com</a>
+    <div style="height:12px"></div>
+    <small class="muted">© <span id="year"></span> Calculator By PirateRuler.com — Backup & resources: pirateruler.com</small>
+    <!-- REMOVED: navigation links from footer -->
+  </footer>
+</div>
 
-          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-            <button id="copyBtn" class="btn ghost" style="flex:1">Copy results</button>
-            <button id="resetBtn" class="btn ghost" style="flex:1">Reset</button>
-          </div>
-
-          <div style="margin-top:12px;color:var(--muted);font-size:13px">Results update every second. This is a browser-only demo — for production use your own endpoints for accurate results.</div>
-        </div>
-      </aside>
-    </section>
-
-    <div style="height:18px"></div>
-    <footer style="text-align:center;color:var(--muted)">© <span id="year"></span> PirateRuler — Speed Test</footer>
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="close"><button class="ghost" id="closeSidebar">Close</button></div>
+  <h3>PirateRuler Links</h3>
+  <p class="muted">Quick links & backup resources</p>
+  <nav class="nav-list">
+    <a href="about.html">About — PirateRuler</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="contact.html">Contact</a>
+    <a href="terms.html">Terms & Service</a>
+    <a href="resources.html">Backup Resources</a>
+  </nav>
+  <div class="backup">
+    If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank">pirateruler.com</a>
   </div>
-
-  <div id="menu" class="offcanvas" role="dialog" aria-hidden="true">
-    <h3>Menu</h3>
-    <div class="menu-item" onclick="startQuick()">Start Test</div>
-    <div class="menu-item" onclick="showAbout()">About</div>
-    <div class="menu-item" onclick="showPrivacy()">Privacy</div>
-    <div class="menu-item" onclick="showContact()">Contact</div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button id="closeMenuBtn" class="btn ghost" style="flex:1">Close</button>
-    </div>
-  </div>
+</aside>
 
 <script>
-/* ---------- helpers ---------- */
-const $ = id => document.getElementById(id);
-$('year').textContent = new Date().getFullYear();
+  // Year in footer
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-/* theme */
-const doc = document.documentElement;
-const saved = localStorage.getItem('pr-theme') || 'light';
-if(saved === 'dark') doc.classList.add('dark');
-$('toggleTheme').addEventListener('click', ()=>{
-  if(doc.classList.contains('dark')){ doc.classList.remove('dark'); localStorage.setItem('pr-theme','light'); }
-  else { doc.classList.add('dark'); localStorage.setItem('pr-theme','dark'); }
-});
-
-/* menu */
-const menu = $('menu');
-$('openMenu').addEventListener('click', ()=> {
-  const open = menu.classList.toggle('open');
-  $('openMenu').setAttribute('aria-expanded', String(open));
-});
-$('closeMenuBtn').addEventListener('click', ()=> menu.classList.remove('open'));
-function startQuick(){ menu.classList.remove('open'); startTest(); }
-function showAbout(){ alert('Speed Test by PirateRuler — client-only demo.'); }
-function showPrivacy(){ alert('Privacy: Runs client-side. No server storage by default.'); }
-function showContact(){ alert('Contact: PirateRuler.com'); }
-
-/* ---------- improved speed test logic ---------- */
-
-/*
-  Changes made:
-  - Immediate small probe to produce a fast initial estimate
-  - Parallel progressive download streams (4) to saturate better
-  - Upload measured with XMLHttpRequest + progress events to show live upload
-  - UI updates every 500ms for snappy feel
-  - Smoothing via simple moving average for stable numbers
-*/
-
-let running = false;
-let dlBytes = 0, dlStart = 0;
-let dlSamples = [], ulSamples = [];
-let pingMs = null;
-let abortControllers = [];
-let uiTimer = null;
-let dlLastBytes = 0;
-let UI_INTERVAL = 500; // 500ms updates for snappier UI
-
-// public demo files (these are CORS-enabled public hosts; for production host your own)
-const DOWNLOAD_URLS = [
-  'https://speed.hetzner.de/100MB.bin',  // big
-  'https://speed.hetzner.de/10MB.bin'    // fallback smaller
-];
-const PARALLEL_DOWNLOADS = 4;
-const DL_RUN_MS = 12000; // 12s of downloads
-const UPLOAD_SIZE_MB = 8; // upload blob ~8MB for measurable upload streaming
-const UPLOAD_URL = 'https://httpbin.org/post'; // public echo (CORS)
-
-/* helper conversions */
-function bytesToMbps(bytes, seconds){ return (bytes * 8) / (1024*1024) / Math.max(seconds, 0.000001); }
-function setText(id, txt){ if($(id)) $(id).textContent = txt; }
-
-/* ping first quickly (small fetch) */
-async function measurePing(){
-  try {
-    const t0 = performance.now();
-    await fetch('https://httpbin.org/get?cachebust=' + Math.random(), {cache:'no-store', mode:'cors'});
-    const t1 = performance.now();
-    pingMs = Math.round(t1 - t0);
-  } catch(e){ pingMs = null; }
-  setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
-}
-
-/* small fast probe: fetch a small byte-range to get immediate throughput */
-async function smallProbe(url){
-  try {
-    const controller = new AbortController();
-    abortControllers.push(controller);
-    // try requesting a small range (first ~200KB) to get a fast initial delta
-    const headers = new Headers();
-    headers.set('Range','bytes=0-200000');
-    const res = await fetch(url + '?r=' + Math.random(), { method:'GET', headers, signal: controller.signal, cache:'no-store', mode:'cors' });
-    if(!res.ok) return 0;
-    const reader = res.body.getReader();
-    let probeBytes = 0;
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      probeBytes += value.byteLength;
-      dlBytes += value.byteLength;
-      // return early after some bytes so UI can update
-      if(probeBytes >= 180000) break;
-    }
-    try{ controller.abort(); }catch(e){}
-    return probeBytes;
-  } catch(e){
-    return 0;
+  // Theme Toggle (Light/Dark only)
+  const themeBtn = document.getElementById('themeBtn');
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    themeBtn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+    themeBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
   }
-}
-
-/* stream download: progressive fetch + reader */
-async function streamDownload(url){
-  const controller = new AbortController();
-  abortControllers.push(controller);
-  try {
-    const res = await fetch(url + '?r=' + Math.random(), { method:'GET', signal: controller.signal, cache:'no-store', mode:'cors' });
-    if(!res.ok || !res.body) return;
-    const reader = res.body.getReader();
-    while(true){
-      const {done, value} = await reader.read();
-      if(done) break;
-      dlBytes += value.byteLength;
-      // slight yielding
-      // (we don't await here so loop continues quickly)
-    }
-  } catch(e){
-    // ignore errors (CORS, abort)
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+    themeBtn.textContent = '☀️ Light';
   }
-}
+  themeBtn.addEventListener('click', toggleTheme);
 
-/* upload measured via XMLHttpRequest to get onprogress events */
-function startUploadWithProgress(){
-  return new Promise((resolve) => {
-    try {
-      // build blob of size UPLOAD_SIZE_MB
-      const chunk = new Uint8Array(1024*1024).fill(0x61);
-      const parts = [];
-      for(let i=0;i<UPLOAD_SIZE_MB;i++) parts.push(chunk);
-      const blob = new Blob(parts, {type: 'application/octet-stream'});
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', UPLOAD_URL + '?r=' + Math.random());
-      xhr.timeout = 30000;
-      let lastLoaded = 0;
-      let lastTime = performance.now();
-      const samples = [];
-
-      xhr.upload.onprogress = function(e){
-        if(e.lengthComputable){
-          const now = performance.now();
-          const deltaBytes = e.loaded - lastLoaded;
-          const deltaSeconds = (now - lastTime)/1000;
-          if(deltaSeconds > 0){
-            const mbps = bytesToMbps(deltaBytes, deltaSeconds);
-            samples.push(mbps);
-            // update live UL speed immediately
-            setText('ulLive', 'UL: ' + mbps.toFixed(2) + ' Mbps');
-          }
-          lastLoaded = e.loaded;
-          lastTime = now;
-        }
-      };
-      xhr.onload = function(){
-        // compute average from samples
-        const avg = samples.length ? (samples.reduce((a,b)=>a+b,0)/samples.length) : 0;
-        resolve(avg);
-      };
-      xhr.onerror = function(){ resolve(0); };
-      xhr.ontimeout = function(){ resolve(0); };
-      xhr.send(blob);
-    } catch(e){ resolve(0); }
+  // Sidebar Controls
+  const sidebar = document.getElementById('sidebar');
+  const hambBtn = document.getElementById('hambBtn');
+  const closeSidebar = document.getElementById('closeSidebar');
+  function openSidebar(){ 
+    sidebar.classList.add('open'); 
+    sidebar.setAttribute('aria-hidden','false'); 
+    closeSidebar.focus(); 
+  }
+  function closeSB(){ 
+    sidebar.classList.remove('open'); 
+    sidebar.setAttribute('aria-hidden','true'); 
+  }
+  hambBtn.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSB);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSB(); });
+  document.addEventListener('click', e => {
+    if(sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hambBtn.contains(e.target)) closeSB();
   });
-}
 
-/* start UI updater (smoother, 500ms) */
-function startUiLoop(){
-  if(uiTimer) clearInterval(uiTimer);
-  let smoothingWindow = 6; // keep last N samples for smoothing
-  let dlMoving = [];
-  uiTimer = setInterval(()=>{
-    // compute overall elapsed seconds since dlStart
-    const now = performance.now();
-    const elapsed = (now - dlStart)/1000;
-    const totalDl = dlBytes;
-    const overallMbps = bytesToMbps(totalDl, Math.max(elapsed,0.000001));
-    // compute per-interval speed using delta bytes since last tick
-    const deltaBytes = totalDl - (dlLastBytes || 0);
-    const msInterval = UI_INTERVAL;
-    const instantMbps = bytesToMbps(deltaBytes, Math.max(msInterval/1000, 0.000001));
-    dlLastBytes = totalDl;
-
-    // smoothing
-    dlMoving.push(instantMbps);
-    if(dlMoving.length > smoothingWindow) dlMoving.shift();
-    const smooth = dlMoving.reduce((a,b)=>a+b,0)/dlMoving.length;
-
-    // push sample into dlSamples every second (approx)
-    dlSamples.push(overallMbps);
-
-    setText('currentThrough', smooth.toFixed(2) + ' Mbps');
-    setText('dlLive', 'DL: ' + overallMbps.toFixed(2) + ' Mbps');
-    const dlAvgVal = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : overallMbps;
-    setText('dlAvg', dlAvgVal.toFixed(2));
-
-    // UL: we use ulSamples populated by upload function
-    const ulAvgVal = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : parseFloat($('ulLive').textContent.replace(/[^\d.]/g,'')) || 0;
-    setText('ulAvg', ulAvgVal.toFixed(2));
-
-    setText('pingVal', pingMs ? `${pingMs} ms` : '-- ms');
-    // graph placeholder
-    $('graphArea').textContent = Math.round(smooth) + ' Mbps';
-  }, UI_INTERVAL);
-}
-function stopUiLoop(){ if(uiTimer){ clearInterval(uiTimer); uiTimer=null; } }
-
-/* start test driver */
-async function startTest(){
-  if(running) return;
-  running = true;
-  $('startBtn').disabled = true;
-  $('stopBtn').disabled = false;
-  dlBytes = 0; dlSamples=[]; ulSamples=[]; dlStart = performance.now(); dlLastBytes = 0;
-  setText('currentThrough','0.0 Mbps'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('dlAvg','0.0'); setText('ulAvg','0.0');
-  setText('resultNote','Running test — client-only demo');
-
-  // initial quick ping and small probe to show a fast number
-  await measurePing();
-  // small probe try each download URL until one works
-  let probeSuccess = false;
-  for(const url of DOWNLOAD_URLS){
-    const p = await smallProbe(url);
-    if(p > 0){ probeSuccess = true; break; }
+  // Tabs
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  function showTab(id){
+    document.querySelectorAll('main section.card').forEach(s => s.hidden = true);
+    const el = document.getElementById(id);
+    if(el) el.hidden = false;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.target === id));
+    setTimeout(()=>{ 
+      const rect = el && el.getBoundingClientRect(); 
+      if(rect) window.scrollTo({top: window.scrollY + rect.top - 80, behavior:'smooth'}); 
+    }, 70);
   }
-  // start UI loop (immediate)
-  startUiLoop();
+  tabs.forEach(t => t.addEventListener('click', ()=> showTab(t.dataset.target)));
+  showTab('basic');
 
-  // start parallel streaming downloads for DL_RUN_MS
-  const startTime = performance.now();
-  abortControllers = [];
-  const dlPromises = [];
-  for(let i=0;i<PARALLEL_DOWNLOADS;i++){
-    // pick first url (big) and stream until time window ends
-    dlPromises.push((async ()=>{
-      while(running && (performance.now() - startTime) < DL_RUN_MS){
-        await streamDownload(DOWNLOAD_URLS[0]);
-        // small delay to allow other tasks and avoid tight loop
-        await new Promise(r=>setTimeout(r, 80));
-      }
-    })());
+  // Basic Calculator Functions
+  let expr = '';
+  const display = document.getElementById('basicDisplay');
+  function setText(id,val){ const el=document.getElementById(id); if(el) el.textContent = val; }
+  function basicAdd(v){ 
+    if(display.value === '0' && v !== '.' ) display.value = ''; 
+    expr = display.value + v; 
+    display.value = expr; 
   }
-
-  // in parallel, schedule upload tests halfway through
-  const uploader = (async ()=>{
-    // wait a short bit so download has started
-    await new Promise(r=>setTimeout(r, 1200));
-    // attempt two upload runs, recording averages
-    for(let i=0;i<2 && running;i++){
-      const avg = await startUploadWithProgress();
-      if(avg) ulSamples.push(avg);
-      // short wait between uploads
-      await new Promise(r=>setTimeout(r, 300));
+  function basicClear(){ expr=''; display.value='0'; setText('basicRes',''); }
+  function basicBack(){ expr = display.value.slice(0,-1); display.value = expr || '0'; }
+  function basicEval(){
+    if(!display.value) return;
+    const safe = display.value.replace(/[^0-9+\-*/().% ]/g,'');
+    try { 
+      const res = Function('"use strict";return ('+safe+')')(); 
+      setText('basicRes', isFinite(res) ? 'Result: ' + res : 'Invalid'); 
+      display.value = String(res); 
     }
-  })();
+    catch(e){ setText('basicRes','Invalid expression'); }
+  }
+  document.addEventListener('keydown', e => {
+    if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    if(/^[0-9+\-*/().%]$/.test(e.key)) basicAdd(e.key);
+    if(e.key === 'Enter') basicEval();
+    if(e.key === 'Backspace') basicBack();
+  });
 
-  // wait for downloads to finish or stop
-  await Promise.race([
-    Promise.all(dlPromises),
-    new Promise(r=> setTimeout(r, DL_RUN_MS + 2000))
-  ]).catch(()=>{});
-
-  // ensure uploader completes
-  await uploader.catch(()=>{});
-
-  // done
-  running = false;
-  // abort any outstanding controllers
-  try{ abortControllers.forEach(c=>c.abort()); }catch(e){}
-  stopUiLoop();
-
-  // compute final averages
-  const dlAvg = dlSamples.length ? (dlSamples.reduce((a,b)=>a+b,0)/dlSamples.length) : bytesToMbps(dlBytes, Math.max((performance.now()-dlStart)/1000, 0.000001));
-  const ulAvg = ulSamples.length ? (ulSamples.reduce((a,b)=>a+b,0)/ulSamples.length) : 0;
-  setText('dlAvg', dlAvg.toFixed(2));
-  setText('ulAvg', ulAvg.toFixed(2));
-  setText('currentThrough', '0.0 Mbps');
-  setText('resultNote', 'Demo complete — results are approximate (client-only)');
-  $('startBtn').disabled = false;
-  $('stopBtn').disabled = true;
-}
-
-/* stop */
-function stopTest(){
-  running = false;
-  try{ abortControllers.forEach(c=>c.abort()); }catch(e){}
-  stopUiLoop();
-  $('startBtn').disabled = false;
-  $('stopBtn').disabled = true;
-  setText('resultNote','Test stopped');
-}
-
-/* UI interactions */
-$('startBtn').addEventListener('click', ()=> startTest());
-$('stopBtn').addEventListener('click', ()=> stopTest());
-$('resetBtn').addEventListener('click', ()=>{
-  dlBytes = 0; dlSamples=[]; ulSamples=[]; setText('dlAvg','0.0'); setText('ulAvg','0.0'); setText('currentThrough','0.0 Mbps'); setText('dlLive','DL: 0.0 Mbps'); setText('ulLive','UL: 0.0 Mbps'); setText('pingVal','-- ms'); $('graphArea').textContent='(live graph placeholder)';
-});
-$('copyBtn').addEventListener('click', ()=>{
-  const txt = `Speed Test results:
-  Download (avg): ${$('dlAvg').textContent} Mbps
-  Upload (avg): ${$('ulAvg').textContent} Mbps
-  Ping: ${$('pingVal').textContent}
-  Source: PirateRuler client-only demo`;
-  navigator.clipboard?.writeText(txt).then(()=> alert('Results copied')).catch(()=> alert('Copy failed'));
-});
-
-/* keyboard shortcuts */
-document.addEventListener('keydown', (e)=>{
-  if(e.key.toLowerCase() === 's') startTest();
-  if(e.key.toLowerCase() === 'x') stopTest();
-});
+  // Calculator Functions
+  function computeAge(){
+    const v = document.getElementById('dob').value; 
+    if(!v) return setText('ageRes','Please select birthday');
+    const dob = new Date(v); 
+    if(isNaN(dob)) return setText('ageRes','Invalid date');
+    const now = new Date(); 
+    let y = now.getFullYear()-dob.getFullYear(); 
+    let m = now.getMonth()-dob.getMonth(); 
+    let d = now.getDate()-dob.getDate();
+    if(d<0){ m--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); } 
+    if(m<0){ y--; m += 12; }
+    setText('ageRes', `${y} years, ${m} months, ${d} days`);
+  }
+  function computeBMI(){ 
+    const w=parseFloat(document.getElementById('bmiW').value), 
+          h=parseFloat(document.getElementById('bmiH').value);
+    if(!w||!h) return setText('bmiRes','Enter valid weight and height'); 
+    const bmi=w/(h*h); 
+    setText('bmiRes','BMI: '+bmi.toFixed(2)); 
+  }
+  function computeGST(){ 
+    const a=parseFloat(document.getElementById('gstAmt').value), 
+          r=parseFloat(document.getElementById('gstRate').value);
+    if(isNaN(a)||isNaN(r)) return setText('gstRes','Enter amount & rate'); 
+    const t=a+(a*r/100); 
+    setText('gstRes','Total: '+t.toFixed(2)); 
+  }
+  function computeSIP(){ 
+    const m=parseFloat(document.getElementById('sipM').value), 
+          annual=parseFloat(document.getElementById('sipR').value), 
+          years=parseFloat(document.getElementById('sipY').value);
+    if(isNaN(m)||isNaN(annual)||isNaN(years)) return setText('sipRes','Enter monthly, rate and years'); 
+    const r=annual/100/12, n=years*12; 
+    const fv=m*((Math.pow(1+r,n)-1)/r)*(1+r); 
+    setText('sipRes','Future: '+fv.toFixed(2)); 
+  }
+  function computeMort(){ 
+    const a=parseFloat(document.getElementById('mortA').value), 
+          annual=parseFloat(document.getElementById('mortR').value), 
+          years=parseFloat(document.getElementById('mortY').value);
+    if(isNaN(a)||isNaN(annual)||isNaN(years)) return setText('mortRes','Enter valid values'); 
+    const r=annual/100/12, n=years*12; 
+    const emi=a*r*(Math.pow(1+r,n)/(Math.pow(1+r,n)-1)); 
+    setText('mortRes','Monthly EMI: '+emi.toFixed(2)); 
+  }
+  function computeTip(){ 
+    const b=parseFloat(document.getElementById('tipBill').value), 
+          p=parseFloat(document.getElementById('tipPct').value);
+    if(isNaN(b)||isNaN(p)) return setText('tipRes','Enter bill & tip%'); 
+    const tot=b+(b*p/100); 
+    setText('tipRes','Total: '+tot.toFixed(2)); 
+  }
+  function computeDisc(){ 
+    const p=parseFloat(document.getElementById('discPrice').value), 
+          d=parseFloat(document.getElementById('discPct').value);
+    if(isNaN(p)||isNaN(d)) return setText('discRes','Enter price & discount'); 
+    const f=p-(p*d/100); 
+    setText('discRes','Final: '+f.toFixed(2)); 
+  }
 </script>
 </body>
 </html>
