@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>About - Calculator By PirateRuler.com</title>
+<meta name="description" content="About PirateRuler Calculator Suite - Privacy-first, fast calculators that run entirely in your browser." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect rx='14' width='64' height='64' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' font-family='Inter,Arial,sans-serif' font-weight='800' font-size='26' text-anchor='middle' alignment-baseline='central' fill='white'%3EPR%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#ffffff; --card:#ffffff; --muted:#555555; --text:#000000;
+    --border:#000000; --accent:#000000;
+  }
+  html.dark {
+    --bg:#121212; --card:#1e1e1e; --muted:#aaaaaa; --text:#ffffff;
+    --border:#ffffff; --accent:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; color:var(--text); margin:0; -webkit-font-smoothing:antialiased; transition:background 0.3s, color 0.3s;}
+  a{color:inherit;text-decoration:none}
+  .container{max-width:1280px;margin:14px auto;padding:18px;}
+  header.header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; border-radius:0; background:var(--card); border-bottom:2px solid var(--border);}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .logo{width:60px;height:60px;border-radius:0;display:flex;align-items:center;justify-content:center;font-weight:800; background:var(--accent); color:var(--bg); font-size:20px;}
+  .brand-title .title-strong{font-size:22px;font-weight:900;margin:0}
+  .brand-title .by{font-size:12px;color:var(--muted); margin-top:3px}
+  .header-actions{display:flex; gap:10px; align-items:center;}
+  .btn{padding:9px 12px;border-radius:0;border:2px solid var(--border); cursor:pointer; font-weight:700; background:var(--bg); color:var(--text); transition:all 0.2s;}
+  .btn:hover{background:var(--accent); color:var(--bg);}
+  .hamb{width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer; border:2px solid var(--border); font-weight:bold;}
+  .page-content{max-width:800px; margin:0 auto; padding:30px 20px;}
+  .page-content h1{font-weight:900; font-size:32px; margin-bottom:16px;}
+  .page-content h2{font-weight:900; border-bottom:2px solid var(--border); padding-bottom:8px; margin-top:24px;}
+  .page-content h3{font-weight:800; margin-top:20px;}
+  .page-content p{line-height:1.7; margin:12px 0;}
+  .page-content ul{margin:12px 0; padding-left:20px;}
+  .page-content li{margin:8px 0; color:var(--muted);}
+  .page-content a{text-decoration:underline; font-weight:700;}
+  footer{margin-top:16px; padding:16px; border:2px solid var(--border); background:var(--card); text-align:center;}
+  .visit{padding:12px 20px; display:inline-block; background:var(--accent); color:var(--bg); font-weight:800; text-decoration:none; border:2px solid var(--border);}
+  .muted{color:var(--muted)}
+  /* Sidebar */
+  .sidebar{position:fixed; top:0; right:0; height:100vh; width:360px; max-width:94vw; transform:translateX(120%); transition:transform .28s; z-index:90; background:var(--card); border-left:2px solid var(--border); padding:20px; overflow:auto;}
+  .sidebar.open{transform:translateX(0);}
+  .close{display:flex; justify-content:flex-end;}
+  .nav-list{margin-top:10px; display:flex; flex-direction:column; gap:12px}
+  .nav-list a{display:block; padding:14px; border:2px solid var(--border); background:var(--bg); color:var(--text); font-weight:600; transition:all 0.2s;}
+  .nav-list a:hover{background:var(--accent); color:var(--bg);}
+  .backup{margin-top:18px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:12px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <div class="brand">
+      <a href="index.html" style="display:flex; align-items:center; gap:12px">
+        <div class="logo">PR</div>
+        <div class="brand-title">
+          <div class="title-strong">Calculator</div>
+          <div class="by">by PirateRuler.com</div>
+        </div>
+      </a>
+    </div>
+    <div class="header-actions">
+      <button class="btn ghost" id="themeBtn">🌙 Dark</button>
+      <div class="hamb" id="hambBtn">☰</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <h1>About PirateRuler Calculator Suite</h1>
+    <p>Welcome to the most comprehensive, privacy-first calculator suite on the web. Built with modern web technologies and designed for speed, our calculators run entirely in your browser with zero data collection.</p>
+    
+    <h2>Our Mission</h2>
+    <p>We believe powerful tools should be accessible, private, and fast. Every calculator in this suite is optimized for instant results across all devices, from mobile phones to desktop computers.</p>
+    
+    <h2>Features</h2>
+    <ul>
+      <li>8 specialized calculators in one seamless interface</li>
+      <li>Keyboard support for power users</li>
+      <li>100% client-side processing — your data never leaves your device</li>
+      <li>Mobile-first responsive design</li>
+      <li>No ads, no tracking, no analytics</li>
+      <li>Open source and developer-friendly</li>
+    </ul>
+    
+    <h2>Technology</h2>
+    <p>Built with vanilla HTML, CSS, and JavaScript. No frameworks, no bloat. The entire suite weighs less than 50KB and loads in under 100ms on most connections.</p>
+    
+    <h2>Backup & Reliability</h2>
+    <p>If this site ever becomes unavailable, visit <a href="https://pirateruler.com" target="_blank">PirateRuler.com</a> for mirror links and downloadable versions you can run locally.</p>
+    
+    <h2>Feedback</h2>
+    <p>Have suggestions for new calculators or features? <a href="contact.html">Contact us</a> — we read every message.</p>
+  </main>
+
+  <footer>
+    <a class="visit" href="https://pirateruler.com" target="_blank">Visit PirateRuler.com</a>
+    <div style="height:12px"></div>
+    <small class="muted">© <span id="year"></span> Calculator By PirateRuler.com</small>
+  </footer>
+</div>
+
+<aside id="sidebar" class="sidebar">
+  <div class="close"><button class="ghost" id="closeSidebar">Close</button></div>
+  <h3>PirateRuler Links</h3>
+  <nav class="nav-list">
+    <a href="about.html">About — PirateRuler</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="contact.html">Contact</a>
+    <a href="terms.html">Terms & Service</a>
+    <a href="resources.html">Backup Resources</a>
+  </nav>
+  <div class="backup">
+    If this site is offline you can visit PirateRuler for backups & resources:<br><a href="https://pirateruler.com" target="_blank">pirateruler.com</a>
+  </div>
+</aside>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const themeBtn = document.getElementById('themeBtn');
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    themeBtn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  }
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark');
+    themeBtn.textContent = '☀️ Light';
+  }
+  themeBtn.addEventListener('click', toggleTheme);
+  const sidebar = document.getElementById('sidebar');
+  const hambBtn = document.getElementById('hambBtn');
+  const closeSidebar = document.getElementById('closeSidebar');
+  function openSidebar(){ sidebar.classList.add('open'); sidebar.setAttribute('aria-hidden','false'); }
+  function closeSB(){ sidebar.classList.remove('open'); sidebar.setAttribute('aria-hidden','true'); }
+  hambBtn.addEventListener('click', openSidebar);
+  closeSidebar.addEventListener('click', closeSB);
+  document.addEventListener('click', e => { if(sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hambBtn.contains(e.target)) closeSB(); });
+</script>
+</body>
+</html>
