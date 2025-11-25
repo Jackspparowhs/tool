@@ -3,7 +3,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Typing Test — PirateRuler.com</title>
     <meta name="description" content="Take the typing test and measure your words per minute (WPM) and accuracy.">
     <link rel="stylesheet" href="styles.css">
@@ -12,21 +12,23 @@
     <!-- Header -->
     <header class="header">
         <div class="container header-inner">
-            <div class="brand">
-                <div class="logo">PR</div>
-                <div>
-                    <h1 class="brand-title">Typing Test</h1>
-                    <p class="brand-subtitle">by PirateRuler.com</p>
+            <a href="index.html" class="brand-link">
+                <div class="brand">
+                    <div class="logo">PR</div>
+                    <div>
+                        <h1 class="brand-title">Typing Test</h1>
+                        <p class="brand-subtitle">by PirateRuler.com</p>
+                    </div>
                 </div>
-            </div>
+            </a>
             <div class="header-controls">
                 <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
                     </svg>
                 </button>
                 <button class="icon-btn" id="menuToggle" aria-label="Open menu">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                     </svg>
                 </button>
@@ -59,8 +61,11 @@
                             <option value="120">2 minutes</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" id="startBtn">Start</button>
-                    <button class="btn btn-ghost" id="restartBtn" style="display: none;">Restart</button>
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" id="startBtn">Start</button>
+                        <button class="btn btn-ghost" id="restartBtn" style="display: none;">Restart</button>
+                    </div>
                 </div>
 
                 <!-- Stats -->
@@ -75,7 +80,7 @@
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="chars">0</span>
-                        <span class="stat-label">Chars</span>
+                        <span class="stat-label">Correct</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="mistakes">0</span>
@@ -88,14 +93,14 @@
 
                 <!-- Typing Area -->
                 <div class="typing-area" id="typingArea" style="display: none;">
-                    <div class="passage-display" id="passageDisplay"></div>
+                    <div class="passage-display" id="passageDisplay" aria-live="polite"></div>
                     <div class="input-wrapper">
-                        <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false">
+                        <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
                     </div>
                 </div>
 
                 <!-- Keyboard Visualizer -->
-                <div class="keyboard" id="keyboard" style="display: none;">
+                <div class="keyboard" id="keyboard" style="display: none;" aria-hidden="true">
                     <div class="keyboard-row">
                         <div class="key" data-key="q">Q</div>
                         <div class="key" data-key="w">W</div>
@@ -139,7 +144,7 @@
     <!-- Results Modal -->
     <div class="modal-overlay" id="modalOverlay" style="display: none;"></div>
     <div class="results-modal" id="resultsModal" role="dialog" aria-labelledby="resultsTitle" style="display: none;">
-        <h3 id="resultsTitle">Test Complete!</h3>
+        <h3 id="resultsTitle">Test Complete! 🎉</h3>
         <div class="results-stats">
             <div class="results-stat">
                 <span class="results-label">WPM</span>
@@ -182,21 +187,23 @@
 
     <!-- Off-canvas Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
-    <aside class="menu" id="menu">
+    <aside class="menu" id="menu" role="dialog" aria-modal="true">
         <div class="menu-header">
             <h3>Menu</h3>
             <button class="icon-btn" id="menuClose" aria-label="Close menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
             </button>
         </div>
         <nav class="menu-nav">
+            <a href="index.html" class="menu-link">Home</a>
+            <a href="test.html" class="menu-link">Start Test</a>
             <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
             <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
             <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
             <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
-            <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem;">Visit PirateRuler.com</a>
+            <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Visit PirateRuler.com</a>
         </nav>
     </aside>
 
