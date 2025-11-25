@@ -1,4 +1,4 @@
-// Maps by PirateRuler.com - Main JavaScript
+// Maps by PirateRuler.com - Google Maps Style Edition
 
 class PirateMaps {
     constructor() {
@@ -9,6 +9,10 @@ class PirateMaps {
         this.markers = [];
         this.baseLayers = {};
         this.overlays = {};
+        this.travelMode = 'driving';
+        this.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        this.isDirectionsMode = false;
+        this.contextMenuPosition = null;
         
         this.init();
     }
@@ -19,31 +23,40 @@ class PirateMaps {
         this.initGeolocation();
         this.initSearch();
         this.initDirections();
+        this.initSidebar();
+        this.initContextMenu();
+        this.loadRecentSearches();
     }
 
     initMap() {
-        // Initialize the map
+        // Initialize the map with better options
         this.map = L.map('map', {
             center: [40.7128, -74.0060], // New York City
             zoom: 13,
             zoomControl: false,
-            attributionControl: true
+            attributionControl: false,
+            zoomAnimation: true,
+            fadeAnimation: true,
+            markerZoomAnimation: true
         });
 
-        // Base layers
+        // Base layers with better attribution
         this.baseLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19,
+            className: 'street-layer'
         });
 
         this.baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: '© Esri, © OpenStreetMap contributors',
-            maxZoom: 19
+            maxZoom: 19,
+            className: 'satellite-layer'
         });
 
         this.baseLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenTopoMap, © OpenStreetMap contributors',
-            maxZoom: 17
+            maxZoom: 17,
+            className: 'terrain-layer'
         });
 
         // Add default layer
@@ -52,35 +65,63 @@ class PirateMaps {
         // Initialize overlays
         this.overlays.traffic = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
-            opacity: 0.5
+            opacity: 0.6
         });
 
-        this.overlays.transit = L.tileLayer('https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
+        this.overlays.transit = L.tileLayer('https://tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
             attribution: '© Thunderforest, © OpenStreetMap contributors',
             opacity: 0.6
         });
 
-        // Add layer controls
-        this.setupLayerControls();
+        this.overlays.bike = L.tileLayer('https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=6170aad10dfd42a38d4d8c709a536f38', {
+            attribution: '© Thunderforest, © OpenStreetMap contributors',
+            opacity: 0.6
+        });
+
+        // Add scale control
+        L.control.scale({
+            position: 'bottomleft',
+            metric: true,
+            imperial: false
+        }).addTo(this.map);
 
         // Update coordinates display
         this.map.on('mousemove', (e) => {
             document.getElementById('coordinates').textContent = 
-                `Lat: ${e.latlng.lat.toFixed(6)}, Lng: ${e.latlng.lng.toFixed(6)}`;
+                `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`;
         });
 
-        // Add click handler for adding markers
+        // Map click handler
         this.map.on('click', (e) => {
-            this.addMarker(e.latlng, 'Custom Location');
+            if (this.isDirectionsMode) {
+                this.handleDirectionsClick(e.latlng);
+            } else {
+                this.addMarker(e.latlng, 'Selected Location');
+            }
         });
+
+        // Context menu
+        this.map.on('contextmenu', (e) => {
+            e.originalEvent.preventDefault();
+            this.showContextMenu(e.latlng, e.originalEvent);
+        });
+
+        this.setupLayerControls();
     }
 
     setupLayerControls() {
-        // Base map radio buttons
-        document.querySelectorAll('input[name="basemap"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                Object.values(this.baseLayers).forEach(layer => this.map.removeLayer(layer));
-                this.baseLayers[e.target.value].addTo(this.map);
+        // Map type options
+        document.querySelectorAll('.map-type-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const type = e.currentTarget.dataset.type;
+                this.switchMapType(type);
+                
+                // Update active state
+                document.querySelectorAll('.map-type-option').forEach(opt => opt.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Update map type button
+                document.getElementById('mapTypeText').textContent = type.charAt(0).toUpperCase() + type.slice(1);
             });
         });
 
@@ -100,6 +141,19 @@ class PirateMaps {
                 this.map.removeLayer(this.overlays.transit);
             }
         });
+
+        document.getElementById('bikeLayer').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                this.map.addLayer(this.overlays.bike);
+            } else {
+                this.map.removeLayer(this.overlays.bike);
+            }
+        });
+
+        // Map type button
+        document.getElementById('mapTypeBtn').addEventListener('click', () => {
+            this.toggleMapTypes();
+        });
     }
 
     initEventListeners() {
@@ -110,6 +164,11 @@ class PirateMaps {
 
         document.getElementById('fullscreenBtn').addEventListener('click', () => {
             this.toggleFullscreen();
+        });
+
+        document.getElementById('clearSearch').addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchSuggestions').style.display = 'none';
         });
 
         // Map controls
@@ -125,9 +184,13 @@ class PirateMaps {
             this.rotateMap();
         });
 
+        document.getElementById('tiltMap').addEventListener('click', () => {
+            this.toggle3D();
+        });
+
         // Sidebar toggle
         document.getElementById('sidebarToggle').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('collapsed');
+            this.toggleSidebar();
         });
 
         // Search
@@ -145,6 +208,139 @@ class PirateMaps {
         document.getElementById('getDirections').addEventListener('click', () => {
             this.getDirections();
         });
+
+        // Travel modes
+        document.querySelectorAll('.travel-mode').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.travel-mode').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                this.travelMode = e.currentTarget.dataset.mode;
+            });
+        });
+
+        // Clear directions inputs
+        document.getElementById('clearStart').addEventListener('click', () => {
+            document.getElementById('startPoint').value = '';
+        });
+
+        document.getElementById('clearEnd').addEventListener('click', () => {
+            document.getElementById('endPoint').value = '';
+        });
+
+        // Place categories
+        document.querySelectorAll('.place-category').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const category = e.currentTarget.dataset.category;
+                this.searchNearbyPlaces(category);
+            });
+        });
+
+        // Context menu
+        document.addEventListener('click', () => {
+            document.getElementById('contextMenu').style.display = 'none';
+        });
+
+        document.getElementById('directionsFrom').addEventListener('click', () => {
+            this.setDirectionsPoint('start');
+        });
+
+        document.getElementById('directionsTo').addEventListener('click', () => {
+            this.setDirectionsPoint('end');
+        });
+
+        document.getElementById('addMarker').addEventListener('click', () => {
+            this.addMarker(this.contextMenuPosition, 'Custom Marker');
+        });
+
+        document.getElementById('whatsHere').addEventListener('click', () => {
+            this.reverseGeocode(this.contextMenuPosition);
+        });
+    }
+
+    initSidebar() {
+        // Section toggles
+        const toggles = [
+            { toggle: 'directionsToggle', panel: 'directionsPanel' },
+            { toggle: 'layersToggle', panel: 'layersPanel' },
+            { toggle: 'placesToggle', panel: 'placesPanel' },
+            { toggle: 'recentToggle', panel: 'recentPanel' }
+        ];
+
+        toggles.forEach(({ toggle, panel }) => {
+            document.getElementById(toggle).addEventListener('click', (e) => {
+                const panelEl = document.getElementById(panel);
+                const toggleEl = e.currentTarget;
+                
+                if (panelEl.style.display === 'none') {
+                    panelEl.style.display = 'block';
+                    toggleEl.classList.remove('rotated');
+                } else {
+                    panelEl.style.display = 'none';
+                    toggleEl.classList.add('rotated');
+                }
+            });
+        });
+    }
+
+    initContextMenu() {
+        // Context menu functionality is handled in event listeners
+    }
+
+    showContextMenu(latlng, event) {
+        this.contextMenuPosition = latlng;
+        const menu = document.getElementById('contextMenu');
+        
+        menu.style.left = event.pageX + 'px';
+        menu.style.top = event.pageY + 'px';
+        menu.style.display = 'block';
+    }
+
+    setDirectionsPoint(type) {
+        if (!this.contextMenuPosition) return;
+
+        const coords = `${this.contextMenuPosition.lat.toFixed(6)}, ${this.contextMenuPosition.lng.toFixed(6)}`;
+        
+        if (type === 'start') {
+            document.getElementById('startPoint').value = coords;
+        } else {
+            document.getElementById('endPoint').value = coords;
+        }
+        
+        this.addMarker(this.contextMenuPosition, type === 'start' ? 'Start Point' : 'End Point');
+    }
+
+    switchMapType(type) {
+        Object.values(this.baseLayers).forEach(layer => this.map.removeLayer(layer));
+        this.baseLayers[type].addTo(this.map);
+        
+        // Update map style
+        const mapContainer = document.getElementById('map');
+        mapContainer.className = mapContainer.className.replace(/map-type-\w+/g, '');
+        mapContainer.classList.add(`map-type-${type}`);
+    }
+
+    toggleMapTypes() {
+        // Simple toggle between street and satellite
+        const currentType = this.map.hasLayer(this.baseLayers.street) ? 'street' : 'satellite';
+        const newType = currentType === 'street' ? 'satellite' : 'street';
+        
+        this.switchMapType(newType);
+        
+        // Update active state
+        document.querySelectorAll('.map-type-option').forEach(opt => opt.classList.remove('active'));
+        document.querySelector(`[data-type="${newType}"]`).classList.add('active');
+        
+        document.getElementById('mapTypeText').textContent = newType.charAt(0).toUpperCase() + newType.slice(1);
+    }
+
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+        
+        // Adjust map size
+        setTimeout(() => {
+            this.map.invalidateSize();
+        }, 300);
     }
 
     initGeolocation() {
@@ -159,7 +355,7 @@ class PirateMaps {
                     this.addMarker(
                         [this.userLocation.lat, this.userLocation.lng], 
                         'Your Location',
-                        'fa-user'
+                        'location-marker'
                     );
                 },
                 (error) => {
@@ -177,8 +373,8 @@ class PirateMaps {
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    this.map.setView([lat, lng], 15);
-                    this.addMarker([lat, lng], 'Current Location', 'fa-user');
+                    this.map.setView([lat, lng], 16);
+                    this.addMarker([lat, lng], 'Current Location', 'location-marker');
                     this.showLoading(false);
                     this.showNotification('Location found!', 'success');
                 },
@@ -216,15 +412,17 @@ class PirateMaps {
 
     async getSearchSuggestions(query) {
         try {
-            // Using Nominatim API for geocoding (free, no API key required)
+            this.showLoading(true);
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
             );
             const data = await response.json();
             
             this.displaySuggestions(data);
+            this.showLoading(false);
         } catch (error) {
             console.log('Search error:', error);
+            this.showLoading(false);
         }
     }
 
@@ -240,10 +438,22 @@ class PirateMaps {
         suggestions.forEach(item => {
             const div = document.createElement('div');
             div.className = 'suggestion-item';
+            
+            const type = this.getLocationType(item);
+            const icon = this.getLocationIcon(type);
+            
             div.innerHTML = `
-                <strong>${item.display_name.split(',')[0]}</strong><br>
-                <small>${item.display_name}</small>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="${icon}" style="color: #4285f4; width: 16px;"></i>
+                    <div>
+                        <strong>${item.display_name.split(',')[0]}</strong>
+                        <div style="font-size: 12px; color: #5f6368; margin-top: 2px;">
+                            ${this.formatAddress(item.display_name)}
+                        </div>
+                    </div>
+                </div>
             `;
+            
             div.addEventListener('click', () => {
                 this.selectLocation(item);
                 container.style.display = 'none';
@@ -254,6 +464,35 @@ class PirateMaps {
         container.style.display = 'block';
     }
 
+    getLocationType(location) {
+        const type = location.type || '';
+        const importance = location.importance || 0;
+        
+        if (type.includes('city') || type.includes('town')) return 'city';
+        if (type.includes('restaurant') || type.includes('food')) return 'restaurant';
+        if (type.includes('shop') || type.includes('store')) return 'shopping';
+        if (type.includes('hospital') || type.includes('medical')) return 'hospital';
+        if (type.includes('school') || type.includes('education')) return 'school';
+        return 'place';
+    }
+
+    getLocationIcon(type) {
+        const icons = {
+            city: 'fas fa-city',
+            restaurant: 'fas fa-utensils',
+            shopping: 'fas fa-shopping-cart',
+            hospital: 'fas fa-hospital',
+            school: 'fas fa-school',
+            place: 'fas fa-map-marker-alt'
+        };
+        return icons[type] || icons.place;
+    }
+
+    formatAddress(address) {
+        const parts = address.split(',');
+        return parts.slice(1, 3).join(',').trim();
+    }
+
     selectLocation(location) {
         const lat = parseFloat(location.lat);
         const lng = parseFloat(location.lon);
@@ -261,27 +500,80 @@ class PirateMaps {
         this.map.setView([lat, lng], 16);
         this.addMarker([lat, lng], location.display_name.split(',')[0]);
         
+        // Add to recent searches
+        this.addToRecentSearches({
+            name: location.display_name.split(',')[0],
+            address: location.display_name,
+            lat: lat,
+            lng: lng
+        });
+        
         document.getElementById('searchInput').value = location.display_name.split(',')[0];
     }
 
-    searchLocation() {
-        const query = document.getElementById('searchInput').value;
-        if (query) {
-            this.getSearchSuggestions(query);
-        }
+    addToRecentSearches(search) {
+        // Remove if already exists
+        this.recentSearches = this.recentSearches.filter(item => 
+            item.name !== search.name && item.address !== search.address
+        );
+        
+        // Add to beginning
+        this.recentSearches.unshift(search);
+        
+        // Keep only last 10
+        this.recentSearches = this.recentSearches.slice(0, 10);
+        
+        // Save to localStorage
+        localStorage.setItem('recentSearches', JSON.stringify(this.recentSearches));
+        
+        this.updateRecentSearchesDisplay();
     }
 
-    addMarker(latlng, title, iconClass = 'fa-map-marker-alt') {
-        // Remove previous marker if exists
-        if (this.currentMarker) {
+    updateRecentSearchesDisplay() {
+        const container = document.getElementById('recentList');
+        container.innerHTML = '';
+        
+        if (this.recentSearches.length === 0) {
+            container.innerHTML = '<div style="padding: 16px; text-align: center; color: #9aa0a6;">No recent searches</div>';
+            return;
+        }
+        
+        this.recentSearches.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'recent-item';
+            div.innerHTML = `
+                <i class="fas fa-history"></i>
+                <div class="recent-item-content">
+                    <div class="recent-item-title">${item.name}</div>
+                    <div class="recent-item-subtitle">${this.formatAddress(item.address)}</div>
+                </div>
+            `;
+            
+            div.addEventListener('click', () => {
+                this.map.setView([item.lat, item.lng], 16);
+                this.addMarker([item.lat, item.lng], item.name);
+            });
+            
+            container.appendChild(div);
+        });
+    }
+
+    loadRecentSearches() {
+        this.updateRecentSearchesDisplay();
+    }
+
+    addMarker(latlng, title, markerClass = 'custom-marker') {
+        // Remove previous marker if exists and not in directions mode
+        if (this.currentMarker && !this.isDirectionsMode) {
             this.map.removeLayer(this.currentMarker);
         }
 
         const customIcon = L.divIcon({
-            html: `<div class="custom-marker"><i class="fas ${iconClass}"></i></div>`,
+            html: `<div class="${markerClass}"><i class="fas fa-map-marker-alt"></i></div>`,
             className: 'custom-div-icon',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
         });
 
         this.currentMarker = L.marker(latlng, { icon: customIcon })
@@ -293,14 +585,20 @@ class PirateMaps {
     }
 
     initDirections() {
-        // Directions functionality will be implemented here
+        // Directions functionality
         console.log('Directions initialized');
+    }
+
+    handleDirectionsClick(latlng) {
+        if (!this.contextMenuPosition) return;
+        
+        // Add waypoint marker
+        this.addMarker(latlng, 'Waypoint');
     }
 
     async getDirections() {
         const start = document.getElementById('startPoint').value;
         const end = document.getElementById('endPoint').value;
-        const mode = document.getElementById('travelMode').value;
 
         if (!start || !end) {
             this.showNotification('Please enter both start and end points', 'error');
@@ -317,7 +615,7 @@ class PirateMaps {
             ]);
 
             if (startCoords && endCoords) {
-                this.displayRoute(startCoords, endCoords, mode);
+                this.displayRoute(startCoords, endCoords, this.travelMode);
             } else {
                 this.showNotification('Unable to find one or both locations', 'error');
             }
@@ -356,21 +654,22 @@ class PirateMaps {
             this.map.removeLayer(this.directionsLayer);
         }
 
-        // Create route line
+        // Create route line (simplified for demo)
         const routeCoords = [
             [start.lat, start.lng],
             [end.lat, end.lng]
         ];
 
         this.directionsLayer = L.polyline(routeCoords, {
-            color: '#667eea',
-            weight: 4,
-            opacity: 0.8
+            color: '#4285f4',
+            weight: 5,
+            opacity: 0.8,
+            smoothFactor: 1
         }).addTo(this.map);
 
         // Add markers for start and end
-        this.addMarker([start.lat, start.lng], start.name, 'fa-play-circle');
-        this.addMarker([end.lat, end.lng], end.name, 'fa-stop-circle');
+        this.addMarker([start.lat, start.lng], start.name, 'location-marker');
+        this.addMarker([end.lat, end.lng], end.name, 'destination-marker');
 
         // Fit map to show both points
         const group = new L.featureGroup([
@@ -381,20 +680,76 @@ class PirateMaps {
 
         // Display route info
         const distance = this.calculateDistance(start, end);
+        const duration = this.estimateDuration(distance, mode);
+        
         document.getElementById('directionsResults').innerHTML = `
             <div class="route-info">
-                <p><strong>From:</strong> ${start.name}</p>
-                <p><strong>To:</strong> ${end.name}</p>
-                <p><strong>Distance:</strong> ${distance.toFixed(2)} km</p>
-                <p><strong>Mode:</strong> ${mode.charAt(0).toUpperCase() + mode.slice(1)}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <div style="font-size: 18px; font-weight: 500; color: #202124;">${this.formatDistance(distance)}</div>
+                        <div style="font-size: 14px; color: #5f6368;">${duration}</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="travel-mode-btn active" data-mode="${mode}">
+                            <i class="fas ${this.getTravelModeIcon(mode)}"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid #e8eaed; padding-top: 12px;">
+                    <div style="font-size: 14px; color: #5f6368; margin-bottom: 4px;">
+                        <strong>From:</strong> ${start.name}
+                    </div>
+                    <div style="font-size: 14px; color: #5f6368;">
+                        <strong>To:</strong> ${end.name}
+                    </div>
+                </div>
             </div>
         `;
 
         this.showNotification('Route calculated successfully!', 'success');
     }
 
+    getTravelModeIcon(mode) {
+        const icons = {
+            driving: 'fa-car',
+            walking: 'fa-walking',
+            cycling: 'fa-bicycle',
+            transit: 'fa-bus'
+        };
+        return icons[mode] || icons.driving;
+    }
+
+    formatDistance(km) {
+        if (km < 1) {
+            return `${Math.round(km * 1000)} m`;
+        } else if (km < 10) {
+            return `${km.toFixed(1)} km`;
+        } else {
+            return `${Math.round(km)} km`;
+        }
+    }
+
+    estimateDuration(distance, mode) {
+        const speeds = {
+            driving: 50,
+            walking: 5,
+            cycling: 15,
+            transit: 25
+        };
+        
+        const speed = speeds[mode] || 50;
+        const hours = distance / speed;
+        
+        if (hours < 1) {
+            return `${Math.round(hours * 60)} min`;
+        } else {
+            const h = Math.floor(hours);
+            const m = Math.round((hours - h) * 60);
+            return `${h}h ${m}min`;
+        }
+    }
+
     calculateDistance(start, end) {
-        // Simple distance calculation (Haversine formula)
         const R = 6371; // Earth's radius in km
         const dLat = this.toRad(end.lat - start.lat);
         const dLng = this.toRad(end.lng - start.lng);
@@ -409,6 +764,109 @@ class PirateMaps {
         return value * Math.PI / 180;
     }
 
+    async searchNearbyPlaces(category) {
+        if (!this.userLocation && !this.map.getCenter()) return;
+        
+        this.showLoading(true);
+        
+        const center = this.userLocation || this.map.getCenter();
+        const lat = center.lat || center[0];
+        const lng = center.lng || center[1];
+        
+        try {
+            // Using Nominatim to search for nearby places
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(category)}&limit=10&viewbox=${lng-0.1},${lat+0.1},${lng+0.1},${lat-0.1}&bounded=1`
+            );
+            const data = await response.json();
+            
+            this.displayNearbyPlaces(data, category);
+            this.showLoading(false);
+        } catch (error) {
+            console.log('Places search error:', error);
+            this.showLoading(false);
+            this.showNotification('Error searching for places', 'error');
+        }
+    }
+
+    displayNearbyPlaces(places, category) {
+        // Clear existing place markers
+        this.markers.forEach(marker => {
+            if (marker.options.category === 'place') {
+                this.map.removeLayer(marker);
+            }
+        });
+        
+        places.forEach(place => {
+            const lat = parseFloat(place.lat);
+            const lng = parseFloat(place.lon);
+            
+            const marker = this.addPlaceMarker(
+                [lat, lng], 
+                place.display_name.split(',')[0],
+                category
+            );
+            
+            marker.options.category = 'place';
+            this.markers.push(marker);
+        });
+        
+        if (places.length > 0) {
+            this.showNotification(`Found ${places.length} ${category.replace('_', ' ')}s nearby`, 'success');
+        }
+    }
+
+    addPlaceMarker(latlng, title, category) {
+        const icons = {
+            restaurant: 'fa-utensils',
+            gas_station: 'fa-gas-pump',
+            hospital: 'fa-hospital',
+            bank: 'fa-university',
+            shopping_mall: 'fa-shopping-cart',
+            park: 'fa-tree'
+        };
+        
+        const icon = icons[category] || 'fa-map-marker-alt';
+        
+        const customIcon = L.divIcon({
+            html: `<div class="place-marker"><i class="fas ${icon}"></i></div>`,
+            className: 'custom-div-icon',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        const marker = L.marker(latlng, { icon: customIcon })
+            .addTo(this.map)
+            .bindPopup(title);
+
+        return marker;
+    }
+
+    async reverseGeocode(latlng) {
+        this.showLoading(true);
+        
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`
+            );
+            const data = await response.json();
+            
+            this.showLoading(false);
+            
+            if (data && data.display_name) {
+                const title = data.display_name.split(',')[0];
+                const address = this.formatAddress(data.display_name);
+                
+                this.addMarker(latlng, title);
+                this.showNotification(`Location: ${title}\n${address}`, 'info');
+            }
+        } catch (error) {
+            this.showLoading(false);
+            this.showNotification('Unable to get location details', 'error');
+        }
+    }
+
     toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
@@ -421,16 +879,29 @@ class PirateMaps {
 
     rotateMap() {
         // Simple rotation effect
-        const currentRotation = this.map.getBearing() || 0;
-        this.map.setBearing(currentRotation + 90);
+        const mapContainer = document.getElementById('map');
+        const currentRotation = mapContainer.style.transform || 'rotate(0deg)';
+        const currentDegree = parseInt(currentRotation.match(/\d+/) || 0);
+        const newDegree = (currentDegree + 90) % 360;
+        
+        mapContainer.style.transform = `rotate(${newDegree}deg)`;
+        mapContainer.style.transition = 'transform 0.3s ease';
+        
+        setTimeout(() => {
+            mapContainer.style.transform = 'rotate(0deg)';
+        }, 300);
+    }
+
+    toggle3D() {
+        this.showNotification('3D view coming soon!', 'info');
     }
 
     showLoading(show) {
-        const spinner = document.getElementById('loadingSpinner');
+        const overlay = document.getElementById('loadingOverlay');
         if (show) {
-            spinner.classList.add('active');
+            overlay.classList.add('active');
         } else {
-            spinner.classList.remove('active');
+            overlay.classList.remove('active');
         }
     }
 
@@ -441,17 +912,28 @@ class PirateMaps {
         notification.textContent = message;
         
         // Style the notification
+        const colors = {
+            success: '#34a853',
+            error: '#ea4335',
+            info: '#4285f4',
+            warning: '#fbbc04'
+        };
+        
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
-            padding: 1rem 1.5rem;
-            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+            padding: 16px 20px;
+            background: ${colors[type]};
             color: white;
-            border-radius: 6px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 10000;
             animation: slideIn 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 300px;
+            line-height: 1.4;
         `;
         
         document.body.appendChild(notification);
@@ -461,9 +943,16 @@ class PirateMaps {
             notification.remove();
         }, 3000);
     }
+
+    searchLocation() {
+        const query = document.getElementById('searchInput').value;
+        if (query) {
+            this.getSearchSuggestions(query);
+        }
+    }
 }
 
-// Custom marker styles
+// Custom styles
 const style = document.createElement('style');
 style.textContent = `
     .custom-div-icon {
@@ -472,20 +961,35 @@ style.textContent = `
     }
     
     .custom-marker {
-        background: #667eea;
+        background: #4285f4;
         color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         border: 2px solid white;
     }
     
     .custom-marker i {
-        font-size: 14px;
+        transform: rotate(45deg);
+        font-size: 16px;
+    }
+    
+    .location-marker {
+        background: #ea4335;
+    }
+    
+    .destination-marker {
+        background: #34a853;
+    }
+    
+    .place-marker {
+        background: #fbbc04;
+        border-radius: 50%;
     }
     
     @keyframes slideIn {
@@ -500,15 +1004,31 @@ style.textContent = `
     }
     
     .route-info {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 6px;
-        font-size: 0.9rem;
+        background: white;
+        border: 1px solid #e8eaed;
+        border-radius: 8px;
+        padding: 16px;
     }
     
-    .route-info p {
-        margin: 0.5rem 0;
+    .travel-mode-btn {
+        background: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 8px;
+        cursor: pointer;
+        color: #5f6368;
+        transition: all 0.2s;
     }
+    
+    .travel-mode-btn.active {
+        background: #4285f4;
+        color: white;
+        border-color: #4285f4;
+    }
+    
+    .map-type-street { background: #f8f9fa; }
+    .map-type-satellite { background: #1f1f1f; }
+    .map-type-terrain { background: #e8f5e8; }
 `;
 document.head.appendChild(style);
 
