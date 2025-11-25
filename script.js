@@ -1,4 +1,4 @@
-// Maps by PirateRuler.com - Google Maps Style Edition
+// Maps by PirateRuler.com - Fixed Mobile & Functionality Edition
 
 class PirateMaps {
     constructor() {
@@ -13,6 +13,8 @@ class PirateMaps {
         this.recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
         this.isDirectionsMode = false;
         this.contextMenuPosition = null;
+        this.startPoint = null;
+        this.endPoint = null;
         
         this.init();
     }
@@ -29,7 +31,7 @@ class PirateMaps {
     }
 
     initMap() {
-        // Initialize the map with better options
+        // Initialize the map with better mobile support
         this.map = L.map('map', {
             center: [40.7128, -74.0060], // New York City
             zoom: 13,
@@ -37,26 +39,26 @@ class PirateMaps {
             attributionControl: false,
             zoomAnimation: true,
             fadeAnimation: true,
-            markerZoomAnimation: true
+            markerZoomAnimation: true,
+            tap: true, // Enable mobile tap
+            touchZoom: true,
+            dragging: true
         });
 
-        // Base layers with better attribution
+        // Base layers
         this.baseLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19,
-            className: 'street-layer'
+            maxZoom: 19
         });
 
         this.baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: '© Esri, © OpenStreetMap contributors',
-            maxZoom: 19,
-            className: 'satellite-layer'
+            maxZoom: 19
         });
 
         this.baseLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenTopoMap, © OpenStreetMap contributors',
-            maxZoom: 17,
-            className: 'terrain-layer'
+            maxZoom: 17
         });
 
         // Add default layer
@@ -78,13 +80,8 @@ class PirateMaps {
             opacity: 0.6
         });
 
-        // Add scale control
-        L.control.scale({
-            position: 'bottomleft',
-            metric: true,
-            imperial: false
-        }).addTo(this.map);
-
+        this.setupLayerControls();
+        
         // Update coordinates display
         this.map.on('mousemove', (e) => {
             document.getElementById('coordinates').textContent = 
@@ -105,8 +102,6 @@ class PirateMaps {
             e.originalEvent.preventDefault();
             this.showContextMenu(e.latlng, e.originalEvent);
         });
-
-        this.setupLayerControls();
     }
 
     setupLayerControls() {
@@ -162,6 +157,10 @@ class PirateMaps {
             this.getCurrentLocation();
         });
 
+        document.getElementById('currentLocationBtn2').addEventListener('click', () => {
+            this.getCurrentLocation();
+        });
+
         document.getElementById('fullscreenBtn').addEventListener('click', () => {
             this.toggleFullscreen();
         });
@@ -180,16 +179,12 @@ class PirateMaps {
             this.map.zoomOut();
         });
 
-        document.getElementById('rotateMap').addEventListener('click', () => {
-            this.rotateMap();
-        });
-
-        document.getElementById('tiltMap').addEventListener('click', () => {
-            this.toggle3D();
-        });
-
         // Sidebar toggle
         document.getElementById('sidebarToggle').addEventListener('click', () => {
+            this.toggleSidebar();
+        });
+
+        document.getElementById('closeSidebar').addEventListener('click', () => {
             this.toggleSidebar();
         });
 
@@ -204,12 +199,12 @@ class PirateMaps {
             }
         });
 
-        // Directions
+        // Directions - FIXED
         document.getElementById('getDirections').addEventListener('click', () => {
             this.getDirections();
         });
 
-        // Travel modes
+        // Travel modes - FIXED
         document.querySelectorAll('.travel-mode').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.travel-mode').forEach(b => b.classList.remove('active'));
@@ -221,10 +216,12 @@ class PirateMaps {
         // Clear directions inputs
         document.getElementById('clearStart').addEventListener('click', () => {
             document.getElementById('startPoint').value = '';
+            this.startPoint = null;
         });
 
         document.getElementById('clearEnd').addEventListener('click', () => {
             document.getElementById('endPoint').value = '';
+            this.endPoint = null;
         });
 
         // Place categories
@@ -254,6 +251,11 @@ class PirateMaps {
 
         document.getElementById('whatsHere').addEventListener('click', () => {
             this.reverseGeocode(this.contextMenuPosition);
+        });
+
+        // Mobile overlay
+        document.getElementById('mobileOverlay').addEventListener('click', () => {
+            this.toggleSidebar();
         });
     }
 
@@ -302,8 +304,10 @@ class PirateMaps {
         
         if (type === 'start') {
             document.getElementById('startPoint').value = coords;
+            this.startPoint = this.contextMenuPosition;
         } else {
             document.getElementById('endPoint').value = coords;
+            this.endPoint = this.contextMenuPosition;
         }
         
         this.addMarker(this.contextMenuPosition, type === 'start' ? 'Start Point' : 'End Point');
@@ -335,7 +339,15 @@ class PirateMaps {
 
     toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        
         sidebar.classList.toggle('collapsed');
+        
+        if (!sidebar.classList.contains('collapsed')) {
+            overlay.classList.add('active');
+        } else {
+            overlay.classList.remove('active');
+        }
         
         // Adjust map size
         setTimeout(() => {
@@ -377,6 +389,9 @@ class PirateMaps {
                     this.addMarker([lat, lng], 'Current Location', 'location-marker');
                     this.showLoading(false);
                     this.showNotification('Location found!', 'success');
+                    
+                    // Update user location
+                    this.userLocation = { lat, lng };
                 },
                 (error) => {
                     this.showLoading(false);
@@ -571,9 +586,9 @@ class PirateMaps {
         const customIcon = L.divIcon({
             html: `<div class="${markerClass}"><i class="fas fa-map-marker-alt"></i></div>`,
             className: 'custom-div-icon',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
+            iconSize: [28, 28],
+            iconAnchor: [14, 28],
+            popupAnchor: [0, -28]
         });
 
         this.currentMarker = L.marker(latlng, { icon: customIcon })
@@ -585,7 +600,7 @@ class PirateMaps {
     }
 
     initDirections() {
-        // Directions functionality
+        // Directions functionality - FIXED
         console.log('Directions initialized');
     }
 
@@ -596,23 +611,33 @@ class PirateMaps {
         this.addMarker(latlng, 'Waypoint');
     }
 
+    // FIXED DIRECTIONS FUNCTION
     async getDirections() {
-        const start = document.getElementById('startPoint').value;
-        const end = document.getElementById('endPoint').value;
+        const startInput = document.getElementById('startPoint').value.trim();
+        const endInput = document.getElementById('endPoint').value.trim();
 
-        if (!start || !end) {
-            this.showNotification('Please enter both start and end points', 'error');
+        if (!startInput || !endInput) {
+            this.showNotification('Please enter both start and end locations', 'error');
             return;
         }
 
         this.showLoading(true);
 
         try {
-            // Geocode start and end points
-            const [startCoords, endCoords] = await Promise.all([
-                this.geocodeLocation(start),
-                this.geocodeLocation(end)
-            ]);
+            let startCoords, endCoords;
+
+            // Check if inputs are coordinates
+            if (this.isCoordinate(startInput)) {
+                startCoords = this.parseCoordinate(startInput);
+            } else {
+                startCoords = await this.geocodeLocation(startInput);
+            }
+
+            if (this.isCoordinate(endInput)) {
+                endCoords = this.parseCoordinate(endInput);
+            } else {
+                endCoords = await this.geocodeLocation(endInput);
+            }
 
             if (startCoords && endCoords) {
                 this.displayRoute(startCoords, endCoords, this.travelMode);
@@ -625,6 +650,21 @@ class PirateMaps {
         } finally {
             this.showLoading(false);
         }
+    }
+
+    isCoordinate(input) {
+        // Check if input looks like coordinates
+        const coordPattern = /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/;
+        return coordPattern.test(input.trim());
+    }
+
+    parseCoordinate(coordString) {
+        const parts = coordString.split(',');
+        return {
+            lat: parseFloat(parts[0].trim()),
+            lng: parseFloat(parts[1].trim()),
+            name: coordString.trim()
+        };
     }
 
     async geocodeLocation(query) {
@@ -648,18 +688,15 @@ class PirateMaps {
         }
     }
 
-    displayRoute(start, end, mode) {
+    displayRoute(startCoords, endCoords, mode) {
         // Remove existing route
         if (this.directionsLayer) {
             this.map.removeLayer(this.directionsLayer);
         }
 
-        // Create route line (simplified for demo)
-        const routeCoords = [
-            [start.lat, start.lng],
-            [end.lat, end.lng]
-        ];
-
+        // Create route line with waypoints (simplified routing)
+        const routeCoords = this.generateRoute(startCoords, endCoords);
+        
         this.directionsLayer = L.polyline(routeCoords, {
             color: '#4285f4',
             weight: 5,
@@ -668,45 +705,68 @@ class PirateMaps {
         }).addTo(this.map);
 
         // Add markers for start and end
-        this.addMarker([start.lat, start.lng], start.name, 'location-marker');
-        this.addMarker([end.lat, end.lng], end.name, 'destination-marker');
+        this.addMarker([startCoords.lat, startCoords.lng], startCoords.name, 'location-marker');
+        this.addMarker([endCoords.lat, endCoords.lng], endCoords.name, 'destination-marker');
 
         // Fit map to show both points
         const group = new L.featureGroup([
-            L.marker([start.lat, start.lng]),
-            L.marker([end.lat, end.lng])
+            L.marker([startCoords.lat, startCoords.lng]),
+            L.marker([endCoords.lat, endCoords.lng])
         ]);
         this.map.fitBounds(group.getBounds().pad(0.1));
 
         // Display route info
-        const distance = this.calculateDistance(start, end);
+        const distance = this.calculateDistance(startCoords, endCoords);
         const duration = this.estimateDuration(distance, mode);
         
         document.getElementById('directionsResults').innerHTML = `
             <div class="route-info">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <div>
-                        <div style="font-size: 18px; font-weight: 500; color: #202124;">${this.formatDistance(distance)}</div>
-                        <div style="font-size: 14px; color: #5f6368;">${duration}</div>
+                        <div style="font-size: 16px; font-weight: 500; color: #202124;">${this.formatDistance(distance)}</div>
+                        <div style="font-size: 12px; color: #5f6368;">${duration}</div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="travel-mode-btn active" data-mode="${mode}">
+                    <div style="display: flex; gap: 6px;">
+                        <button class="travel-mode-btn active" data-mode="${mode}" style="background: #4285f4; color: white; border: none; border-radius: 4px; padding: 6px;">
                             <i class="fas ${this.getTravelModeIcon(mode)}"></i>
                         </button>
                     </div>
                 </div>
                 <div style="border-top: 1px solid #e8eaed; padding-top: 12px;">
-                    <div style="font-size: 14px; color: #5f6368; margin-bottom: 4px;">
-                        <strong>From:</strong> ${start.name}
+                    <div style="font-size: 12px; color: #5f6368; margin-bottom: 4px;">
+                        <strong>From:</strong> ${startCoords.name}
                     </div>
-                    <div style="font-size: 14px; color: #5f6368;">
-                        <strong>To:</strong> ${end.name}
+                    <div style="font-size: 12px; color: #5f6368;">
+                        <strong>To:</strong> ${endCoords.name}
                     </div>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e8eaed;">
+                    <button onclick="pirateMaps.clearRoute()" style="background: #ea4335; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer;">
+                        <i class="fas fa-times"></i> Clear Route
+                    </button>
                 </div>
             </div>
         `;
 
         this.showNotification('Route calculated successfully!', 'success');
+    }
+
+    generateRoute(start, end) {
+        // Simple route generation with waypoints
+        const waypoints = [];
+        const steps = 10; // Number of steps between start and end
+        
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            const lat = start.lat + (end.lat - start.lat) * t;
+            const lng = start.lng + (end.lng - start.lng) * t;
+            
+            // Add some realistic curves (simplified)
+            const curve = Math.sin(t * Math.PI) * 0.01;
+            waypoints.push([lat + curve, lng + curve]);
+        }
+        
+        return waypoints;
     }
 
     getTravelModeIcon(mode) {
@@ -764,6 +824,23 @@ class PirateMaps {
         return value * Math.PI / 180;
     }
 
+    clearRoute() {
+        if (this.directionsLayer) {
+            this.map.removeLayer(this.directionsLayer);
+            this.directionsLayer = null;
+        }
+        
+        // Clear markers
+        this.markers.forEach(marker => {
+            if (marker.options.type === 'route') {
+                this.map.removeLayer(marker);
+            }
+        });
+        
+        document.getElementById('directionsResults').innerHTML = '';
+        this.showNotification('Route cleared', 'info');
+    }
+
     async searchNearbyPlaces(category) {
         if (!this.userLocation && !this.map.getCenter()) return;
         
@@ -813,6 +890,8 @@ class PirateMaps {
         
         if (places.length > 0) {
             this.showNotification(`Found ${places.length} ${category.replace('_', ' ')}s nearby`, 'success');
+        } else {
+            this.showNotification(`No ${category.replace('_', ' ')}s found nearby`, 'info');
         }
     }
 
@@ -831,9 +910,8 @@ class PirateMaps {
         const customIcon = L.divIcon({
             html: `<div class="place-marker"><i class="fas ${icon}"></i></div>`,
             className: 'custom-div-icon',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
         });
 
         const marker = L.marker(latlng, { icon: customIcon })
@@ -877,25 +955,6 @@ class PirateMaps {
         }
     }
 
-    rotateMap() {
-        // Simple rotation effect
-        const mapContainer = document.getElementById('map');
-        const currentRotation = mapContainer.style.transform || 'rotate(0deg)';
-        const currentDegree = parseInt(currentRotation.match(/\d+/) || 0);
-        const newDegree = (currentDegree + 90) % 360;
-        
-        mapContainer.style.transform = `rotate(${newDegree}deg)`;
-        mapContainer.style.transition = 'transform 0.3s ease';
-        
-        setTimeout(() => {
-            mapContainer.style.transform = 'rotate(0deg)';
-        }, 300);
-    }
-
-    toggle3D() {
-        this.showNotification('3D view coming soon!', 'info');
-    }
-
     showLoading(show) {
         const overlay = document.getElementById('loadingOverlay');
         if (show) {
@@ -921,18 +980,18 @@ class PirateMaps {
         
         notification.style.cssText = `
             position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 16px 20px;
+            top: 70px;
+            right: 16px;
+            padding: 12px 16px;
             background: ${colors[type]};
             color: white;
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 10000;
             animation: slideIn 0.3s ease;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            max-width: 300px;
+            max-width: 280px;
             line-height: 1.4;
         `;
         
@@ -952,7 +1011,8 @@ class PirateMaps {
     }
 }
 
-// Custom styles
+// Make pirateMaps globally accessible for the clear route button
+let pirateMaps;
 const style = document.createElement('style');
 style.textContent = `
     .custom-div-icon {
@@ -963,20 +1023,20 @@ style.textContent = `
     .custom-marker {
         background: #4285f4;
         color: white;
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 50% 50% 50% 0;
         transform: rotate(-45deg);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         border: 2px solid white;
     }
     
     .custom-marker i {
         transform: rotate(45deg);
-        font-size: 16px;
+        font-size: 14px;
     }
     
     .location-marker {
@@ -1007,14 +1067,15 @@ style.textContent = `
         background: white;
         border: 1px solid #e8eaed;
         border-radius: 8px;
-        padding: 16px;
+        padding: 12px;
+        font-size: 12px;
     }
     
     .travel-mode-btn {
         background: #f8f9fa;
         border: 1px solid #dadce0;
         border-radius: 4px;
-        padding: 8px;
+        padding: 6px;
         cursor: pointer;
         color: #5f6368;
         transition: all 0.2s;
@@ -1025,14 +1086,10 @@ style.textContent = `
         color: white;
         border-color: #4285f4;
     }
-    
-    .map-type-street { background: #f8f9fa; }
-    .map-type-satellite { background: #1f1f1f; }
-    .map-type-terrain { background: #e8f5e8; }
 `;
 document.head.appendChild(style);
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new PirateMaps();
+    pirateMaps = new PirateMaps();
 });
