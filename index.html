@@ -2,26 +2,19 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Typing Test — PirateRuler.com</title>
-    <meta name="description" content="Measure your typing speed with our modern, private, and beautiful typing test. AI-powered insights, offline-first, no login required.">
+    <meta name="description" content="Measure your typing speed with our modern, private, and beautiful typing test.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Skip Link for Accessibility -->
-    <a href="#main" class="skip-link">Skip to main content</a>
-
     <!-- Header -->
-    <header class="header" id="header">
+    <header class="header">
         <div class="container header-inner">
-            <a href="index.html" class="brand-link" aria-label="Typing Test Home">
+            <a href="index.html" class="brand-link">
                 <div class="brand">
-                    <div class="logo" aria-hidden="true">
-                        <span class="logo-text">PR</span>
-                    </div>
-                    <div class="brand-text">
+                    <div class="logo">PR</div>
+                    <div>
                         <h1 class="brand-title">Typing Test</h1>
                         <p class="brand-subtitle">by PirateRuler.com</p>
                     </div>
@@ -43,34 +36,18 @@
     </header>
 
     <!-- Main -->
-    <main id="main">
+    <main>
         <!-- Hero -->
         <section class="hero">
             <div class="container hero-content">
-                <div class="trust-badge animate-fade-in">
-                    <svg class="icon-small" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                    </svg>
-                    Trusted by 10,000+ users worldwide
-                </div>
-                <h2 class="hero-title animate-slide-up">
+                <h2 class="hero-title">
                     Measure Your <span class="gradient-text">Typing Speed</span> — 
                     <span class="gradient-text">Fast, Private & Beautiful</span>
                 </h2>
-                <p class="hero-subtitle animate-slide-up">A modern, browser-based typing tester with AI-powered insights. No login. No tracking. Just pure performance measurement.</p>
-                <div class="hero-actions animate-slide-up">
-                    <a href="test.html" class="btn btn-primary btn-large">
-                        <span>Start Typing Test — Free</span>
-                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                        </svg>
-                    </a>
-                    <button class="btn btn-ghost btn-large" onclick="document.getElementById('faq').scrollIntoView({behavior: 'smooth'})">
-                        <span>Read FAQ</span>
-                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
-                        </svg>
-                    </button>
+                <p class="hero-subtitle">A modern, browser-based typing tester. No login. No tracking. Just pure performance measurement.</p>
+                <div class="hero-actions">
+                    <a href="test.html" class="btn btn-primary">Start Typing Test — Free</a>
+                    <button class="btn btn-ghost" onclick="document.getElementById('faq').scrollIntoView({behavior: 'smooth'})">Read FAQ</button>
                 </div>
             </div>
         </section>
@@ -78,32 +55,22 @@
         <!-- Stats -->
         <section class="stats">
             <div class="container">
-                <div class="stats-grid animate-on-scroll">
+                <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number" data-count="10000">0</div>
+                        <div class="stat-number">10k+</div>
                         <div class="stat-label">Active Users</div>
-                        <div class="stat-progress"></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" data-count="500000">0</div>
+                        <div class="stat-number">500k+</div>
                         <div class="stat-label">Tests Completed</div>
-                        <div class="stat-progress"></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">99.9%</div>
                         <div class="stat-label">Uptime</div>
-                        <div class="stat-progress"></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">4.9</div>
+                        <div class="stat-number">4.9/5</div>
                         <div class="stat-label">User Rating</div>
-                        <div class="stat-rating">
-                            <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                            <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -112,61 +79,41 @@
         <!-- Features -->
         <section id="features" class="features">
             <div class="container">
-                <h3 class="section-title gradient-text animate-on-scroll">Premium Features</h3>
+                <h3 class="section-title gradient-text">Premium Features</h3>
                 <div class="features-stack">
-                    <div class="feature-card animate-on-scroll">
-                        <div class="feature-icon pulse">🤖</div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
                         <div class="feature-content">
                             <h4>AI-Enhanced Speed Tracking</h4>
-                            <p>Intelligent analysis of your typing patterns with adaptive difficulty that grows with your skills. Get personalized insights and recommendations.</p>
-                            <div class="feature-tags">
-                                <span class="tag">Machine Learning</span>
-                                <span class="tag">Adaptive</span>
-                            </div>
+                            <p>Intelligent analysis of your typing patterns with adaptive difficulty.</p>
                         </div>
                     </div>
-                    <div class="feature-card animate-on-scroll">
-                        <div class="feature-icon pulse">⚡</div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
                         <div class="feature-content">
                             <h4>Real-Time Accuracy Feedback</h4>
-                            <p>Instant visual feedback on every keystroke with color-coded accuracy indicators and live error heatmaps.</p>
-                            <div class="feature-tags">
-                                <span class="tag">Live Analytics</span>
-                                <span class="tag">Visual</span>
-                            </div>
+                            <p>Instant visual feedback on every keystroke with color-coded indicators.</p>
                         </div>
                     </div>
-                    <div class="feature-card animate-on-scroll">
-                        <div class="feature-icon pulse">🗺️</div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
                         <div class="feature-content">
                             <h4>Error Heatmaps</h4>
-                            <p>Visualize your most common mistakes and focus practice on weak keys and patterns. Detailed error analytics.</p>
-                            <div class="feature-tags">
-                                <span class="tag">Data Viz</span>
-                                <span class="tag">Insights</span>
-                            </div>
+                            <p>Visualize your most common mistakes and focus practice on weak keys.</p>
                         </div>
                     </div>
-                    <div class="feature-card animate-on-scroll">
-                        <div class="feature-icon pulse">📱</div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
                         <div class="feature-content">
                             <h4>Offline-First Design</h4>
-                            <p>Works seamlessly without internet connection. Your data stays private and local with PWA support.</p>
-                            <div class="feature-tags">
-                                <span class="tag">PWA</span>
-                                <span class="tag">Privacy</span>
-                            </div>
+                            <p>Works seamlessly without internet. Your data stays private and local.</p>
                         </div>
                     </div>
-                    <div class="feature-card animate-on-scroll">
-                        <div class="feature-icon pulse">📊</div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
                         <div class="feature-content">
                             <h4>Export & Analytics</h4>
-                            <p>Download detailed CSV/JSON reports of your progress and share achievements. Historical data tracking.</p>
-                            <div class="feature-tags">
-                                <span class="tag">Export</span>
-                                <span class="tag">History</span>
-                            </div>
+                            <p>Download detailed CSV/JSON reports of your progress.</p>
                         </div>
                     </div>
                 </div>
@@ -176,31 +123,27 @@
         <!-- Use Cases -->
         <section class="usecases">
             <div class="container">
-                <h3 class="section-title gradient-text animate-on-scroll">Perfect For Every User</h3>
+                <h3 class="section-title gradient-text">Perfect For Every User</h3>
                 <div class="usecases-grid">
-                    <div class="usecase-card animate-on-scroll">
+                    <div class="usecase-card">
                         <div class="usecase-icon">💼</div>
                         <h4>Hiring Managers</h4>
-                        <p>Screen candidates efficiently with standardized typing tests and detailed reports.</p>
-                        <div class="usecase-meta">Enterprise Ready</div>
+                        <p>Screen candidates efficiently with standardized tests.</p>
                     </div>
-                    <div class="usecase-card animate-on-scroll">
+                    <div class="usecase-card">
                         <div class="usecase-icon">🎮</div>
                         <h4>Content Creators</h4>
-                        <p>Show off your speed to viewers and improve streaming productivity.</p>
-                        <div class="usecase-meta">Live Streaming</div>
+                        <p>Show off your speed and improve streaming productivity.</p>
                     </div>
-                    <div class="usecase-card animate-on-scroll">
+                    <div class="usecase-card">
                         <div class="usecase-icon">🎓</div>
                         <h4>Students</h4>
-                        <p>Enhance academic performance with faster note-taking and assignment completion.</p>
-                        <div class="usecase-meta">Educational</div>
+                        <p>Enhance academic performance with faster note-taking.</p>
                     </div>
-                    <div class="usecase-card animate-on-scroll">
+                    <div class="usecase-card">
                         <div class="usecase-icon">💻</div>
                         <h4>Developers</h4>
-                        <p>Code faster with precision and reduce time spent on documentation.</p>
-                        <div class="usecase-meta">Technical</div>
+                        <p>Code faster with precision and reduce documentation time.</p>
                     </div>
                 </div>
             </div>
@@ -209,23 +152,15 @@
         <!-- Testimonials -->
         <section class="testimonials">
             <div class="container">
-                <h3 class="section-title gradient-text animate-on-scroll">What Users Say</h3>
+                <h3 class="section-title gradient-text">What Users Say</h3>
                 <div class="testimonials-grid">
-                    <div class="testimonial-card animate-on-scroll">
-                        <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                        <p class="testimonial-text">"The best typing test I've used. Clean interface and accurate results. My WPM improved by 30% in just two weeks!"</p>
-                        <div class="testimonial-author">
-                            <strong>Sarah Chen</strong>
-                            <span class="testimonial-role">Software Engineer</span>
-                        </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"The best typing test I've used. Clean interface and accurate results."</p>
+                        <div class="testimonial-author">— Sarah Chen, Software Engineer</div>
                     </div>
-                    <div class="testimonial-card animate-on-scroll">
-                        <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                        <p class="testimonial-text">"As a hiring manager, this tool saves me hours. The CSV export feature is perfect for candidate evaluation."</p>
-                        <div class="testimonial-author">
-                            <strong>Marcus Johnson</strong>
-                            <span class="testimonial-role">HR Director</span>
-                        </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Saves me hours. The CSV export is perfect for candidate evaluation."</p>
+                        <div class="testimonial-author">— Marcus Johnson, HR Director</div>
                     </div>
                 </div>
             </div>
@@ -234,28 +169,19 @@
         <!-- FAQ -->
         <section id="faq" class="faq">
             <div class="container">
-                <h3 class="section-title gradient-text animate-on-scroll">Frequently Asked Questions</h3>
+                <h3 class="section-title gradient-text">Frequently Asked Questions</h3>
                 <div class="faq-list">
-                    <details class="faq-item animate-on-scroll">
-                        <summary class="faq-question">
-                            <span>How accurate is the typing test?</span>
-                            <svg class="faq-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                        </summary>
-                        <p class="faq-answer">Our test uses industry-standard WPM calculation (5 characters = 1 word) with real-time accuracy tracking, providing results within 1% margin of error.</p>
+                    <details class="faq-item">
+                        <summary class="faq-question">How accurate is the typing test?</summary>
+                        <p class="faq-answer">Industry-standard WPM calculation with 1% margin of error.</p>
                     </details>
-                    <details class="faq-item animate-on-scroll">
-                        <summary class="faq-question">
-                            <span>Is my data stored or tracked?</span>
-                            <svg class="faq-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                        </summary>
-                        <p class="faq-answer">No. All tests run locally in your browser. We don't store any personal data or typing history on our servers. Everything stays private.</p>
+                    <details class="faq-item">
+                        <summary class="faq-question">Is my data stored?</summary>
+                        <p class="faq-answer">No. All tests run locally in your browser.</p>
                     </details>
-                    <details class="faq-item animate-on-scroll">
-                        <summary class="faq-question">
-                            <span>Can I use this on mobile devices?</span>
-                            <svg class="faq-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                        </summary>
-                        <p class="faq-answer">Yes! The test is fully responsive and optimized for touch keyboards on iOS and Android devices. However, physical keyboards provide the best experience.</p>
+                    <details class="faq-item">
+                        <summary class="faq-question">Can I use this on mobile?</summary>
+                        <p class="faq-answer">Yes! Fully responsive for iOS and Android.</p>
                     </details>
                 </div>
             </div>
@@ -264,24 +190,10 @@
         <!-- CTA -->
         <section class="cta-section">
             <div class="container">
-                <div class="cta-card animate-on-scroll">
-                    <div class="cta-badge">🚀</div>
+                <div class="cta-card">
                     <h3 class="cta-title">Ready to Transform Your Typing?</h3>
-                    <p class="cta-subtitle">Join thousands mastering their keyboard skills with data-driven insights and personalized practice.</p>
-                    <div class="cta-stats">
-                        <div class="cta-stat">
-                            <strong>30%</strong>
-                            <span>Average improvement</span>
-                        </div>
-                        <div class="cta-stat">
-                            <strong>2 weeks</strong>
-                            <span>To see results</span>
-                        </div>
-                    </div>
-                    <a href="test.html" class="btn btn-primary btn-large">
-                        <span>Start Your First Test Now</span>
-                        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
-                    </a>
+                    <p class="cta-subtitle">Join thousands mastering their keyboard skills.</p>
+                    <a href="test.html" class="btn btn-primary">Start Your First Test</a>
                 </div>
             </div>
         </section>
@@ -291,64 +203,33 @@
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-brand">
-                <div class="logo" aria-hidden="true">PR</div>
-                <div>
-                    <strong>Typing Test</strong>
-                    <p class="footer-tagline">Master your keyboard skills</p>
-                </div>
+                <div class="logo">PR</div>
+                <span>Typing Test</span>
             </div>
             <div class="footer-links">
-                <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
-                <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
-                <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
-                <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+                <a href="https://pirateruler.com/post/about.html" target="_blank">About — PirateRuler</a>
+                <a href="https://pirateruler.com/post/privacy.html" target="_blank">Privacy Policy</a>
+                <a href="https://pirateruler.com/post/contact.html" target="_blank">Contact</a>
+                <a href="https://pirateruler.com/post/terms.html" target="_blank">Terms & Service</a>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 PirateRuler.com. All rights reserved.</p>
         </div>
     </footer>
 
     <!-- Off-canvas Menu -->
     <div class="menu-overlay" id="menuOverlay"></div>
-    <aside class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Main menu">
+    <aside class="menu" id="menu">
         <div class="menu-header">
             <h3>Menu</h3>
-            <button class="icon-btn" id="menuClose" aria-label="Close menu">
-                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
+            <button class="icon-btn" id="menuClose">✕</button>
         </div>
         <nav class="menu-nav">
-            <button class="menu-btn" onclick="window.location.href='index.html'">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                Home
-            </button>
-            <button class="menu-btn" onclick="window.location.href='test.html'">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                Start Test
-            </button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/about.html', '_blank', 'noopener')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                About — PirateRuler
-            </button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/privacy.html', '_blank', 'noopener')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
-                Privacy Policy
-            </button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/contact.html', '_blank', 'noopener')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                Contact
-            </button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/terms.html', '_blank', 'noopener')">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                Terms & Service
-            </button>
-            <a href="https://pirateruler.com" class="btn btn-primary menu-cta" target="_blank">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.19 0 2.34-.21 3.41-.6.3-.11.49-.4.49-.72 0-.43-.35-.78-.78-.78-.17 0-.33.06-.46.11-.91.31-1.89.48-2.67.48-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8c0 .79-.1 1.58-.31 2.33-.04.15-.07.31-.07.47 0 .36.19.68.49.83.32.15.68.03.87-.24.27-.37.46-.77.59-1.19.02-.06.04-.12.04-.18 0-.55-.45-1-1-1s-1 .45-1 1c0 .37.21.69.5.86.09.05.18.08.27.08.22 0 .43-.11.55-.29.19-.27.3-.59.3-.93 0-3.86-3.14-7-7-7s-7 3.14-7 7 3.14 7 7 7c1.31 0 2.53-.37 3.57-1.01.31-.18.41-.59.22-.9-.18-.31-.59-.41-.9-.22-.8.46-1.73.73-2.69.73-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.97-.84 2.75-.16.22-.11.53.11.69.22.16.53.11.69-.11.65-.89 1.04-1.98 1.04-3.13 0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c.79 0 1.54-.18 2.21-.49.34-.15.49-.56.34-.9-.15-.34-.56-.49-.9-.34-.49.21-1.01.32-1.55.32z"/></svg>
-                Visit PirateRuler.com
-            </a>
+            <a href="index.html" class="menu-link">Home</a>
+            <a href="test.html" class="menu-link">Start Test</a>
+            <a href="https://pirateruler.com/post/about.html" target="_blank" class="menu-link">About — PirateRuler</a>
+            <a href="https://pirateruler.com/post/privacy.html" target="_blank" class="menu-link">Privacy Policy</a>
+            <a href="https://pirateruler.com/post/contact.html" target="_blank" class="menu-link">Contact</a>
+            <a href="https://pirateruler.com/post/terms.html" target="_blank" class="menu-link">Terms & Service</a>
+            <a href="https://pirateruler.com" target="_blank" class="btn btn-primary" style="margin-top: 1rem;">Visit PirateRuler.com</a>
         </nav>
     </aside>
 
