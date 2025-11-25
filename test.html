@@ -1,0 +1,205 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Test — PirateRuler.com</title>
+    <meta name="description" content="Take the typing test and measure your words per minute (WPM) and accuracy.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <div class="brand">
+                <div class="logo">PR</div>
+                <div>
+                    <h1 class="brand-title">Typing Test</h1>
+                    <p class="brand-subtitle">by PirateRuler.com</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="menuToggle" aria-label="Open menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="test-main">
+        <div class="container">
+            <div class="test-card">
+                <h2 class="test-title">Typing Test</h2>
+                <p class="test-subtitle">by PirateRuler.com</p>
+
+                <!-- Controls -->
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label for="passageSelect">Passage Length</label>
+                        <select id="passageSelect">
+                            <option value="short">Short (50 chars)</option>
+                            <option value="medium" selected>Medium (150 chars)</option>
+                            <option value="long">Long (300 chars)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="timerSelect">Timer</label>
+                        <select id="timerSelect">
+                            <option value="30">30 seconds</option>
+                            <option value="60" selected>60 seconds</option>
+                            <option value="120">2 minutes</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="startBtn">Start</button>
+                    <button class="btn btn-ghost" id="restartBtn" style="display: none;">Restart</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-value" id="wpm">0</span>
+                        <span class="stat-label">WPM</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="accuracy">100%</span>
+                        <span class="stat-label">Accuracy</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="chars">0</span>
+                        <span class="stat-label">Chars</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="mistakes">0</span>
+                        <span class="stat-label">Mistakes</span>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="timer-display" id="timerDisplay">1:00</div>
+
+                <!-- Typing Area -->
+                <div class="typing-area" id="typingArea" style="display: none;">
+                    <div class="passage-display" id="passageDisplay"></div>
+                    <div class="input-wrapper">
+                        <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+
+                <!-- Keyboard Visualizer -->
+                <div class="keyboard" id="keyboard" style="display: none;">
+                    <div class="keyboard-row">
+                        <div class="key" data-key="q">Q</div>
+                        <div class="key" data-key="w">W</div>
+                        <div class="key" data-key="e">E</div>
+                        <div class="key" data-key="r">R</div>
+                        <div class="key" data-key="t">T</div>
+                        <div class="key" data-key="y">Y</div>
+                        <div class="key" data-key="u">U</div>
+                        <div class="key" data-key="i">I</div>
+                        <div class="key" data-key="o">O</div>
+                        <div class="key" data-key="p">P</div>
+                    </div>
+                    <div class="keyboard-row">
+                        <div class="key" data-key="a">A</div>
+                        <div class="key" data-key="s">S</div>
+                        <div class="key" data-key="d">D</div>
+                        <div class="key" data-key="f">F</div>
+                        <div class="key" data-key="g">G</div>
+                        <div class="key" data-key="h">H</div>
+                        <div class="key" data-key="j">J</div>
+                        <div class="key" data-key="k">K</div>
+                        <div class="key" data-key="l">L</div>
+                    </div>
+                    <div class="keyboard-row">
+                        <div class="key" data-key="z">Z</div>
+                        <div class="key" data-key="x">X</div>
+                        <div class="key" data-key="c">C</div>
+                        <div class="key" data-key="v">V</div>
+                        <div class="key" data-key="b">B</div>
+                        <div class="key" data-key="n">N</div>
+                        <div class="key" data-key="m">M</div>
+                    </div>
+                    <div class="keyboard-row">
+                        <div class="key large" data-key=" ">Space</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Results Modal -->
+    <div class="modal-overlay" id="modalOverlay" style="display: none;"></div>
+    <div class="results-modal" id="resultsModal" role="dialog" aria-labelledby="resultsTitle" style="display: none;">
+        <h3 id="resultsTitle">Test Complete!</h3>
+        <div class="results-stats">
+            <div class="results-stat">
+                <span class="results-label">WPM</span>
+                <span class="results-value" id="finalWpm">0</span>
+            </div>
+            <div class="results-stat">
+                <span class="results-label">Accuracy</span>
+                <span class="results-value" id="finalAccuracy">0%</span>
+            </div>
+            <div class="results-stat">
+                <span class="results-label">Mistakes</span>
+                <span class="results-value" id="finalMistakes">0</span>
+            </div>
+            <div class="results-stat">
+                <span class="results-label">Correct</span>
+                <span class="results-value" id="finalCorrect">0</span>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="exportBtn">Export CSV</button>
+            <button class="btn btn-ghost" id="tryAgainBtn">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="logo">PR</div>
+                <span>Typing Test</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
+                <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+                <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
+                <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Off-canvas Menu -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <aside class="menu" id="menu">
+        <div class="menu-header">
+            <h3>Menu</h3>
+            <button class="icon-btn" id="menuClose" aria-label="Close menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+        </div>
+        <nav class="menu-nav">
+            <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
+            <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+            <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
+            <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+            <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem;">Visit PirateRuler.com</a>
+        </nav>
+    </aside>
+
+    <script src="app.js"></script>
+</body>
+</html>
