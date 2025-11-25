@@ -1,32 +1,31 @@
-<!-- test.html -->
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Take the ultimate typing test with real-time analytics and advanced metrics.">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <title>Typing Test — PirateRuler.com</title>
+    <meta name="description" content="Take the typing test and measure your words per minute (WPM) and accuracy. AI-powered insights and real-time feedback.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Skip Link -->
+    <a href="#main" class="skip-link">Skip to test</a>
+
     <!-- Header -->
-    <header class="header">
+    <header class="header" id="header">
         <div class="container header-inner">
-            <a href="index.html" class="brand-link">
+            <a href="index.html" class="brand-link" aria-label="Typing Test Home">
                 <div class="brand">
-                    <div class="logo">PR</div>
-                    <div>
+                    <div class="logo" aria-hidden="true">PR</div>
+                    <div class="brand-text">
                         <h1 class="brand-title">Typing Test</h1>
                         <p class="brand-subtitle">by PirateRuler.com</p>
                     </div>
                 </div>
             </a>
             <div class="header-controls">
-                <button class="icon-btn" id="soundToggle" aria-label="Toggle sound">
-                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 10v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71V6.41c0-.89-1.08-1.34-1.71-.71L7 9H4c-.55 0-1 .45-1 1z"/>
-                    </svg>
-                </button>
                 <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
@@ -42,25 +41,48 @@
     </header>
 
     <!-- Main -->
-    <main class="test-main">
+    <main class="test-main" id="main">
         <div class="container">
             <div class="test-card">
-                <h2 class="test-title">Advanced Typing Test</h2>
-                <p class="test-subtitle">by PirateRuler.com</p>
+                <div class="test-header">
+                    <h2 class="test-title">Typing Test</h2>
+                    <p class="test-subtitle">by PirateRuler.com</p>
+                    <div class="test-progress">
+                        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Settings -->
+                <div class="test-settings">
+                    <button class="settings-btn" id="settingsBtn" aria-label="Open settings">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                        Settings
+                    </button>
+                </div>
 
                 <!-- Controls -->
                 <div class="test-controls">
                     <div class="control-group">
-                        <label for="timerSelect">Duration</label>
-                        <select id="timerSelect">
+                        <label for="passageSelect">Passage Length</label>
+                        <select id="passageSelect" class="modern-select">
+                            <option value="short">Short (50 chars)</option>
+                            <option value="medium" selected>Medium (150 chars)</option>
+                            <option value="long">Long (300 chars)</option>
+                            <option value="custom">Custom Text</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="timerSelect">Timer</label>
+                        <select id="timerSelect" class="modern-select">
                             <option value="30">30 seconds</option>
                             <option value="60" selected>60 seconds</option>
                             <option value="120">2 minutes</option>
+                            <option value="300">5 minutes</option>
                         </select>
                     </div>
                     <div class="control-group">
                         <label for="difficultySelect">Difficulty</label>
-                        <select id="difficultySelect">
+                        <select id="difficultySelect" class="modern-select">
                             <option value="easy">Easy</option>
                             <option value="medium" selected>Medium</option>
                             <option value="hard">Hard</option>
@@ -68,30 +90,28 @@
                     </div>
                     <div class="control-group">
                         <label>&nbsp;</label>
-                        <button class="btn btn-primary" id="startBtn">Start</button>
-                        <button class="btn btn-ghost" id="restartBtn" style="display: none;">Restart</button>
+                        <button class="btn btn-primary btn-start" id="startBtn">
+                            <span>Start</span>
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button class="btn btn-ghost btn-start" id="restartBtn" style="display: none;">
+                            <span>Restart</span>
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Live Chart -->
-                <canvas id="wpmChart" class="chart" width="400" height="100"></canvas>
 
                 <!-- Stats -->
                 <div class="stats-bar">
                     <div class="stat-item">
                         <span class="stat-value" id="wpm">0</span>
                         <span class="stat-label">WPM</span>
-                        <div class="stat-bar"><div class="stat-fill" id="wpmFill"></div></div>
+                        <div class="stat-change" id="wpmChange"></div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="accuracy">100%</span>
                         <span class="stat-label">Accuracy</span>
-                        <div class="stat-bar"><div class="stat-fill" id="accuracyFill"></div></div>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="consistency">100%</span>
-                        <span class="stat-label">Consistency</span>
-                        <div class="stat-bar"><div class="stat-fill" id="consistencyFill"></div></div>
+                        <div class="stat-change" id="accuracyChange"></div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="chars">0</span>
@@ -101,6 +121,15 @@
                         <span class="stat-value" id="mistakes">0</span>
                         <span class="stat-label">Mistakes</span>
                     </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="keystrokes">0</span>
+                        <span class="stat-label">KPM</span>
+                    </div>
+                </div>
+
+                <!-- Live Graph -->
+                <div class="graph-container" id="graphContainer" style="display: none;">
+                    <canvas id="wpmGraph" width="400" height="100"></canvas>
                 </div>
 
                 <!-- Timer -->
@@ -110,9 +139,13 @@
                 <div class="typing-area" id="typingArea" style="display: none;">
                     <div class="passage-display" id="passageDisplay" aria-live="polite"></div>
                     <div class="input-wrapper">
-                        <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
+                        <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Start typing here...">
+                        <div class="input-line"></div>
                     </div>
                 </div>
+
+                <!-- Achievements -->
+                <div class="achievements" id="achievements" style="display: none;"></div>
 
                 <!-- Keyboard Visualizer -->
                 <div class="keyboard" id="keyboard" style="display: none;" aria-hidden="true">
@@ -156,40 +189,84 @@
         </div>
     </main>
 
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel" style="display: none;">
+        <h4>Test Settings</h4>
+        <div class="setting-group">
+            <label for="soundToggle">
+                <input type="checkbox" id="soundToggle">
+                <span>Sound Effects</span>
+            </label>
+        </div>
+        <div class="setting-group">
+            <label for="numbersToggle">
+                <input type="checkbox" id="numbersToggle">
+                <span>Include Numbers</span>
+            </label>
+        </div>
+        <div class="setting-group">
+            <label for="punctuationToggle">
+                <input type="checkbox" id="punctuationToggle">
+                <span>Include Punctuation</span>
+            </label>
+        </div>
+        <button class="btn btn-ghost" id="closeSettings">Close</button>
+    </div>
+
     <!-- Results Modal -->
     <div class="modal-overlay" id="modalOverlay" style="display: none;"></div>
     <div class="results-modal" id="resultsModal" role="dialog" aria-labelledby="resultsTitle" style="display: none;">
-        <h3 id="resultsTitle">Test Complete! 🎉</h3>
+        <div class="results-header">
+            <h3 id="resultsTitle">Test Complete! 🎉</h3>
+            <p id="resultsSubtitle">Great job! Here are your results:</p>
+        </div>
+        <div class="results-chart">
+            <canvas id="resultsGraph" width="300" height="150"></canvas>
+        </div>
         <div class="results-stats">
             <div class="results-stat">
                 <span class="results-label">WPM</span>
                 <span class="results-value" id="finalWpm">0</span>
+                <span class="results-comparison" id="wpmComparison"></span>
             </div>
             <div class="results-stat">
                 <span class="results-label">Accuracy</span>
                 <span class="results-value" id="finalAccuracy">0%</span>
+                <span class="results-comparison" id="accuracyComparison"></span>
             </div>
             <div class="results-stat">
                 <span class="results-label">Mistakes</span>
                 <span class="results-value" id="finalMistakes">0</span>
             </div>
             <div class="results-stat">
-                <span class="results-label">Consistency</span>
-                <span class="results-value" id="finalConsistency">0%</span>
+                <span class="results-label">Correct</span>
+                <span class="results-value" id="finalCorrect">0</span>
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn btn-primary" id="exportBtn">Export CSV</button>
-            <button class="btn btn-ghost" id="tryAgainBtn">Try Again</button>
+            <button class="btn btn-primary" id="exportBtn">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Export CSV
+            </button>
+            <button class="btn btn-ghost" id="tryAgainBtn">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                Try Again
+            </button>
         </div>
     </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip" role="tooltip"></div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-brand">
-                <div class="logo">PR</div>
-                <span>Typing Test</span>
+                <div class="logo" aria-hidden="true">PR</div>
+                <div>
+                    <strong>Typing Test</strong>
+                    <p class="footer-tagline">Master your keyboard skills</p>
+                </div>
             </div>
             <div class="footer-links">
                 <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
@@ -197,6 +274,9 @@
                 <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
                 <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
             </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 PirateRuler.com. All rights reserved.</p>
         </div>
     </footer>
 
@@ -212,13 +292,22 @@
             </button>
         </div>
         <nav class="menu-nav">
-            <button class="menu-btn" onclick="window.location.href='index.html'; closeMenu();">Home</button>
-            <button class="menu-btn" onclick="window.location.href='test.html'; closeMenu();">Start Test</button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/about.html', '_blank', 'noopener'); closeMenu();">About — PirateRuler</button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/privacy.html', '_blank', 'noopener'); closeMenu();">Privacy Policy</button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/contact.html', '_blank', 'noopener'); closeMenu();">Contact</button>
-            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/terms.html', '_blank', 'noopener'); closeMenu();">Terms & Service</button>
-            <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Visit PirateRuler.com</a>
+            <button class="menu-btn" onclick="window.location.href='index.html'">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                Home
+            </button>
+            <button class="menu-btn" onclick="window.location.href='test.html'">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Start Test
+            </button>
+            <button class="menu-btn" onclick="window.open('https://pirateruler.com/post/about.html', '_blank', 'noopener')">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.19 0 2.34-.21 3.41-.6.3-.11.49-.4.49-.72 0-.43-.35-.78-.78-.78-.17 0-.33.06-.46.11-.91.31-1.89.48-2.67.48-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8c0 .79-.1 1.58-.31 2.33-.04.15-.07.31-.07.47 0 .36.19.68.49.83.32.15.68.03.87-.24.27-.37.46-.77.59-1.19.02-.06.04-.12.04-.18 0-.55-.45-1-1-1s-1 .45-1 1c0 .37.21.69.5.86.09.05.18.08.27.08.22 0 .43-.11.55-.29.19-.27.3-.59.3-.93 0-3.86-3.14-7-7-7s-7 3.14-7 7 3.14 7 7 7c1.31 0 2.53-.37 3.57-1.01.31-.18.41-.59.22-.9-.18-.31-.59-.41-.9-.22-.8.46-1.73.73-2.69.73-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.97-.84 2.75-.16.22-.11.53.11.69.22.16.53.11.69-.11.65-.89 1.04-1.98 1.04-3.13 0-2.76-2.24-5-5-5s-5 2.24-5 5 2.24 5 5 5c.79 0 1.54-.18 2.21-.49.34-.15.49-.56.34-.9-.15-.34-.56-.49-.9-.34-.49.21-1.01.32-1.55.32z"/></svg>
+                About — PirateRuler
+            </button>
+            <a href="https://pirateruler.com" class="btn btn-primary menu-cta" target="_blank">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Visit PirateRuler.com
+            </a>
         </nav>
     </aside>
 
