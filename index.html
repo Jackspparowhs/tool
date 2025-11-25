@@ -1,532 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Typing Test — PirateRuler.com</title>
-<meta name="description" content="Typing Test by PirateRuler — premium typing speed & accuracy tester." />
-<meta name="theme-color" content="#1d2233" />
-<link rel="icon" href="https://pirateruler.com/static/pr-logo.png" type="image/png">
-
-<style>
-/* -----------------------------------
-   NEW PREMIUM THEME (NON-NEON)
------------------------------------ */
-:root {
-  --space: 16px;
-  --radius: 14px;
-  --text-sans: "Inter", system-ui, sans-serif;
-
-  --bg-1: #1d2233;
-  --bg-2: #23283a;
-  --surface: #2c3147;
-  --surface-soft: #343a50;
-
-  --border: rgba(255,255,255,0.07);
-  --text: #f5f7fa;
-  --muted: #aeb6ca;
-
-  --accent: #5b6fdd; /* soft slate-blue */
-  --accent-2: #8293ff;
-
-  --shadow-lg: 0 20px 50px rgba(0,0,0,0.35);
-  --shadow-md: 0 10px 30px rgba(0,0,0,0.25);
-
-  --max-width: 1100px;
-}
-
-body {
-  margin: 0;
-  padding: var(--space);
-  font-family: var(--text-sans);
-  background: linear-gradient(160deg, var(--bg-1), var(--bg-2));
-  color: var(--text);
-}
-
-/* ---------- GENERAL ---------- */
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-
-.wrap { max-width: var(--max-width); margin: 0 auto; }
-
-/* ---------- HEADER ---------- */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px;
-  border-radius: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-}
-
-.logo {
-  width: 54px;
-  height: 54px;
-  border-radius: 12px;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  color: white;
-  font-size: 18px;
-  box-shadow: var(--shadow-md);
-}
-
-.brand .title {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.brand .sub {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.icon-btn, .hamb {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface-soft);
-  color: var(--text);
-  cursor: pointer;
-}
-
-/* ---------- HERO ---------- */
-.hero {
-  margin-top: 18px;
-  padding: 36px;
-  border-radius: 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  text-align: center;
-}
-
-.h1 {
-  font-size: 32px;
-  font-weight: 900;
-  margin: 10px 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.lead {
-  max-width: 800px;
-  margin: 0 auto;
-  font-size: 15px;
-  color: var(--muted);
-}
-
-.hero-cta {
-  margin-top: 20px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-primary {
-  padding: 14px 22px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: white;
-  font-weight: 900;
-  border: none;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-}
-
-.btn-ghost {
-  padding: 12px 20px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--muted);
-  font-weight: 700;
-}
-
-/* ---------- STATS ---------- */
-.stats {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 22px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  background: var(--surface-soft);
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  min-width: 120px;
-  text-align: center;
-  box-shadow: var(--shadow-md);
-}
-
-.stat .num { font-size: 18px; font-weight: 900; }
-
-/* ---------- MAIN GRID ---------- */
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 18px;
-  margin-top: 22px;
-}
-
-@media (max-width: 900px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ---------- PANEL ---------- */
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
-}
-
-h2.section {
-  margin: 0 0 12px 0;
-  font-size: 20px;
-  font-weight: 900;
-}
-
-/* ---------- FEATURES ---------- */
-.features { display: flex; flex-direction: column; gap: 12px; }
-
-.feature {
-  display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 12px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-}
-
-.feature .ic {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: var(--accent);
-  color: white;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ---------- USE CASES ---------- */
-.usecases {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.uc {
-  padding: 18px;
-  border-radius: 14px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  text-align: center;
-}
-
-.uc-icon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 8px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ---------- SIDEBAR RIGHT ---------- */
-.preview-card {
-  background: var(--surface-soft);
-  border-radius: 16px;
-  padding: 20px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-}
-
-.mini-cta {
-  display: block;
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 12px;
-  text-align: center;
-  background: var(--accent);
-  color: white;
-  font-weight: 900;
-}
-
-/* ---------- FOOTER ---------- */
-footer {
-  margin-top: 32px;
-  text-align: center;
-}
-
-.visit {
-  display: inline-block;
-  margin-bottom: 10px;
-  padding: 12px 20px;
-  background: var(--accent);
-  color: white;
-  border-radius: 30px;
-  font-weight: 900;
-}
-
-/* ---------- MENU ---------- */
-.offcanvas {
-  position: fixed;
-  right: 12px;
-  top: 12px;
-  width: 330px;
-  max-width: 92vw;
-  padding: 18px;
-  border-radius: 16px;
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  transform: translateX(140%);
-  transition: 0.25s ease;
-}
-
-.offcanvas.open {
-  transform: translateX(0);
-}
-
-.offcanvas a {
-  display: block;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  margin-bottom: 8px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maps by PirateRuler.com</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-<div class="wrap">
-
-<!-- HEADER -->
-<header>
-  <div class="brand">
-    <div class="logo">PR</div>
-    <div>
-      <div class="title">Typing Test</div>
-      <div class="sub">by PirateRuler.com</div>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button id="toggleTheme" class="icon-btn">🌓</button>
-    <button id="openMenu" class="hamb">
-      <svg viewBox="0 0 24 24" width="22" height="22">
-        <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round"/>
-      </svg>
-    </button>
-  </div>
-</header>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="kicker" style="color:var(--muted);font-weight:700;font-size:13px;margin-bottom:8px">
-    Trusted by developers & learners
-  </div>
-
-  <h1 class="h1">Measure typing speed & accuracy — private & instant</h1>
-
-  <p class="lead">
-    Fast, private, browser-based typing tests. No login. No tracking. Perfect for streamers,
-    students, and hiring tests.
-  </p>
-
-  <div class="hero-cta">
-    <a class="btn-primary" href="/typing-test.html">Start Typing Test — Free</a>
-    <button class="btn-ghost"
-            onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})">Read FAQ</button>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><div class="num">10k+</div><div class="lbl">Active users</div></div>
-    <div class="stat"><div class="num">500k+</div><div class="lbl">Tests run</div></div>
-    <div class="stat"><div class="num">99.9%</div><div class="lbl">Uptime</div></div>
-  </div>
-</section>
-
-<!-- MAIN GRID -->
-<div class="main-grid">
-
-  <!-- LEFT CONTENT -->
-  <div>
-    <section class="panel">
-      <h2 class="section">Powerful features</h2>
-      <p style="color:var(--muted)">All computation runs in your browser — fast, private, and secure.</p>
-
-      <div class="features">
-        <div class="feature">
-          <div class="ic">⚡</div>
-          <div>
-            <h4>Instant & offline-first</h4>
-            <p>Runs locally — no server delay.</p>
-          </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Maps by PirateRuler.com</span>
+            </div>
+            <div class="header-controls">
+                <button id="currentLocationBtn" class="btn btn-primary">
+                    <i class="fas fa-location-arrow"></i> My Location
+                </button>
+                <button id="fullscreenBtn" class="btn btn-secondary">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
         </div>
+    </header>
 
-        <div class="feature">
-          <div class="ic">🔒</div>
-          <div>
-            <h4>Privacy first</h4>
-            <p>Your test data never leaves your device.</p>
-          </div>
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for places, addresses, or coordinates...">
+            <button id="searchBtn" class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
-
-        <div class="feature">
-          <div class="ic">📊</div>
-          <div>
-            <h4>Detailed scoring</h4>
-            <p>Accuracy, WPM breakdown, & error maps.</p>
-          </div>
-        </div>
-
-        <div class="feature">
-          <div class="ic">🎯</div>
-          <div>
-            <h4>Practice modes</h4>
-            <p>30/60/120s modes + custom text.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" style="margin-top:14px">
-      <h2 class="section">Where people use it</h2>
-
-      <div class="usecases">
-        <div class="uc">
-          <div class="uc-icon">💼</div>
-          <h4>Hiring tests</h4>
-          <p style="color:var(--muted)">Used by companies for quick skill checks.</p>
-        </div>
-
-        <div class="uc">
-          <div class="uc-icon">🎥</div>
-          <h4>Streamers</h4>
-          <p style="color:var(--muted)">Fast tests for live challenges.</p>
-        </div>
-
-        <div class="uc">
-          <div class="uc-icon">🏫</div>
-          <h4>Students</h4>
-          <p style="color:var(--muted)">Daily typing practice.</p>
-        </div>
-
-        <div class="uc">
-          <div class="uc-icon">🧰</div>
-          <h4>Developers</h4>
-          <p style="color:var(--muted)">Test keyboards & layouts.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" id="testimonials" style="margin-top:14px">
-      <h2 class="section">What users say</h2>
-
-      <div class="tm" style="margin-bottom:12px;padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--surface-soft)">
-        <p>“Improved from 62 to 85 WPM in 3 weeks.”</p>
-        <div class="who" style="margin-top:8px;font-weight:800">— Aisha</div>
-      </div>
-
-      <div class="tm" style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--surface-soft)">
-        <p>“Perfect for our hiring tests — simple & private.”</p>
-        <div class="who" style="margin-top:8px;font-weight:800">— FinTech HR</div>
-      </div>
-    </section>
-
-    <section class="panel" id="faq" style="margin-top:14px">
-      <h2 class="section">FAQ</h2>
-
-      <div class="q" style="padding:12px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--border);margin-bottom:10px">
-        <h4>Is my data stored?</h4>
-        <p style="color:var(--muted)">No. It stays in your browser.</p>
-      </div>
-
-      <div class="q" style="padding:12px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--border);margin-bottom:10px">
-        <h4>Does it work offline?</h4>
-        <p style="color:var(--muted)">Yes, after the first load.</p>
-      </div>
-
-      <div class="q" style="padding:12px;border-radius:12px;background:var(--surface-soft);border:1px solid var(--border)">
-        <h4>Can I use custom text?</h4>
-        <p style="color:var(--muted)">Yes — paste any passage.</p>
-      </div>
-    </section>
-  </div>
-
-  <!-- RIGHT SIDEBAR -->
-  <aside class="right-col">
-    <div class="preview-card panel">
-      <h3 style="margin-top:0">Try a quick drill</h3>
-      <p style="color:var(--muted)">Start a 60s test instantly.</p>
-      <a class="mini-cta" href="/typing-test.html?q=Type%20this%20text">Start 60s practice →</a>
+        <div class="search-suggestions" id="searchSuggestions"></div>
     </div>
 
-    <div style="height:14px"></div>
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-layer-group"></i> Map Layers</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="layer-controls">
+                <div class="layer-group">
+                    <h4>Base Maps</h4>
+                    <label class="layer-option">
+                        <input type="radio" name="basemap" value="street" checked>
+                        <span>Street</span>
+                    </label>
+                    <label class="layer-option">
+                        <input type="radio" name="basemap" value="satellite">
+                        <span>Satellite</span>
+                    </label>
+                    <label class="layer-option">
+                        <input type="radio" name="basemap" value="terrain">
+                        <span>Terrain</span>
+                    </label>
+                </div>
 
-    <div class="panel">
-      <h3 style="margin-top:0">Upgrade your skills</h3>
-      <p style="color:var(--muted)">Daily drills improve accuracy and speed.</p>
-      <a class="mini-cta" href="/typing-test.html">Start Training →</a>
+                <div class="layer-group">
+                    <h4>Overlays</h4>
+                    <label class="layer-option">
+                        <input type="checkbox" id="trafficLayer">
+                        <span>Traffic</span>
+                    </label>
+                    <label class="layer-option">
+                        <input type="checkbox" id="transitLayer">
+                        <span>Transit</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="directions-panel" id="directionsPanel">
+                <h3><i class="fas fa-route"></i> Directions</h3>
+                <div class="directions-inputs">
+                    <input type="text" id="startPoint" placeholder="Starting point">
+                    <input type="text" id="endPoint" placeholder="Destination">
+                    <select id="travelMode">
+                        <option value="driving">Driving</option>
+                        <option value="walking">Walking</option>
+                        <option value="cycling">Cycling</option>
+                    </select>
+                    <button id="getDirections" class="btn btn-primary">Get Directions</button>
+                </div>
+                <div id="directionsResults" class="directions-results"></div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <button id="zoomIn" class="control-btn">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="zoomOut" class="control-btn">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button id="rotateMap" class="control-btn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+
+            <!-- Scale and Coordinates -->
+            <div class="map-info">
+                <div id="coordinates" class="coordinates-display"></div>
+                <div id="scale" class="scale-display"></div>
+            </div>
+        </div>
     </div>
-  </aside>
-</div>
 
-<!-- FOOTER -->
-<footer>
-  <a class="visit" href="https://pirateruler.com" target="_blank">Visit PirateRuler.com</a>
-  <small style="display:block;color:var(--muted);margin-top:10px">
-    © <span id="year"></span> PirateRuler — Typing Test.
-  </small>
-</footer>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+    </div>
 
-</div>
-
-<!-- MENU DRAWER -->
-<div id="menu" class="offcanvas">
-  <h3>Menu</h3>
-  <a href="/typing-test.html">Start Test</a>
-  <a href="https://pirateruler.com/post/about.html" target="_blank">About</a>
-  <a href="https://pirateruler.com/post/privacy.html" target="_blank">Privacy</a>
-  <a href="https://pirateruler.com/post/contact.html" target="_blank">Contact</a>
-  <a href="https://pirateruler.com/post/terms.html" target="_blank">Terms</a>
-  <button id="closeMenu"
-          style="margin-top:12px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:white;font-weight:900;width:100%">
-    Close
-  </button>
-</div>
-
-<script>
-document.getElementById("year").textContent = new Date().getFullYear();
-
-const menu = document.getElementById("menu");
-document.getElementById("openMenu").onclick = () => menu.classList.add("open");
-document.getElementById("closeMenu").onclick = () => menu.classList.remove("open");
-</script>
-
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
