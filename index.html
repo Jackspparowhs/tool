@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maps by PirateRuler.com</title>
     
     <!-- Leaflet CSS -->
@@ -18,7 +18,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏴‍☠️</text></svg>">
 </head>
 <body>
-    <!-- Top Bar - Google Maps Style -->
+    <!-- Top Bar - Fixed for Mobile -->
     <div class="top-bar">
         <div class="top-bar-left">
             <button class="hamburger-menu" id="sidebarToggle">
@@ -37,7 +37,7 @@
             <div class="search-box">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="Search for places, addresses, or coordinates">
+                    <input type="text" id="searchInput" placeholder="Search places...">
                     <button class="clear-search" id="clearSearch">
                         <i class="fas fa-times"></i>
                     </button>
@@ -53,18 +53,23 @@
             <button class="top-bar-btn" id="fullscreenBtn" title="Fullscreen">
                 <i class="fas fa-expand"></i>
             </button>
-            <div class="user-menu">
-                <button class="top-bar-btn">
-                    <i class="fas fa-user-circle"></i>
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Sidebar - Google Maps Style -->
+        <!-- Sidebar - Mobile Fixed -->
         <div class="sidebar" id="sidebar">
+            <div class="sidebar-header-mobile">
+                <button class="close-sidebar" id="closeSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Maps</span>
+                </div>
+            </div>
+            
             <div class="sidebar-content">
                 <!-- Directions Section -->
                 <div class="sidebar-section">
@@ -78,14 +83,14 @@
                         <div class="directions-inputs">
                             <div class="input-group">
                                 <i class="fas fa-dot-circle start-icon"></i>
-                                <input type="text" id="startPoint" placeholder="Choose starting point, or click on map">
+                                <input type="text" id="startPoint" placeholder="Start location">
                                 <button class="input-clear" id="clearStart">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <div class="input-group">
                                 <i class="fas fa-map-marker-alt end-icon"></i>
-                                <input type="text" id="endPoint" placeholder="Choose destination, or click on map">
+                                <input type="text" id="endPoint" placeholder="Destination">
                                 <button class="input-clear" id="clearEnd">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -158,7 +163,7 @@
                 <!-- Places Section -->
                 <div class="sidebar-section">
                     <div class="section-header">
-                        <h3><i class="fas fa-place-of-worship"></i> Nearby Places</h3>
+                        <h3><i class="fas fa-place-of-worship"></i> Nearby</h3>
                         <button class="section-toggle" id="placesToggle">
                             <i class="fas fa-chevron-up"></i>
                         </button>
@@ -167,7 +172,7 @@
                         <div class="place-categories">
                             <button class="place-category" data-category="restaurant">
                                 <i class="fas fa-utensils"></i>
-                                <span>Restaurants</span>
+                                <span>Food</span>
                             </button>
                             <button class="place-category" data-category="gas_station">
                                 <i class="fas fa-gas-pump"></i>
@@ -175,19 +180,19 @@
                             </button>
                             <button class="place-category" data-category="hospital">
                                 <i class="fas fa-hospital"></i>
-                                <span>Hospitals</span>
+                                <span>Hospital</span>
                             </button>
                             <button class="place-category" data-category="bank">
                                 <i class="fas fa-university"></i>
-                                <span>Banks</span>
+                                <span>Bank</span>
                             </button>
                             <button class="place-category" data-category="shopping_mall">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span>Shopping</span>
+                                <span>Shop</span>
                             </button>
                             <button class="place-category" data-category="park">
                                 <i class="fas fa-tree"></i>
-                                <span>Parks</span>
+                                <span>Park</span>
                             </button>
                         </div>
                     </div>
@@ -214,7 +219,7 @@
         <div class="map-wrapper">
             <div id="map"></div>
             
-            <!-- Map Controls - Google Maps Style -->
+            <!-- Map Controls - Mobile Optimized -->
             <div class="map-controls-container">
                 <div class="map-controls">
                     <button class="map-control-btn zoom-in" id="zoomIn" title="Zoom in">
@@ -226,11 +231,8 @@
                 </div>
                 
                 <div class="map-controls">
-                    <button class="map-control-btn" id="rotateMap" title="Rotate map">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button class="map-control-btn" id="tiltMap" title="Toggle 3D">
-                        <i class="fas fa-cube"></i>
+                    <button class="map-control-btn" id="currentLocationBtn2" title="My location">
+                        <i class="fas fa-location-arrow"></i>
                     </button>
                 </div>
             </div>
@@ -239,17 +241,12 @@
             <div class="map-type-control">
                 <button class="map-type-btn" id="mapTypeBtn">
                     <span id="mapTypeText">Map</span>
-                    <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
 
             <!-- Scale and Coordinates -->
             <div class="map-info-bar">
                 <div id="coordinates" class="coordinate-display"></div>
-                <div class="scale-container">
-                    <div id="scaleBar" class="scale-bar"></div>
-                    <span id="scaleText" class="scale-text">500 m</span>
-                </div>
             </div>
 
             <!-- Loading Indicator -->
@@ -262,26 +259,8 @@
         </div>
     </div>
 
-    <!-- Right Click Menu -->
-    <div class="context-menu" id="contextMenu">
-        <div class="context-menu-item" id="directionsFrom">
-            <i class="fas fa-route"></i> Directions from here
-        </div>
-        <div class="context-menu-item" id="directionsTo">
-            <i class="fas fa-map-marker-alt"></i> Directions to here
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" id="addMarker">
-            <i class="fas fa-map-pin"></i> Add marker
-        </div>
-        <div class="context-menu-item" id="measureDistance">
-            <i class="fas fa-ruler"></i> Measure distance
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" id="whatsHere">
-            <i class="fas fa-info-circle"></i> What's here?
-        </div>
-    </div>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
