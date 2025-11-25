@@ -1,75 +1,205 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maps by PirateRuler.com</title>
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Typing Test — PirateRuler.com</title>
+    <meta name="description" content="Measure your typing speed with our modern, private, and beautiful typing test. No login required.">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Top Bar -->
-    <header class="top-bar">
-        <div class="logo-section">
-            <h1 class="logo">Maps</h1>
-            <span class="subtitle">by PirateRuler.com</span>
-        </div>
-        
-        <div class="search-container">
-            <div class="search-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search for places..." autocomplete="off">
-                <button id="clearSearch" class="clear-btn hidden">
-                    <i class="fas fa-times"></i>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <div class="brand">
+                <div class="logo">PR</div>
+                <div>
+                    <h1 class="brand-title">Typing Test</h1>
+                    <p class="brand-subtitle">by PirateRuler.com</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" id="menuToggle" aria-label="Open menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
                 </button>
             </div>
-            <div id="searchResults" class="search-results hidden"></div>
         </div>
-        
-        <button id="myLocationBtn" class="location-btn" title="My Location">
-            <i class="fas fa-location-arrow"></i>
-        </button>
     </header>
 
-    <!-- Map Container -->
-    <main class="map-container">
-        <div id="map" class="map"></div>
-        
-        <!-- Loading Spinner -->
-        <div id="loadingSpinner" class="loading-spinner hidden">
-            <div class="spinner"></div>
-        </div>
-        
-        <!-- Mobile Bottom Controls -->
-        <div class="mobile-controls">
-            <button id="mobileSearchBtn" class="mobile-btn">
-                <i class="fas fa-search"></i>
-            </button>
-            <button id="mobileLocationBtn" class="mobile-btn">
-                <i class="fas fa-location-arrow"></i>
-            </button>
-        </div>
+    <!-- Main -->
+    <main>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container hero-content">
+                <div class="trust-badge">Trusted by 10,000+ users worldwide</div>
+                <h2 class="hero-title">
+                    Measure Your <span class="gradient-text">Typing Speed</span> — 
+                    <span class="gradient-text">Fast, Private & Beautiful</span>
+                </h2>
+                <p class="hero-subtitle">A modern, browser-based typing tester. No login. No tracking.</p>
+                <div class="hero-actions">
+                    <a href="test.html" class="btn btn-primary">Start Typing Test — Free</a>
+                    <button class="btn btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">Read FAQ</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">10k+</div>
+                        <div class="stat-label">Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">500k+</div>
+                        <div class="stat-label">Tests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">4.9/5</div>
+                        <div class="stat-label">Rating</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="features">
+            <div class="container">
+                <h3 class="section-title gradient-text">Premium Features</h3>
+                <div class="features-stack">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <div>
+                            <h4>AI-Enhanced Speed Tracking</h4>
+                            <p>Intelligent analysis of your typing patterns</p>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <div>
+                            <h4>Real-Time Accuracy</h4>
+                            <p>Instant feedback on every keystroke</p>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <div>
+                            <h4>Error Heatmaps</h4>
+                            <p>Visualize your most common mistakes</p>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <div>
+                            <h4>Offline-first</h4>
+                            <p>Works without internet connection</p>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div>
+                            <h4>Export CSV/JSON</h4>
+                            <p>Download your typing history</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section class="usecases">
+            <div class="container">
+                <h3 class="section-title gradient-text">Perfect For</h3>
+                <div class="usecases-grid">
+                    <div class="usecase-card">
+                        <div class="usecase-icon">💼</div>
+                        <h4>Hiring</h4>
+                        <p>Screen candidates efficiently</p>
+                    </div>
+                    <div class="usecase-card">
+                        <div class="usecase-icon">🎮</div>
+                        <h4>Streamers</div>
+                        <p>Show off your speed to viewers</p>
+                    </div>
+                    <div class="usecase-card">
+                        <div class="usecase-icon">🎓</div>
+                        <h4>Students</h4>
+                        <p>Improve productivity for schoolwork</p>
+                    </div>
+                    <div class="usecase-card">
+                        <div class="usecase-icon">💻</div>
+                        <h4>Developers</h4>
+                        <p>Code faster with precision</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-card">
+                    <h3 class="cta-title">Ready to Improve Your Typing?</h3>
+                    <p class="cta-subtitle">Join thousands mastering their keyboard skills today</p>
+                    <a href="test.html" class="btn btn-primary">Start Your First Test</a>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-links">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="logo">PR</div>
+                <span>Typing Test</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
+                <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+                <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
+                <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+            </div>
+            <div class="footer-cta">
+                <a href="https://pirateruler.com" class="btn btn-primary">Visit PirateRuler.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Off-canvas Menu -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <aside class="menu" id="menu">
+        <div class="menu-header">
+            <h3>Menu</h3>
+            <button class="icon-btn" id="menuClose" aria-label="Close menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+        </div>
+        <nav class="menu-nav">
             <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
             <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
             <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
             <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
-        </div>
-    </footer>
+            <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem;">Visit PirateRuler.com</a>
+        </nav>
+    </aside>
 
-    <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
