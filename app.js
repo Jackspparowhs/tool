@@ -1,13 +1,10 @@
 // app.js
 /*
 README: PirateRuler.com Typing Test Application
-This file contains all JavaScript functionality for both index.html and test.html.
-- Theme toggle (dark/light)
-- Off-canvas menu
-- Typing test logic (timer, WPM, accuracy)
-- Keyboard visualizer
-- CSV export
-- API fallback for passages
+- Fixed theme toggle with true monochrome light mode
+- Improved responsive behavior and overflow prevention
+- Enhanced keyboard visualizer and accessibility
+- Added loading states and better error handling
 */
 
 // Theme Management
@@ -18,11 +15,13 @@ function initTheme() {
     const saved = localStorage.getItem('theme');
     if (saved) {
         html.setAttribute('data-theme', saved);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        html.setAttribute('data-theme', 'light');
     }
 }
 
 function toggleTheme() {
-    const current = html.getAttribute('data-theme');
+    const current = html.getAttribute('data-theme') || 'dark';
     const next = current === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
@@ -42,26 +41,28 @@ function openMenu() {
     menu.classList.add('active');
     menuOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    menu.setAttribute('aria-hidden', 'false');
 }
 
 function closeMenu() {
     menu.classList.remove('active');
     menuOverlay.classList.remove('active');
     document.body.style.overflow = '';
+    menu.setAttribute('aria-hidden', 'true');
 }
 
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (menuClose) menuClose.addEventListener('click', closeMenu);
 if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
 
-// Typing Test Logic (only run on test.html)
+// Typing Test Logic
 const testPage = document.querySelector('.test-main');
 if (testPage) {
     // Passages with fallbacks
     const passages = {
         short: "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.",
-        medium: "JavaScript is a versatile programming language that powers the modern web. Developers use it to create interactive experiences, from simple animations to complex applications. Its flexibility and wide browser support make it essential for front-end development.",
-        long: "In the realm of digital communication, typing speed remains a critical skill. Whether you're a programmer writing code, a writer crafting stories, or a professional sending emails, efficient keyboard use saves countless hours. Regular practice with accurate measurement tools helps build muscle memory and improve accuracy over time."
+        medium: "JavaScript powers the modern web with dynamic interactions. Developers create everything from simple animations to complex applications using its flexible syntax and extensive ecosystem.",
+        long: "Consistent typing practice develops muscle memory and improves accuracy. Focus on proper finger placement, maintain good posture, and use wrist rests. Regular breaks prevent strain and improve long-term performance for programmers, writers, and professionals."
     };
 
     // DOM Elements
@@ -105,28 +106,32 @@ if (testPage) {
         updateDisplay();
     }
 
-    // Load passage (with API attempt)
+    // Load passage
     async function loadPassage() {
         const length = passageSelect.value;
+        // Show loading state
+        passageDisplay.innerHTML = '<div style="text-align: center; color: var(--text-muted);">Loading passage...</div>';
+        
         try {
-            const res = await fetch(`https://baconipsum.com/api/?type=meat-and-filler&paras=1&format=text`);
+            const res = await fetch(`https://baconipsum.com/api/?type=meat-and-filler&paras=2&format=text`);
             if (res.ok) {
                 const text = await res.text();
-                // Limit length
-                if (length === 'short') testState.passage = text.slice(0, 50);
-                else if (length === 'medium') testState.passage = text.slice(0, 150);
-                else testState.passage = text.slice(0, 300);
+                let passage = text.replace(/\s+/g, ' ').trim();
+                if (length === 'short') passage = passage.slice(0, 50);
+                else if (length === 'medium') passage = passage.slice(0, 150);
+                else passage = passage.slice(0, 300);
+                testState.passage = passage;
             } else {
                 throw new Error('API failed');
             }
         } catch (e) {
-            // Fallback to local passages
+            // Fallback
             testState.passage = passages[length];
         }
         renderPassage();
     }
 
-    // Render passage with highlighting
+    // Render passage
     function renderPassage() {
         passageDisplay.innerHTML = '';
         testState.passage.split('').forEach((char, index) => {
@@ -169,16 +174,22 @@ if (testPage) {
 
     // Timer
     function startTimer() {
+        updateTimerDisplay();
         testState.timer = setInterval(() => {
             testState.timeLeft--;
-            const minutes = Math.floor(testState.timeLeft / 60);
-            const seconds = testState.timeLeft % 60;
-            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            updateTimerDisplay();
             
             if (testState.timeLeft <= 0) {
                 endTest();
             }
         }, 1000);
+    }
+
+    // Update timer display
+    function updateTimerDisplay() {
+        const minutes = Math.floor(testState.timeLeft / 60);
+        const seconds = testState.timeLeft % 60;
+        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
     // End test
@@ -187,14 +198,12 @@ if (testPage) {
         clearInterval(testState.timer);
         typingInput.disabled = true;
         
-        // Calculate final stats
         const timeMinutes = parseInt(timerSelect.value) / 60;
         const wpm = Math.round((testState.correctChars / 5) / timeMinutes);
         const accuracy = testState.typed.length > 0 
             ? Math.round((testState.correctChars / testState.typed.length) * 100) 
             : 100;
         
-        // Show modal
         finalWpm.textContent = wpm;
         finalAccuracy.textContent = accuracy + '%';
         finalMistakes.textContent = testState.mistakes;
@@ -202,6 +211,7 @@ if (testPage) {
         
         modalOverlay.style.display = 'block';
         resultsModal.style.display = 'block';
+        resultsModal.focus();
     }
 
     // Restart test
@@ -228,7 +238,7 @@ if (testPage) {
     // Calculate WPM
     function calculateWPM() {
         if (!testState.isRunning || !testState.startTime) return 0;
-        const elapsed = (Date.now() - testState.startTime) / 1000 / 60; // minutes
+        const elapsed = (Date.now() - testState.startTime) / 1000 / 60;
         return Math.round((testState.correctChars / 5) / elapsed) || 0;
     }
 
@@ -247,14 +257,14 @@ if (testPage) {
         const prevLen = testState.typed.length;
         const newLen = newTyped.length;
         
-        // Handle backspace or delete
+        // Backspace
         if (newLen < prevLen) {
             testState.typed = newTyped;
             renderPassage();
             return;
         }
         
-        // Process new character
+        // New character
         const newChar = newTyped[newLen - 1];
         const expectedChar = testState.passage[newLen - 1];
         
@@ -269,6 +279,12 @@ if (testPage) {
         highlightKey(newChar, false);
         renderPassage();
         updateDisplay();
+        
+        // Auto-scroll passage
+        const currentChar = passageDisplay.querySelector('.char.current');
+        if (currentChar) {
+            currentChar.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        }
     });
 
     // Keyboard visualizer
@@ -289,16 +305,19 @@ if (testPage) {
             accuracy: finalAccuracy.textContent,
             mistakes: finalMistakes.textContent,
             correct: finalCorrect.textContent,
-            date: new Date().toISOString()
+            date: new Date().toLocaleString(),
+            duration: timerSelect.value + 's'
         };
         
-        const csv = `Metric,Value\nWPM,${data.wpm}\nAccuracy,${data.accuracy}\nMistakes,${data.mistakes}\nCorrect,${data.correct}\nDate,${data.date}`;
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const csv = `Metric,Value\nWPM,${data.wpm}\nAccuracy,${data.accuracy}\nMistakes,${data.mistakes}\nCorrect Characters,${data.correct}\nDate,${data.date}\nTest Duration,${data.duration}`;
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `typing-test-${Date.now()}.csv`;
+        a.download = `typing-test-results-${Date.now()}.csv`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
@@ -308,10 +327,28 @@ if (testPage) {
     passageSelect.addEventListener('change', loadPassage);
     exportBtn.addEventListener('click', exportCSV);
     tryAgainBtn.addEventListener('click', restartTest);
+    
+    // Prevent spacebar scrolling
+    window.addEventListener('keydown', e => {
+        if (e.code === 'Space' && e.target === typingInput) {
+            e.stopPropagation();
+        }
+    });
 
     // Initialize
     initTest();
 }
+
+// Global smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
 
 // Initialize theme on page load
 initTheme();
