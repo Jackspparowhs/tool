@@ -4,11 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Take the ultimate typing test with real-time analytics, achievements, and advanced metrics.">
+    <meta name="keywords" content="typing test, wpm, speed test, keyboard practice">
+    <meta name="author" content="PirateRuler.com">
     <title>Typing Test — PirateRuler.com</title>
-    <meta name="description" content="Take the typing test and measure your words per minute (WPM) and accuracy.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="container header-inner">
@@ -22,6 +29,11 @@
                 </div>
             </a>
             <div class="header-controls">
+                <button class="icon-btn" id="soundToggle" aria-label="Toggle sound">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 10v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71V6.41c0-.89-1.08-1.34-1.71-.71L7 9H4c-.55 0-1 .45-1 1z"/>
+                    </svg>
+                </button>
                 <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
                     <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
@@ -40,43 +52,72 @@
     <main class="test-main">
         <div class="container">
             <div class="test-card">
-                <h2 class="test-title">Typing Test</h2>
+                <h2 class="test-title">Advanced Typing Test</h2>
                 <p class="test-subtitle">by PirateRuler.com</p>
+
+                <!-- XP Bar -->
+                <div class="xp-bar">
+                    <div class="xp-progress" id="xpProgress"></div>
+                    <span class="xp-text">Level <span id="userLevel">1</span> - <span id="xpDisplay">0/100</span> XP</span>
+                </div>
 
                 <!-- Controls -->
                 <div class="test-controls">
                     <div class="control-group">
-                        <label for="passageSelect">Passage Length</label>
-                        <select id="passageSelect">
-                            <option value="short">Short (50 chars)</option>
-                            <option value="medium" selected>Medium (150 chars)</option>
-                            <option value="long">Long (300 chars)</option>
+                        <label for="modeSelect">Mode</label>
+                        <select id="modeSelect">
+                            <option value="time" selected>Time Mode</option>
+                            <option value="words">Words Mode</option>
+                            <option value="quote">Quotes</option>
+                            <option value="custom">Custom Text</option>
                         </select>
                     </div>
                     <div class="control-group">
-                        <label for="timerSelect">Timer</label>
+                        <label for="difficultySelect">Difficulty</label>
+                        <select id="difficultySelect">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="timerSelect">Duration</label>
                         <select id="timerSelect">
                             <option value="30">30 seconds</option>
                             <option value="60" selected>60 seconds</option>
                             <option value="120">2 minutes</option>
+                            <option value="300">5 minutes</option>
                         </select>
                     </div>
                     <div class="control-group">
                         <label>&nbsp;</label>
-                        <button class="btn btn-primary" id="startBtn">Start</button>
-                        <button class="btn btn-ghost" id="restartBtn" style="display: none;">Restart</button>
+                        <div class="control-buttons">
+                            <button class="btn btn-primary" id="startBtn">Start</button>
+                            <button class="btn btn-ghost" id="pauseBtn" style="display: none;">Pause</button>
+                            <button class="btn btn-ghost" id="skipBtn" style="display: none;">Skip</button>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Live Chart -->
+                <canvas id="wpmChart" class="chart" width="400" height="100"></canvas>
 
                 <!-- Stats -->
                 <div class="stats-bar">
                     <div class="stat-item">
                         <span class="stat-value" id="wpm">0</span>
                         <span class="stat-label">WPM</span>
+                        <div class="stat-bar"><div class="stat-fill" id="wpmFill"></div></div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="accuracy">100%</span>
                         <span class="stat-label">Accuracy</span>
+                        <div class="stat-bar"><div class="stat-fill" id="accuracyFill"></div></div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="consistency">100%</span>
+                        <span class="stat-label">Consistency</span>
+                        <div class="stat-bar"><div class="stat-fill" id="consistencyFill"></div></div>
                     </div>
                     <div class="stat-item">
                         <span class="stat-value" id="chars">0</span>
@@ -88,6 +129,11 @@
                     </div>
                 </div>
 
+                <!-- Progress Bar -->
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
                 <!-- Timer -->
                 <div class="timer-display" id="timerDisplay">1:00</div>
 
@@ -97,6 +143,13 @@
                     <div class="input-wrapper">
                         <input type="text" id="typingInput" aria-label="Type the passage here" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
                     </div>
+                </div>
+
+                <!-- Custom Text Input -->
+                <div class="custom-text-input" id="customTextInput" style="display: none;">
+                    <label for="customText">Enter your own text:</label>
+                    <textarea id="customText" placeholder="Paste or type your text here..."></textarea>
+                    <button class="btn btn-primary" id="useCustomBtn">Use Custom Text</button>
                 </div>
 
                 <!-- Keyboard Visualizer -->
@@ -145,26 +198,33 @@
     <div class="modal-overlay" id="modalOverlay" style="display: none;"></div>
     <div class="results-modal" id="resultsModal" role="dialog" aria-labelledby="resultsTitle" style="display: none;">
         <h3 id="resultsTitle">Test Complete! 🎉</h3>
-        <div class="results-stats">
-            <div class="results-stat">
-                <span class="results-label">WPM</span>
-                <span class="results-value" id="finalWpm">0</span>
+        <div class="results-summary">
+            <div class="result-badge" id="resultBadge"></div>
+            <div class="results-stats">
+                <div class="results-stat">
+                    <span class="results-label">WPM</span>
+                    <span class="results-value" id="finalWpm">0</span>
+                </div>
+                <div class="results-stat">
+                    <span class="results-label">Accuracy</span>
+                    <span class="results-value" id="finalAccuracy">0%</span>
+                </div>
+                <div class="results-stat">
+                    <span class="results-label">Mistakes</span>
+                    <span class="results-value" id="finalMistakes">0</span>
+                </div>
+                <div class="results-stat">
+                    <span class="results-label">Consistency</span>
+                    <span class="results-value" id="finalConsistency">0%</span>
+                </div>
             </div>
-            <div class="results-stat">
-                <span class="results-label">Accuracy</span>
-                <span class="results-value" id="finalAccuracy">0%</span>
-            </div>
-            <div class="results-stat">
-                <span class="results-label">Mistakes</span>
-                <span class="results-value" id="finalMistakes">0</span>
-            </div>
-            <div class="results-stat">
-                <span class="results-label">Correct</span>
-                <span class="results-value" id="finalCorrect">0</span>
+            <div class="results-details">
+                <canvas id="resultsChart" width="400" height="150"></canvas>
             </div>
         </div>
         <div class="modal-actions">
             <button class="btn btn-primary" id="exportBtn">Export CSV</button>
+            <button class="btn btn-ghost" id="shareBtn">Share Results</button>
             <button class="btn btn-ghost" id="tryAgainBtn">Try Again</button>
         </div>
     </div>
@@ -174,14 +234,22 @@
         <div class="container footer-content">
             <div class="footer-brand">
                 <div class="logo">PR</div>
-                <span>Typing Test</span>
+                <div>
+                    <strong>Typing Test</strong><br>
+                    <small>by PirateRuler.com</small>
+                </div>
             </div>
             <div class="footer-links">
-                <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
-                <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+                <a href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About</a>
+                <a href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy</a>
                 <a href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
-                <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+                <a href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms</a>
+                <a href="#faq">FAQ</a>
+                <a href="test.html">Test</a>
             </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PirateRuler.com. All rights reserved. Made with ☠️ in the digital seas.</p>
         </div>
     </footer>
 
@@ -206,6 +274,30 @@
             <a href="https://pirateruler.com" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Visit PirateRuler.com</a>
         </nav>
     </aside>
+
+    <!-- Cookie Consent -->
+    <div class="cookie-consent" id="cookieConsent">
+        <p>We use cookies to enhance your experience. By continuing, you agree to our <a href="https://pirateruler.com/post/privacy.html" target="_blank">Privacy Policy</a>.</p>
+        <button class="btn btn-primary" id="acceptCookies">Accept</button>
+    </div>
+
+    <!-- Achievement Notification -->
+    <div class="achievement" id="achievement">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-text">
+            <strong>Achievement Unlocked!</strong>
+            <span id="achievementName"></span>
+        </div>
+    </div>
+
+    <!-- Daily Challenge -->
+    <div class="daily-challenge" id="dailyChallenge">
+        <h4>🔥 Daily Challenge</h4>
+        <p id="challengeText">Type 500 characters at 90% accuracy</p>
+        <div class="challenge-progress">
+            <div class="challenge-bar" id="challengeBar"></div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
