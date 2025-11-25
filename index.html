@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Maps by PirateRuler.com - Better Than Google Maps</title>
+    <title>Maps by PirateRuler.com - Perfect Google Maps Clone</title>
     
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS - Free Mapping Library -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <!-- Font Awesome -->
@@ -16,10 +16,6 @@
     
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏴‍☠️</text></svg>">
-    
-    <!-- Mobile Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
     <!-- Loading Screen -->
@@ -28,7 +24,7 @@
             <div class="pirate-logo">
                 <i class="fas fa-map-marked-alt"></i>
                 <h1>Maps by PirateRuler.com</h1>
-                <p>Better Than Google Maps</p>
+                <p>Perfect Google Maps Clone</p>
             </div>
             <div class="loading-spinner">
                 <div class="spinner"></div>
@@ -37,7 +33,7 @@
         </div>
     </div>
 
-    <!-- Top Bar - Professional Design -->
+    <!-- Header - Google Maps Style -->
     <header class="main-header">
         <div class="header-left">
             <button class="menu-btn" id="sidebarToggle" aria-label="Toggle menu">
@@ -72,15 +68,12 @@
             <button class="header-btn" id="fullscreenBtn" title="Fullscreen">
                 <i class="fas fa-expand"></i>
             </button>
-            <button class="header-btn" id="settingsBtn" title="Settings">
-                <i class="fas fa-cog"></i>
-            </button>
         </div>
     </header>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Sidebar - Professional Design -->
+        <!-- Sidebar - Google Maps Style -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>Navigation</h2>
@@ -247,9 +240,6 @@
                     <button class="control-btn" id="currentLocationBtn2" title="My Location">
                         <i class="fas fa-location-arrow"></i>
                     </button>
-                    <button class="control-btn" id="rotateBtn" title="Rotate Map">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
                 </div>
             </div>
 
@@ -257,19 +247,7 @@
             <div class="map-type-selector">
                 <button class="map-type-btn" id="mapTypeSelector">
                     <span id="currentMapType">Map</span>
-                    <i class="fas fa-chevron-down"></i>
                 </button>
-                <div class="map-type-dropdown" id="mapTypeDropdown">
-                    <div class="dropdown-item active" data-type="street">
-                        <i class="fas fa-map"></i> Default Map
-                    </div>
-                    <div class="dropdown-item" data-type="satellite">
-                        <i class="fas fa-satellite"></i> Satellite
-                    </div>
-                    <div class="dropdown-item" data-type="terrain">
-                        <i class="fas fa-mountain"></i> Terrain
-                    </div>
-                </div>
             </div>
 
             <!-- Coordinates Display -->
@@ -291,10 +269,6 @@
                 </div>
                 <div class="context-item" data-action="whatsHere">
                     <i class="fas fa-info-circle"></i> What's here?
-                </div>
-                <div class="context-separator"></div>
-                <div class="context-item" data-action="measureDistance">
-                    <i class="fas fa-ruler"></i> Measure distance
                 </div>
             </div>
 
