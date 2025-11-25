@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Maps by PirateRuler.com</title>
+    <title>Maps by PirateRuler.com - Better Than Google Maps</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,29 +16,48 @@
     
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏴‍☠️</text></svg>">
+    
+    <!-- Mobile Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-    <!-- Top Bar - Fixed for Mobile -->
-    <div class="top-bar">
-        <div class="top-bar-left">
-            <button class="hamburger-menu" id="sidebarToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <div class="logo">
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="pirate-logo">
                 <i class="fas fa-map-marked-alt"></i>
-                <span>Maps</span>
-                <small>by PirateRuler.com</small>
+                <h1>Maps by PirateRuler.com</h1>
+                <p>Better Than Google Maps</p>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Loading Maps...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Bar - Professional Design -->
+    <header class="main-header">
+        <div class="header-left">
+            <button class="menu-btn" id="sidebarToggle" aria-label="Toggle menu">
+                <span class="menu-icon"></span>
+            </button>
+            <div class="brand">
+                <i class="fas fa-map-marked-alt brand-icon"></i>
+                <div class="brand-text">
+                    <span class="brand-main">Maps</span>
+                    <small class="brand-sub">by PirateRuler.com</small>
+                </div>
             </div>
         </div>
         
         <div class="search-container">
             <div class="search-box">
-                <div class="search-input-wrapper">
+                <div class="search-input-group">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="Search places...">
-                    <button class="clear-search" id="clearSearch">
+                    <input type="text" id="searchInput" placeholder="Search for places, addresses, or coordinates..." autocomplete="off">
+                    <button class="search-clear" id="clearSearch" aria-label="Clear search">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -46,221 +65,251 @@
             <div class="search-suggestions" id="searchSuggestions"></div>
         </div>
 
-        <div class="top-bar-right">
-            <button class="top-bar-btn" id="currentLocationBtn" title="Your location">
+        <div class="header-right">
+            <button class="header-btn" id="currentLocationBtn" title="My Location">
                 <i class="fas fa-location-arrow"></i>
             </button>
-            <button class="top-bar-btn" id="fullscreenBtn" title="Fullscreen">
+            <button class="header-btn" id="fullscreenBtn" title="Fullscreen">
                 <i class="fas fa-expand"></i>
             </button>
+            <button class="header-btn" id="settingsBtn" title="Settings">
+                <i class="fas fa-cog"></i>
+            </button>
         </div>
-    </div>
+    </header>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Sidebar - Mobile Fixed -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header-mobile">
-                <button class="close-sidebar" id="closeSidebar">
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Sidebar - Professional Design -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Navigation</h2>
+                <button class="close-sidebar" id="closeSidebar" aria-label="Close sidebar">
                     <i class="fas fa-times"></i>
                 </button>
-                <div class="logo">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <span>Maps</span>
-                </div>
             </div>
-            
+
             <div class="sidebar-content">
-                <!-- Directions Section -->
-                <div class="sidebar-section">
-                    <div class="section-header">
+                <!-- Directions Module -->
+                <section class="sidebar-section">
+                    <div class="section-header" data-toggle="directionsPanel">
                         <h3><i class="fas fa-route"></i> Directions</h3>
-                        <button class="section-toggle" id="directionsToggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
+                        <i class="fas fa-chevron-up toggle-icon"></i>
                     </div>
-                    <div class="directions-panel" id="directionsPanel">
-                        <div class="directions-inputs">
+                    <div class="section-content" id="directionsPanel">
+                        <div class="directions-form">
                             <div class="input-group">
-                                <i class="fas fa-dot-circle start-icon"></i>
-                                <input type="text" id="startPoint" placeholder="Start location">
-                                <button class="input-clear" id="clearStart">
+                                <div class="input-icon start-icon"></div>
+                                <input type="text" id="startPoint" placeholder="Choose starting point" autocomplete="off">
+                                <button class="input-clear-btn" id="clearStart">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <div class="input-group">
-                                <i class="fas fa-map-marker-alt end-icon"></i>
-                                <input type="text" id="endPoint" placeholder="Destination">
-                                <button class="input-clear" id="clearEnd">
+                                <div class="input-icon end-icon"></div>
+                                <input type="text" id="endPoint" placeholder="Choose destination" autocomplete="off">
+                                <button class="input-clear-btn" id="clearEnd">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <div class="travel-modes">
-                                <button class="travel-mode active" data-mode="driving">
+                                <button class="travel-mode active" data-mode="driving" title="Driving">
                                     <i class="fas fa-car"></i>
                                 </button>
-                                <button class="travel-mode" data-mode="walking">
+                                <button class="travel-mode" data-mode="walking" title="Walking">
                                     <i class="fas fa-walking"></i>
                                 </button>
-                                <button class="travel-mode" data-mode="cycling">
+                                <button class="travel-mode" data-mode="cycling" title="Cycling">
                                     <i class="fas fa-bicycle"></i>
                                 </button>
-                                <button class="travel-mode" data-mode="transit">
+                                <button class="travel-mode" data-mode="transit" title="Transit">
                                     <i class="fas fa-bus"></i>
                                 </button>
                             </div>
-                            <button id="getDirections" class="directions-btn">
+                            <button id="getDirections" class="primary-btn">
                                 <i class="fas fa-route"></i> Get Directions
                             </button>
                         </div>
                         <div id="directionsResults" class="directions-results"></div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Map Layers Section -->
-                <div class="sidebar-section">
-                    <div class="section-header">
-                        <h3><i class="fas fa-layer-group"></i> Map Type</h3>
-                        <button class="section-toggle" id="layersToggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
+                <!-- Map Layers Module -->
+                <section class="sidebar-section">
+                    <div class="section-header" data-toggle="layersPanel">
+                        <h3><i class="fas fa-layer-group"></i> Map Style</h3>
+                        <i class="fas fa-chevron-up toggle-icon"></i>
                     </div>
-                    <div class="layers-panel" id="layersPanel">
-                        <div class="map-types">
-                            <div class="map-type-option active" data-type="street">
-                                <div class="map-type-preview street-preview"></div>
+                    <div class="section-content" id="layersPanel">
+                        <div class="map-styles">
+                            <div class="map-style active" data-style="street">
+                                <div class="style-preview street-preview"></div>
                                 <span>Default</span>
                             </div>
-                            <div class="map-type-option" data-type="satellite">
-                                <div class="map-type-preview satellite-preview"></div>
+                            <div class="map-style" data-style="satellite">
+                                <div class="style-preview satellite-preview"></div>
                                 <span>Satellite</span>
                             </div>
-                            <div class="map-type-option" data-type="terrain">
-                                <div class="map-type-preview terrain-preview"></div>
+                            <div class="map-style" data-style="terrain">
+                                <div class="style-preview terrain-preview"></div>
                                 <span>Terrain</span>
                             </div>
                         </div>
                         <div class="layer-options">
-                            <label class="checkbox-option">
+                            <label class="checkbox-item">
                                 <input type="checkbox" id="trafficLayer">
                                 <span class="checkmark"></span>
-                                Traffic
+                                <span>Traffic</span>
                             </label>
-                            <label class="checkbox-option">
+                            <label class="checkbox-item">
                                 <input type="checkbox" id="transitLayer">
                                 <span class="checkmark"></span>
-                                Transit
+                                <span>Transit</span>
                             </label>
-                            <label class="checkbox-option">
+                            <label class="checkbox-item">
                                 <input type="checkbox" id="bikeLayer">
                                 <span class="checkmark"></span>
-                                Bicycling
+                                <span>Bicycling</span>
                             </label>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Places Section -->
-                <div class="sidebar-section">
-                    <div class="section-header">
-                        <h3><i class="fas fa-place-of-worship"></i> Nearby</h3>
-                        <button class="section-toggle" id="placesToggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
+                <!-- Places Module -->
+                <section class="sidebar-section">
+                    <div class="section-header" data-toggle="placesPanel">
+                        <h3><i class="fas fa-compass"></i> Nearby Places</h3>
+                        <i class="fas fa-chevron-up toggle-icon"></i>
                     </div>
-                    <div class="places-panel" id="placesPanel">
+                    <div class="section-content" id="placesPanel">
                         <div class="place-categories">
-                            <button class="place-category" data-category="restaurant">
+                            <button class="place-btn" data-category="restaurant" title="Restaurants">
                                 <i class="fas fa-utensils"></i>
                                 <span>Food</span>
                             </button>
-                            <button class="place-category" data-category="gas_station">
+                            <button class="place-btn" data-category="gas_station" title="Gas Stations">
                                 <i class="fas fa-gas-pump"></i>
                                 <span>Gas</span>
                             </button>
-                            <button class="place-category" data-category="hospital">
+                            <button class="place-btn" data-category="hospital" title="Hospitals">
                                 <i class="fas fa-hospital"></i>
-                                <span>Hospital</span>
+                                <span>Medical</span>
                             </button>
-                            <button class="place-category" data-category="bank">
+                            <button class="place-btn" data-category="bank" title="Banks">
                                 <i class="fas fa-university"></i>
-                                <span>Bank</span>
+                                <span>Banks</span>
                             </button>
-                            <button class="place-category" data-category="shopping_mall">
+                            <button class="place-btn" data-category="shopping_mall" title="Shopping">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span>Shop</span>
+                                <span>Shopping</span>
                             </button>
-                            <button class="place-category" data-category="park">
+                            <button class="place-btn" data-category="park" title="Parks">
                                 <i class="fas fa-tree"></i>
-                                <span>Park</span>
+                                <span>Parks</span>
                             </button>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Recent Searches -->
-                <div class="sidebar-section">
-                    <div class="section-header">
+                <!-- Recent Searches Module -->
+                <section class="sidebar-section">
+                    <div class="section-header" data-toggle="recentPanel">
                         <h3><i class="fas fa-history"></i> Recent</h3>
-                        <button class="section-toggle" id="recentToggle">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
+                        <i class="fas fa-chevron-up toggle-icon"></i>
                     </div>
-                    <div class="recent-panel" id="recentPanel">
+                    <div class="section-content" id="recentPanel">
                         <div class="recent-list" id="recentList">
-                            <!-- Recent searches will appear here -->
+                            <div class="empty-state">
+                                <i class="fas fa-search"></i>
+                                <p>No recent searches</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
-        </div>
+        </aside>
 
         <!-- Map Container -->
-        <div class="map-wrapper">
+        <main class="map-container">
             <div id="map"></div>
             
-            <!-- Map Controls - Mobile Optimized -->
-            <div class="map-controls-container">
-                <div class="map-controls">
-                    <button class="map-control-btn zoom-in" id="zoomIn" title="Zoom in">
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <div class="control-group">
+                    <button class="control-btn zoom-in" id="zoomIn" title="Zoom In">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <button class="map-control-btn zoom-out" id="zoomOut" title="Zoom out">
+                    <button class="control-btn zoom-out" id="zoomOut" title="Zoom Out">
                         <i class="fas fa-minus"></i>
                     </button>
                 </div>
-                
-                <div class="map-controls">
-                    <button class="map-control-btn" id="currentLocationBtn2" title="My location">
+                <div class="control-group">
+                    <button class="control-btn" id="currentLocationBtn2" title="My Location">
                         <i class="fas fa-location-arrow"></i>
+                    </button>
+                    <button class="control-btn" id="rotateBtn" title="Rotate Map">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Map Type Control -->
-            <div class="map-type-control">
-                <button class="map-type-btn" id="mapTypeBtn">
-                    <span id="mapTypeText">Map</span>
+            <!-- Map Type Selector -->
+            <div class="map-type-selector">
+                <button class="map-type-btn" id="mapTypeSelector">
+                    <span id="currentMapType">Map</span>
+                    <i class="fas fa-chevron-down"></i>
                 </button>
-            </div>
-
-            <!-- Scale and Coordinates -->
-            <div class="map-info-bar">
-                <div id="coordinates" class="coordinate-display"></div>
-            </div>
-
-            <!-- Loading Indicator -->
-            <div class="loading-overlay" id="loadingOverlay">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <span>Loading...</span>
+                <div class="map-type-dropdown" id="mapTypeDropdown">
+                    <div class="dropdown-item active" data-type="street">
+                        <i class="fas fa-map"></i> Default Map
+                    </div>
+                    <div class="dropdown-item" data-type="satellite">
+                        <i class="fas fa-satellite"></i> Satellite
+                    </div>
+                    <div class="dropdown-item" data-type="terrain">
+                        <i class="fas fa-mountain"></i> Terrain
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay"></div>
+            <!-- Coordinates Display -->
+            <div class="coordinates-display">
+                <span id="coordinates">Loading...</span>
+            </div>
+
+            <!-- Context Menu -->
+            <div class="context-menu" id="contextMenu">
+                <div class="context-item" data-action="directionsFrom">
+                    <i class="fas fa-route"></i> Directions from here
+                </div>
+                <div class="context-item" data-action="directionsTo">
+                    <i class="fas fa-map-marker-alt"></i> Directions to here
+                </div>
+                <div class="context-separator"></div>
+                <div class="context-item" data-action="addMarker">
+                    <i class="fas fa-map-pin"></i> Add marker here
+                </div>
+                <div class="context-item" data-action="whatsHere">
+                    <i class="fas fa-info-circle"></i> What's here?
+                </div>
+                <div class="context-separator"></div>
+                <div class="context-item" data-action="measureDistance">
+                    <i class="fas fa-ruler"></i> Measure distance
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <!-- Mobile Overlay -->
+            <div class="mobile-overlay" id="mobileOverlay"></div>
+        </main>
+    </div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
