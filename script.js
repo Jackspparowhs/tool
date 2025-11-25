@@ -1,305 +1,326 @@
-// Global variables
-let map;
-let currentMarker;
-let searchTimeout;
-let userLocationMarker;
+// app.js
+/*
+README: PirateRuler.com Typing Test Application
+- Fixed: Sidebar menu uses buttons now
+- Fixed: Header title size slightly increased
+- Maintains pure black/white theme
+*/
 
-// Initialize the map
-function initMap() {
-    // Create map centered on a default location (New York City)
-    map = L.map('map', {
-        center: [40.7128, -74.0060],
-        zoom: 13,
-        zoomControl: true
-    });
+// Theme Management
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
 
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-    }).addTo(map);
-
-    // Add click event to place markers
-    map.on('click', function(e) {
-        placeMarker(e.latlng);
-    });
-
-    // Initialize search functionality
-    initSearch();
-    
-    // Initialize location button
-    initLocationButton();
-    
-    // Initialize mobile controls
-    initMobileControls();
-}
-
-// Place a marker on the map
-function placeMarker(latlng, title = 'Dropped Pin') {
-    // Remove existing marker if any
-    if (currentMarker) {
-        map.removeLayer(currentMarker);
-    }
-
-    // Create new marker
-    currentMarker = L.marker(latlng, {
-        draggable: true
-    }).addTo(map);
-
-    // Add popup
-    const popupContent = `
-        <div style="min-width: 200px;">
-            <h3 style="margin: 0 0 8px 0; font-size: 16px;">${title}</h3>
-            <p style="margin: 0 0 8px 0; font-size: 14px; color: #5f6368;">
-                Lat: ${latlng.lat.toFixed(6)}<br>
-                Lng: ${latlng.lng.toFixed(6)}
-            </p>
-            <button onclick="removeMarker()" style="
-                background: #1a73e8;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-            ">Remove</button>
-        </div>
-    `;
-    
-    currentMarker.bindPopup(popupContent).openPopup();
-
-    // Handle marker drag
-    currentMarker.on('dragend', function(e) {
-        const newLatLng = e.target.getLatLng();
-        updateMarkerPopup(newLatLng);
-    });
-}
-
-// Remove current marker
-function removeMarker() {
-    if (currentMarker) {
-        map.removeLayer(currentMarker);
-        currentMarker = null;
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        html.setAttribute('data-theme', saved);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        html.setAttribute('data-theme', 'light');
     }
 }
 
-// Update marker popup with new coordinates
-function updateMarkerPopup(latlng) {
-    if (currentMarker) {
-        const popupContent = `
-            <div style="min-width: 200px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 16px;">Dropped Pin</h3>
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #5f6368;">
-                    Lat: ${latlng.lat.toFixed(6)}<br>
-                    Lng: ${latlng.lng.toFixed(6)}
-                </p>
-                <button onclick="removeMarker()" style="
-                    background: #1a73e8;
-                    color: white;
-                    border: none;
-                    padding: 6px 12px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 12px;
-                ">Remove</button>
-            </div>
-        `;
-        currentMarker.setPopupContent(popupContent);
-    }
+function toggleTheme() {
+    const current = html.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
 }
 
-// Initialize search functionality
-function initSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const clearBtn = document.getElementById('clearSearch');
-    const searchResults = document.getElementById('searchResults');
+if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+}
 
-    // Handle search input
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim();
+// Off-canvas Menu
+const menuToggle = document.getElementById('menuToggle');
+const menuClose = document.getElementById('menuClose');
+const menu = document.getElementById('menu');
+const menuOverlay = document.getElementById('menuOverlay');
+
+function openMenu() {
+    menu.classList.add('active');
+    menuOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    menu.setAttribute('aria-hidden', 'false');
+}
+
+function closeMenu() {
+    menu.classList.remove('active');
+    menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    menu.setAttribute('aria-hidden', 'true');
+}
+
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (menuClose) menuClose.addEventListener('click', closeMenu);
+if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+
+// Typing Test Logic
+const testPage = document.querySelector('.test-main');
+if (testPage) {
+    const passages = {
+        short: "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.",
+        medium: "JavaScript powers the modern web with dynamic interactions. Developers create everything from simple animations to complex applications using its flexible syntax and extensive ecosystem.",
+        long: "Consistent typing practice develops muscle memory and improves accuracy. Focus on proper finger placement, maintain good posture, and use wrist rests. Regular breaks prevent strain and improve long-term performance for programmers, writers, and professionals."
+    };
+
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const passageSelect = document.getElementById('passageSelect');
+    const timerSelect = document.getElementById('timerSelect');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const typingArea = document.getElementById('typingArea');
+    const passageDisplay = document.getElementById('passageDisplay');
+    const typingInput = document.getElementById('typingInput');
+    const keyboard = document.getElementById('keyboard');
+    const wpmEl = document.getElementById('wpm');
+    const accuracyEl = document.getElementById('accuracy');
+    const charsEl = document.getElementById('chars');
+    const mistakesEl = document.getElementById('mistakes');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const resultsModal = document.getElementById('resultsModal');
+    const finalWpm = document.getElementById('finalWpm');
+    const finalAccuracy = document.getElementById('finalAccuracy');
+    const finalMistakes = document.getElementById('finalMistakes');
+    const finalCorrect = document.getElementById('finalCorrect');
+    const exportBtn = document.getElementById('exportBtn');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+
+    let testState = {
+        isRunning: false,
+        timeLeft: 60,
+        timer: null,
+        passage: '',
+        typed: '',
+        correctChars: 0,
+        mistakes: 0,
+        startTime: null
+    };
+
+    async function initTest() {
+        await loadPassage();
+        updateDisplay();
+    }
+
+    async function loadPassage() {
+        const length = passageSelect.value;
+        passageDisplay.innerHTML = '<div style="text-align: center; color: var(--text-muted);">Loading passage...</div>';
         
-        if (query.length > 0) {
-            clearBtn.classList.remove('hidden');
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                searchLocations(query);
-            }, 300);
-        } else {
-            clearBtn.classList.add('hidden');
-            searchResults.classList.add('hidden');
+        try {
+            const res = await fetch(`https://baconipsum.com/api/?type=meat-and-filler&paras=2&format=text`);
+            if (res.ok) {
+                const text = await res.text();
+                let passage = text.replace(/\s+/g, ' ').trim();
+                if (length === 'short') passage = passage.slice(0, 50);
+                else if (length === 'medium') passage = passage.slice(0, 150);
+                else passage = passage.slice(0, 300);
+                testState.passage = passage;
+            } else {
+                throw new Error('API failed');
+            }
+        } catch (e) {
+            testState.passage = passages[length];
         }
-    });
-
-    // Clear search
-    clearBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        clearBtn.classList.add('hidden');
-        searchResults.classList.add('hidden');
-        searchInput.focus();
-    });
-
-    // Hide results when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-container')) {
-            searchResults.classList.add('hidden');
-        }
-    });
-}
-
-// Search locations using Nominatim API
-async function searchLocations(query) {
-    const searchResults = document.getElementById('searchResults');
-    
-    try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-        const data = await response.json();
-        
-        if (data.length > 0) {
-            displaySearchResults(data);
-        } else {
-            searchResults.innerHTML = '<div class="search-result-item"><p style="color: #5f6368;">No results found</p></div>';
-            searchResults.classList.remove('hidden');
-        }
-    } catch (error) {
-        console.error('Search error:', error);
-        searchResults.innerHTML = '<div class="search-result-item"><p style="color: #ea4335;">Search failed. Please try again.</p></div>';
-        searchResults.classList.remove('hidden');
+        renderPassage();
     }
-}
 
-// Display search results
-function displaySearchResults(results) {
-    const searchResults = document.getElementById('searchResults');
-    searchResults.innerHTML = '';
-    
-    results.forEach(result => {
-        const resultItem = document.createElement('div');
-        resultItem.className = 'search-result-item';
-        resultItem.innerHTML = `
-            <div class="result-title">${result.display_name.split(',')[0]}</div>
-            <div class="result-address">${result.display_name}</div>
-        `;
-        
-        resultItem.addEventListener('click', function() {
-            const lat = parseFloat(result.lat);
-            const lng = parseFloat(result.lon);
-            const latLng = L.latLng(lat, lng);
-            
-            // Move map to location
-            map.setView(latLng, 16);
-            
-            // Place marker
-            placeMarker(latLng, result.display_name.split(',')[0]);
-            
-            // Hide results
-            searchResults.classList.add('hidden');
-            document.getElementById('searchInput').value = result.display_name.split(',')[0];
-            document.getElementById('clearSearch').classList.remove('hidden');
+    function renderPassage() {
+        passageDisplay.innerHTML = '';
+        testState.passage.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.className = 'char';
+            span.textContent = char === ' ' ? '·' : char;
+            if (index === testState.typed.length) {
+                span.classList.add('current');
+            } else if (index < testState.typed.length) {
+                if (testState.typed[index] === char) {
+                    span.classList.add('correct');
+                } else {
+                    span.classList.add('incorrect');
+                }
+            }
+            passageDisplay.appendChild(span);
         });
+    }
+
+    function startTest() {
+        testState.isRunning = true;
+        testState.timeLeft = parseInt(timerSelect.value);
+        testState.startTime = Date.now();
+        testState.typed = '';
+        testState.correctChars = 0;
+        testState.mistakes = 0;
         
-        searchResults.appendChild(resultItem);
-    });
-    
-    searchResults.classList.remove('hidden');
-}
-
-// Initialize location button
-function initLocationButton() {
-    const locationBtn = document.getElementById('myLocationBtn');
-    
-    locationBtn.addEventListener('click', function() {
-        getUserLocation();
-    });
-}
-
-// Get user's current location
-function getUserLocation() {
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    
-    if (!navigator.geolocation) {
-        alert('Geolocation is not supported by your browser');
-        return;
+        startBtn.style.display = 'none';
+        restartBtn.style.display = 'inline-flex';
+        typingArea.style.display = 'block';
+        keyboard.style.display = 'block';
+        typingInput.disabled = false;
+        typingInput.focus();
+        typingInput.value = '';
+        
+        startTimer();
+        updateDisplay();
     }
-    
-    loadingSpinner.classList.remove('hidden');
-    
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const latLng = L.latLng(lat, lng);
+
+    function startTimer() {
+        updateTimerDisplay();
+        testState.timer = setInterval(() => {
+            testState.timeLeft--;
+            updateTimerDisplay();
             
-            // Remove existing user location marker
-            if (userLocationMarker) {
-                map.removeLayer(userLocationMarker);
+            if (testState.timeLeft <= 0) {
+                endTest();
             }
-            
-            // Create user location marker with special icon
-            const userIcon = L.divIcon({
-                html: '<div style="background: #1a73e8; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                iconSize: [16, 16],
-                className: 'user-location-marker'
-            });
-            
-            userLocationMarker = L.marker(latLng, { icon: userIcon }).addTo(map);
-            userLocationMarker.bindPopup('Your Location').openPopup();
-            
-            // Move map to user location
-            map.setView(latLng, 16);
-            
-            loadingSpinner.classList.add('hidden');
-        },
-        function(error) {
-            loadingSpinner.classList.add('hidden');
-            let errorMessage = 'Unable to get your location';
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = 'Location access denied by user';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = 'Location information unavailable';
-                    break;
-                case error.TIMEOUT:
-                    errorMessage = 'Location request timed out';
-                    break;
-            }
-            
-            alert(errorMessage);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(testState.timeLeft / 60);
+        const seconds = testState.timeLeft % 60;
+        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function endTest() {
+        testState.isRunning = false;
+        clearInterval(testState.timer);
+        typingInput.disabled = true;
+        
+        const timeMinutes = parseInt(timerSelect.value) / 60;
+        const wpm = Math.round((testState.correctChars / 5) / timeMinutes);
+        const accuracy = testState.typed.length > 0 
+            ? Math.round((testState.correctChars / testState.typed.length) * 100) 
+            : 100;
+        
+        finalWpm.textContent = wpm;
+        finalAccuracy.textContent = accuracy + '%';
+        finalMistakes.textContent = testState.mistakes;
+        finalCorrect.textContent = testState.correctChars;
+        
+        modalOverlay.style.display = 'block';
+        resultsModal.style.display = 'block';
+        resultsModal.focus();
+    }
+
+    function restartTest() {
+        clearInterval(testState.timer);
+        initTest();
+        startBtn.style.display = 'inline-flex';
+        restartBtn.style.display = 'none';
+        typingArea.style.display = 'none';
+        keyboard.style.display = 'none';
+        modalOverlay.style.display = 'none';
+        resultsModal.style.display = 'none';
+        timerDisplay.textContent = '1:00';
+    }
+
+    function updateDisplay() {
+        wpmEl.textContent = calculateWPM();
+        accuracyEl.textContent = calculateAccuracy();
+        charsEl.textContent = testState.correctChars;
+        mistakesEl.textContent = testState.mistakes;
+    }
+
+    function calculateWPM() {
+        if (!testState.isRunning || !testState.startTime) return 0;
+        const elapsed = (Date.now() - testState.startTime) / 1000 / 60;
+        return Math.round((testState.correctChars / 5) / elapsed) || 0;
+    }
+
+    function calculateAccuracy() {
+        if (testState.typed.length === 0) return '100%';
+        const acc = Math.round((testState.correctChars / testState.typed.length) * 100);
+        return acc + '%';
+    }
+
+    typingInput.addEventListener('input', (e) => {
+        if (!testState.isRunning) return;
+        
+        const newTyped = e.target.value;
+        const prevLen = testState.typed.length;
+        const newLen = newTyped.length;
+        
+        if (newLen < prevLen) {
+            testState.typed = newTyped;
+            renderPassage();
+            return;
         }
-    );
-}
-
-// Initialize mobile controls
-function initMobileControls() {
-    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
-    const mobileLocationBtn = document.getElementById('mobileLocationBtn');
-    const searchInput = document.getElementById('searchInput');
-    
-    mobileSearchBtn.addEventListener('click', function() {
-        searchInput.focus();
-        // Scroll to top to show search bar
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        const newChar = newTyped[newLen - 1];
+        const expectedChar = testState.passage[newLen - 1];
+        
+        if (newChar === expectedChar) {
+            testState.correctChars++;
+        } else {
+            testState.mistakes++;
+            highlightKey(newChar, true);
+        }
+        
+        testState.typed = newTyped;
+        highlightKey(newChar, false);
+        renderPassage();
+        updateDisplay();
+        
+        const currentChar = passageDisplay.querySelector('.char.current');
+        if (currentChar) {
+            currentChar.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        }
     });
-    
-    mobileLocationBtn.addEventListener('click', function() {
-        getUserLocation();
-    });
-}
 
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initMap();
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    if (map) {
-        map.invalidateSize();
+    function highlightKey(char, isError) {
+        const key = keyboard.querySelector(`[data-key="${char.toLowerCase()}"]`);
+        if (key) {
+            key.classList.add(isError ? 'error' : 'active');
+            setTimeout(() => {
+                key.classList.remove('active', 'error');
+            }, 200);
+        }
     }
+
+    function exportCSV() {
+        const data = {
+            wpm: finalWpm.textContent,
+            accuracy: finalAccuracy.textContent,
+            mistakes: finalMistakes.textContent,
+            correct: finalCorrect.textContent,
+            date: new Date().toLocaleString(),
+            duration: timerSelect.value + 's'
+        };
+        
+        const csv = `Metric,Value\nWPM,${data.wpm}\nAccuracy,${data.accuracy}\nMistakes,${data.mistakes}\nCorrect Characters,${data.correct}\nDate,${data.date}\nTest Duration,${data.duration}`;
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `typing-test-results-${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    startBtn.addEventListener('click', startTest);
+    restartBtn.addEventListener('click', restartTest);
+    passageSelect.addEventListener('change', loadPassage);
+    exportBtn.addEventListener('click', exportCSV);
+    tryAgainBtn.addEventListener('click', restartTest);
+    
+    window.addEventListener('keydown', e => {
+        if (e.code === 'Space' && e.target === typingInput) {
+            e.stopPropagation();
+        }
+    });
+
+    initTest();
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
 });
+
+initTheme();
