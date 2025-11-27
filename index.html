@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoStream - Premium Streaming Platform</title>
+    <title>Stocks by PirateRuler.com - Premium Stock Media</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -12,24 +12,39 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-play-circle"></i> VideoStream</h2>
+                <h2><i class="fas fa-images"></i> Stocks by PirateRuler.com</h2>
             </div>
             
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <h3>Main</h3>
+                    <h3>Media Type</h3>
                     <ul>
-                        <li><a href="#" class="nav-link active" data-category="all">
-                            <i class="fas fa-home"></i> Home
+                        <li><a href="#" class="nav-link active" data-media="all">
+                            <i class="fas fa-th-large"></i> All Media
                         </a></li>
-                        <li><a href="#" class="nav-link" data-category="trending">
+                        <li><a href="#" class="nav-link" data-media="photos">
+                            <i class="fas fa-image"></i> Photos
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-media="videos">
+                            <i class="fas fa-video"></i> Videos
+                        </a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Collections</h3>
+                    <ul>
+                        <li><a href="#" class="nav-link" data-collection="trending">
                             <i class="fas fa-fire"></i> Trending
                         </a></li>
-                        <li><a href="#" class="nav-link" data-category="popular">
+                        <li><a href="#" class="nav-link" data-collection="popular">
                             <i class="fas fa-star"></i> Popular
                         </a></li>
-                        <li><a href="#" class="nav-link" data-category="new">
+                        <li><a href="#" class="nav-link" data-collection="new">
                             <i class="fas fa-clock"></i> New
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-collection="favorites">
+                            <i class="fas fa-heart"></i> Favorites
                         </a></li>
                     </ul>
                 </div>
@@ -42,13 +57,16 @@
                 </div>
 
                 <div class="nav-section">
-                    <h3>Quality</h3>
+                    <h3>Filters</h3>
                     <ul>
-                        <li><a href="#" class="nav-link" data-quality="hd">
-                            <i class="fas fa-hd"></i> HD Videos
+                        <li><a href="#" class="nav-link" data-filter="orientation">
+                            <i class="fas fa-compress"></i> Orientation
                         </a></li>
-                        <li><a href="#" class="nav-link" data-quality="4k">
-                            <i class="fas fa-video"></i> 4K Ultra HD
+                        <li><a href="#" class="nav-link" data-filter="color">
+                            <i class="fas fa-palette"></i> Color
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-filter="size">
+                            <i class="fas fa-expand"></i> Size
                         </a></li>
                     </ul>
                 </div>
@@ -60,21 +78,40 @@
             <!-- Header -->
             <header class="header">
                 <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Search videos...">
+                    <input type="text" id="search-input" placeholder="Search photos, videos...">
                     <button id="search-btn"><i class="fas fa-search"></i></button>
                 </div>
                 
                 <div class="header-actions">
+                    <select id="orientation-filter" class="filter-select">
+                        <option value="">All Orientations</option>
+                        <option value="landscape">Landscape</option>
+                        <option value="portrait">Portrait</option>
+                        <option value="square">Square</option>
+                    </select>
+                    
+                    <select id="color-filter" class="filter-select">
+                        <option value="">All Colors</option>
+                        <option value="red">Red</option>
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="orange">Orange</option>
+                        <option value="purple">Purple</option>
+                        <option value="black">Black</option>
+                        <option value="white">White</option>
+                    </select>
+                    
                     <button class="filter-btn" id="filter-btn">
-                        <i class="fas fa-filter"></i> Filters
+                        <i class="fas fa-filter"></i> More Filters
                     </button>
                 </div>
             </header>
 
-            <!-- Video Grid -->
-            <section class="video-section">
+            <!-- Media Grid -->
+            <section class="media-section">
                 <div class="section-header">
-                    <h2 id="section-title">Featured Videos</h2>
+                    <h2 id="section-title">Featured Stock Media</h2>
                     <div class="view-options">
                         <button class="view-btn active" data-view="grid">
                             <i class="fas fa-th"></i>
@@ -85,34 +122,77 @@
                     </div>
                 </div>
                 
-                <div class="video-grid" id="video-grid">
-                    <!-- Videos will be loaded here -->
+                <div class="media-grid" id="media-grid">
+                    <!-- Media items will be loaded here -->
                 </div>
                 
                 <div class="loading" id="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Loading videos...
+                    <i class="fas fa-spinner fa-spin"></i> Loading stock media...
+                </div>
+                
+                <div class="load-more-container">
+                    <button id="load-more-btn" class="load-more-btn">
+                        <i class="fas fa-plus"></i> Load More
+                    </button>
                 </div>
             </section>
         </main>
 
-        <!-- Video Modal -->
-        <div class="video-modal" id="video-modal">
+        <!-- Media Modal -->
+        <div class="media-modal" id="media-modal">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
-                <div class="video-player-container">
-                    <video id="video-player" controls></video>
+                
+                <div class="media-preview-container">
+                    <img id="modal-image" class="modal-image" alt="">
+                    <video id="modal-video" class="modal-video" controls></video>
                 </div>
-                <div class="video-info">
-                    <h3 id="modal-video-title"></h3>
-                    <div class="video-stats">
-                        <span id="modal-video-views"></span>
-                        <span id="modal-video-likes"></span>
-                        <span id="modal-video-duration"></span>
+                
+                <div class="media-info">
+                    <h3 id="modal-media-title"></h3>
+                    <div class="media-stats">
+                        <span id="modal-photographer">
+                            <i class="fas fa-camera"></i> <a id="modal-photographer-link" href="#" target="_blank"></a>
+                        </span>
+                        <span id="modal-media-size"></span>
+                        <span id="modal-media-type"></span>
+                    </div>
+                    
+                    <div class="media-actions">
+                        <button class="download-btn" id="download-btn">
+                            <i class="fas fa-download"></i> Download Free
+                        </button>
+                        
+                        <div class="download-options">
+                            <select id="download-size-select">
+                                <option value="original">Original Size</option>
+                                <option value="large">Large</option>
+                                <option value="medium">Medium</option>
+                                <option value="small">Small</option>
+                            </select>
+                        </div>
+                        
+                        <button class="action-btn" id="favorite-btn">
+                            <i class="far fa-heart"></i> Favorite
+                        </button>
+                        
+                        <button class="action-btn" id="share-btn">
+                            <i class="fas fa-share"></i> Share
+                        </button>
+                        
+                        <button class="action-btn" id="info-btn">
+                            <i class="fas fa-info-circle"></i> Details
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>make by PirateRuler.com</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
