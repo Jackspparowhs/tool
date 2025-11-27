@@ -6,13 +6,60 @@
     <title>Stocks by PirateRuler.com - Premium Stock Media</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid #ddd;
+            color: #555;
+        }
+        .sidebar-header h2 {
+            color: #00d4ff;
+        }
+        .nav-link.active {
+            color: #00d4ff;
+        }
+        .nav-link:hover {
+            color: #00d4ff;
+        }
+        .header {
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+        .search-container {
+            background: #f9f9f9f9;
+        }
+        .media-grid {
+            background: #fff;
+        }
+        .media-card {
+            background: #f9f9f9f9;
+        }
+        .load-more-btn {
+            background: #00d4ff;
+            color: #000;
+        }
+        .load-more-btn:hover {
+            background: #00b8e6;
+        }
+        .footer {
+            background: #f0f0f0;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-images"></i> Stocks by PirateRuler.com</h2>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Stocks by PirateRuler.com</h2>
             </div>
             
             <nav class="sidebar-nav">
@@ -71,6 +118,13 @@
                     </ul>
                 </div>
             </nav>
+
+            <div class="sidebar-footer">
+                <a class="btn" href="https://pirateruler.com/post/about.html" target="_blank" rel="noopener">About — PirateRuler</a>
+                <a class="btn" href="https://pirateruler.com/post/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+                <a class="btn" href="https://pirateruler.com/post/contact.html" target="_blank" rel="noopener">Contact</a>
+                <a class="btn" href="https://pirateruler.com/post/terms.html" target="_blank" rel="noopener">Terms & Service</a>
+            </div>
         </aside>
 
         <!-- Main Content -->
