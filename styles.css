@@ -89,7 +89,7 @@ body {
 }
 
 .nav-link.active {
-    background: #f0f0f0f0;
+    background: #f0f0f0f0f0;
     color: #00d4ff;
     border-left-color: #00d4ff;
 }
@@ -116,7 +116,7 @@ body {
 .search-container {
     display: flex;
     align-items: center;
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border-radius: 25px;
     padding: 5px;
     width: 400px;
@@ -148,7 +148,7 @@ body {
 }
 
 .filter-select {
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border: 1px solid #ddd;
     color: #333;
     padding: 10px 15px;
@@ -159,7 +159,7 @@ body {
 }
 
 .filter-btn {
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border: 1px solid #ddd;
     color: #333;
     padding: 10px 20px;
@@ -199,7 +199,7 @@ body {
 }
 
 .view-btn {
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border: none;
     color: #555;
     padding: 8px 12px;
@@ -221,7 +221,7 @@ body {
 }
 
 .media-card {
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
@@ -469,7 +469,7 @@ body {
 }
 
 .action-btn {
-    background: #f9f9f9f9;
+    background: #f9f9f9f9f9;
     border: 1px solid #ddd;
     color: #333;
     padding: 10px 15px;
@@ -543,20 +543,21 @@ body {
     }
 }
 
-/* List View */
-.media-grid.list-view {
-    grid-template-columns: 1fr;
-}
+    /* List View */
+    .media-grid.list-view {
+        grid-template-columns: 1fr;
+    }
 
-.media-grid.list-view .media-card {
-    display: flex;
-    gap: 20px;
-    height: 180px;
-}
+    .media-grid.list-view .media-card {
+        display: flex;
+        gap: 20px;
+        height: 180px;
+    }
 
-.media-grid.list-view .media-thumbnail {
-    width: 300px;
-    height: 100%;
+    .media-grid.list-view .media-thumbnail {
+        width: 300px;
+        height: 100%;
+    }
 }
 
 /* No Results */
