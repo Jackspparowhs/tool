@@ -451,7 +451,7 @@ function updateSectionTitle() {
         title = 'Featured Stock Media';
     }
     
-    if (currentMediaType !== 'all') {
+     (ifcurrentMediaType !== 'all') {
         title += ` (${currentMediaType})`;
     }
     
@@ -600,3 +600,10 @@ function performSearch() {
 
 // Initial load
 loadMedia();
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar
