@@ -43,7 +43,7 @@ const orientationFilter = document.getElementById('orientation-filter');
 const colorFilter = document.getElementById('color-filter');
 const loadMoreBtn = document.getElementById('load-more-btn');
 const favoriteBtn = document.getElementById('favorite-btn');
-const footer = document.querySelector('.footer');
+const sidebarToggle = document.getElementById('sidebar-toggle');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -583,6 +583,11 @@ function setupEventListeners() {
                 loadMedia(true);
             }
         }
+    });
+    
+    // Toggle sidebar
+    sidebarToggle.addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('active');
     });
 }
 
