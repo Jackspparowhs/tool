@@ -6,8 +6,6 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: #0a0a0a;
-    color: #ffffff;
     overflow-x: hidden;
 }
 
@@ -19,18 +17,19 @@ body {
 /* Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: #1a1a1a;
-    border-right: 1px solid #2a2a2a;
+    background: #fff;
+    border-right: 1px solid #ddd;
     padding: 20px 0;
     position: fixed;
     height: 100vh;
     overflow-y: auto;
     z-index: 1000;
+    transition: transform 0.3s ease;
 }
 
 .sidebar-header {
     padding: 0 20px 20px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
 }
 
@@ -43,12 +42,24 @@ body {
     font-weight: 600;
 }
 
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.sidebar-toggle:hover {
+    color: #00d4ff;
+}
+
 .nav-section {
     margin-bottom: 25px;
 }
 
 .nav-section h3 {
-    color: #888;
+    color: #555;
     font-size: 12px;
     text-transform: uppercase;
     margin-bottom: 10px;
@@ -65,7 +76,7 @@ body {
     align-items: center;
     gap: 12px;
     padding: 10px 20px;
-    color: #ccc;
+    color: #555;
     text-decoration: none;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
@@ -73,13 +84,12 @@ body {
 }
 
 .nav-link:hover {
-    background: #222;
-    color: #fff;
-    border-left-color: #00d4ff;
+    background: #f0f0f0f0;
+    color: #00d4ff;
 }
 
 .nav-link.active {
-    background: #222;
+    background: #f0f0f0f0;
     color: #00d4ff;
     border-left-color: #00d4ff;
 }
@@ -98,25 +108,25 @@ body {
     align-items: center;
     margin-bottom: 25px;
     padding: 15px 20px;
-    background: #1a1a1a;
+    background: #fff;
     border-radius: 10px;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #ddd;
 }
 
 .search-container {
     display: flex;
     align-items: center;
-    background: #252525;
+    background: #f9f9f9f9;
     border-radius: 25px;
     padding: 5px;
     width: 400px;
-    border: 1px solid #333;
+    border: 1px solid #ddd;
 }
 
 #search-input {
     background: none;
     border: none;
-    color: #fff;
+    color: #333;
     padding: 12px 20px;
     flex: 1;
     outline: none;
@@ -138,9 +148,9 @@ body {
 }
 
 .filter-select {
-    background: #252525;
-    border: 1px solid #333;
-    color: #fff;
+    background: #f9f9f9f9;
+    border: 1px solid #ddd;
+    color: #333;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
@@ -149,9 +159,9 @@ body {
 }
 
 .filter-btn {
-    background: #252525;
-    border: 1px solid #333;
-    color: #fff;
+    background: #f9f9f9f9;
+    border: 1px solid #ddd;
+    color: #333;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -159,15 +169,15 @@ body {
 }
 
 .filter-btn:hover {
-    background: #333;
+    background: #ddd;
 }
 
 /* Media Section */
 .media-section {
-    background: #1a1a1a;
+    background: #fff;
     border-radius: 10px;
     padding: 20px;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #ddd;
 }
 
 .section-header {
@@ -178,7 +188,7 @@ body {
 }
 
 .section-header h2 {
-    color: #fff;
+    color: #333;
     font-size: 24px;
     font-weight: 500;
 }
@@ -189,9 +199,9 @@ body {
 }
 
 .view-btn {
-    background: #252525;
+    background: #f9f9f9f9;
     border: none;
-    color: #ccc;
+    color: #555;
     padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
@@ -211,7 +221,7 @@ body {
 }
 
 .media-card {
-    background: #252525;
+    background: #f9f9f9f9;
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
@@ -229,7 +239,7 @@ body {
     width: 100%;
     height: 200px;
     overflow: hidden;
-    background: #333;
+    background: #ddd;
 }
 
 .media-thumbnail img, .media-thumbnail video {
@@ -267,7 +277,7 @@ body {
 }
 
 .media-title {
-    color: #fff;
+    color: #333;
     font-size: 15px;
     margin-bottom: 8px;
     line-height: 1.4;
@@ -360,14 +370,14 @@ body {
 }
 
 .modal-content {
-    background: #1a1a1a;
+    background: #fff;
     border-radius: 10px;
     padding: 20px;
     max-width: 1100px;
     width: 90%;
     max-height: 95vh;
     overflow-y: auto;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #ddd;
     position: relative;
 }
 
@@ -375,7 +385,7 @@ body {
     position: absolute;
     top: 15px;
     right: 20px;
-    color: #fff;
+    color: #333;
     font-size: 28px;
     cursor: pointer;
     z-index: 2001;
@@ -398,7 +408,7 @@ body {
 }
 
 .media-info h3 {
-    color: #fff;
+    color: #333;
     margin-bottom: 15px;
     font-size: 20px;
 }
@@ -449,9 +459,9 @@ body {
 }
 
 #download-size-select {
-    background: #252525;
-    border: 1px solid #333;
-    color: #fff;
+    background: #f9f9f9f9;
+    border: 1px solid #ddd;
+    color: #333;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
@@ -459,9 +469,9 @@ body {
 }
 
 .action-btn {
-    background: #252525;
-    border: 1px solid #333;
-    color: #fff;
+    background: #f9f9f9f9;
+    border: 1px solid #ddd;
+    color: #333;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
@@ -473,7 +483,7 @@ body {
 }
 
 .action-btn:hover {
-    background: #333;
+    background: #ddd;
     border-color: #00d4ff;
 }
 
@@ -484,7 +494,7 @@ body {
     text-align: center;
     color: #555;
     font-size: 12px;
-    border-top: 1px solid #1a1a1a;
+    border-top: 1px solid #ddd;
 }
 
 .footer p {
@@ -495,7 +505,6 @@ body {
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
     }
     
     .sidebar.active {
